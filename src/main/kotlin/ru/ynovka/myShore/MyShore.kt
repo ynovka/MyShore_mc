@@ -14,8 +14,8 @@ class MyShore : JavaPlugin() {
     companion object {
         lateinit var inst: MyShore
             private set
-        const val pluginId = "myshore"
-        val ITEMS: DeferredRegistry<Item> = DeferredRegistry.create(Registries.ITEMS, pluginId)
+        const val PLUGIN_ID = "myshore"
+        val ITEMS: DeferredRegistry<Item> = DeferredRegistry.create(Registries.ITEMS, PLUGIN_ID)
     }
 
     override fun onLoad() {
@@ -29,6 +29,7 @@ class MyShore : JavaPlugin() {
         Translator.register()
         Commands.register()
         Events.register()
+        Items.register()
 
         Hub
 

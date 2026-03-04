@@ -1,8 +1,11 @@
-package ru.ynovka.myShore.lobby
+package ru.ynovka.myShore.utils
 
-import org.bukkit.Bukkit
+import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.lobby.getLobby
+import ru.ynovka.myShore.lobby.Lobby
 import org.bukkit.entity.Player
-import ru.ynovka.myShore.MyShore
+import org.bukkit.Bukkit
+
 
 object PlayerVisibilityController {
 
@@ -20,16 +23,16 @@ object PlayerVisibilityController {
 
             // 1. Настраиваем, кого видит target
             if (shouldSee(targetLobby, otherLobby)) {
-                target.showPlayer(MyShore.Companion.inst, other)
+                target.showPlayer(inst, other)
             } else {
-                target.hidePlayer(MyShore.Companion.inst, other)
+                target.hidePlayer(inst, other)
             }
 
             // 2. Настраиваем, кто видит target (обновляем зрение остальных игроков)
             if (shouldSee(otherLobby, targetLobby)) {
-                other.showPlayer(MyShore.Companion.inst, target)
+                other.showPlayer(inst, target)
             } else {
-                other.hidePlayer(MyShore.Companion.inst, target)
+                other.hidePlayer(inst, target)
             }
         }
     }
@@ -41,5 +44,13 @@ object PlayerVisibilityController {
      */
     private fun shouldSee(viewerLobby: Lobby?, targetLobby: Lobby?): Boolean {
         return viewerLobby == targetLobby
+    }
+
+    /**
+     * Очистка не требуется, так как мы не храним Map, но метод можно оставить пустым
+     * для совместимости с вашими эвентами.
+     */
+    fun removePlayer(player: Player) {
+        // Ничего не делаем, state-less подход
     }
 }

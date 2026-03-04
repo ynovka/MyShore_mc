@@ -7,6 +7,7 @@ import org.bukkit.Bukkit
 import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameId
 import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.utils.PlayerVisibilityController
 import ru.ynovka.myShore.utils.Utils.asPlayers
 
 
