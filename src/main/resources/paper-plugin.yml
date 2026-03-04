@@ -1,0 +1,16 @@
+name: MyShore
+version: '0.0.1'
+main: ru.ynovka.myShore.MyShore
+api-version: '1.21'
+prefix: [ MYSHORE ]
+authors: [ Ynovka ]
+website: myshore.ru
+dependencies:
+  server:
+    AbyssalLib:
+      required: true
+      load: BEFORE
+  bootstrap:
+    AbyssalLib:
+      required: true
+      load: BEFORE
