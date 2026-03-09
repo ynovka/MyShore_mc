@@ -1,0 +1,69 @@
+{
+  "stats": {
+    "minecraft:mined": {
+      "minecraft:slime_block": 1,
+      "minecraft:structure_void": 2
+    },
+    "minecraft:picked_up": {
+      "minecraft:lead": 1,
+      "minecraft:totem_of_undying": 1,
+      "minecraft:light_blue_stained_glass_pane": 2,
+      "minecraft:light_gray_concrete": 1,
+      "minecraft:emerald": 1,
+      "minecraft:slime_block": 1,
+      "minecraft:item_frame": 1
+    },
+    "minecraft:dropped": {
+      "minecraft:item_frame": 1,
+      "minecraft:light_blue_stained_glass_pane": 1,
+      "minecraft:light_gray_concrete": 1
+    },
+    "minecraft:used": {
+      "minecraft:brown_concrete_powder": 1,
+      "minecraft:minecart": 4,
+      "minecraft:piston": 3,
+      "minecraft:waxed_oxidized_copper_bulb": 30,
+      "minecraft:redstone_block": 19,
+      "minecraft:wind_charge": 106,
+      "minecraft:birch_slab": 10,
+      "minecraft:evoker_spawn_egg": 2,
+      "minecraft:birch_stairs": 1,
+      "minecraft:firework_rocket": 2,
+      "minecraft:rail": 5,
+      "minecraft:waxed_copper_bulb": 50,
+      "minecraft:lectern": 1,
+      "minecraft:elytra": 1,
+      "minecraft:light_gray_concrete": 9,
+      "minecraft:enchanted_golden_apple": 6,
+      "minecraft:gray_concrete": 7,
+      "minecraft:ender_pearl": 24
+    },
+    "minecraft:custom": {
+      "minecraft:damage_resisted": 18,
+      "minecraft:time_since_rest": 142600,
+      "minecraft:walk_one_cm": 400985,
+      "minecraft:leave_game": 8,
+      "minecraft:walk_under_water_one_cm": 7603,
+      "minecraft:mob_kills": 2,
+      "minecraft:damage_taken": 1010,
+      "minecraft:play_time": 255696,
+      "minecraft:damage_dealt": 239,
+      "minecraft:damage_absorbed": 72,
+      "minecraft:jump": 8470,
+      "minecraft:time_since_death": 142600,
+      "minecraft:aviate_one_cm": 17001,
+      "minecraft:drop": 3,
+      "minecraft:sprint_one_cm": 1033519,
+      "minecraft:fall_one_cm": 487214,
+      "minecraft:total_world_time": 255696,
+      "minecraft:swim_one_cm": 9275,
+      "minecraft:fly_one_cm": 2839974,
+      "minecraft:walk_on_water_one_cm": 4549,
+      "minecraft:crouch_one_cm": 8459,
+      "minecraft:sneak_time": 5409,
+      "minecraft:climb_one_cm": 36088,
+      "minecraft:deaths": 2
+    }
+  },
+  "DataVersion": 4671
+}

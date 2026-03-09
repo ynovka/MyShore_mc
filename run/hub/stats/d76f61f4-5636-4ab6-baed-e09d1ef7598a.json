@@ -1,0 +1,53 @@
+{
+  "stats": {
+    "minecraft:dropped": {
+      "minecraft:sugar": 262,
+      "minecraft:arrow": 64,
+      "minecraft:stone": 3,
+      "minecraft:grass_block": 1,
+      "minecraft:cobbled_deepslate": 1
+    },
+    "minecraft:custom": {
+      "minecraft:time_since_rest": 27620,
+      "minecraft:walk_one_cm": 51332,
+      "minecraft:leave_game": 8,
+      "minecraft:walk_under_water_one_cm": 600,
+      "minecraft:damage_taken": 340,
+      "minecraft:play_time": 239860,
+      "minecraft:jump": 1983,
+      "minecraft:time_since_death": 27600,
+      "minecraft:drop": 16,
+      "minecraft:sprint_one_cm": 187757,
+      "minecraft:fall_one_cm": 167829,
+      "minecraft:swim_one_cm": 6528,
+      "minecraft:total_world_time": 239860,
+      "minecraft:fly_one_cm": 1406227,
+      "minecraft:walk_on_water_one_cm": 2577,
+      "minecraft:crouch_one_cm": 9161,
+      "minecraft:sneak_time": 5520,
+      "minecraft:climb_one_cm": 12438,
+      "minecraft:deaths": 1
+    },
+    "minecraft:picked_up": {
+      "minecraft:sugar": 64
+    },
+    "minecraft:used": {
+      "minecraft:sugar": 36,
+      "minecraft:grass_block": 1,
+      "minecraft:dark_oak_slab": 3,
+      "minecraft:polished_deepslate_stairs": 5,
+      "minecraft:gray_stained_glass_pane": 2,
+      "minecraft:stone_button": 1,
+      "minecraft:brown_carpet": 2,
+      "minecraft:stone": 2,
+      "minecraft:spruce_slab": 1,
+      "minecraft:polished_deepslate_slab": 12,
+      "minecraft:stone_brick_slab": 11,
+      "minecraft:iron_trapdoor": 13,
+      "minecraft:green_concrete_powder": 2,
+      "minecraft:command_block": 1,
+      "minecraft:yellow_wool": 9
+    }
+  },
+  "DataVersion": 4671
+}
