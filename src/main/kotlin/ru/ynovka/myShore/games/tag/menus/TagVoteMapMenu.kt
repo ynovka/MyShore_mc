@@ -2,6 +2,7 @@ package ru.ynovka.myShore.games.tag.menus
 
 import ru.ynovka.myShore.games.tag.TagItems.tagVoteMountainTrackMapMenuItem
 import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
+import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import ru.ynovka.myShore.games.tag.TagItems.tagVoteJungleMapMenuItem
 import ru.ynovka.myShore.games.tag.TagItems.tagVoteRandomMapMenuItem
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
@@ -19,6 +20,7 @@ import ru.ynovka.myShore.lobby.getLobby
 import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
 import org.bukkit.Sound
+import ru.ynovka.myShore.games.tag.maps.TagGameMaps
 
 
 @Suppress("UnstableApiUsage")
@@ -27,33 +29,40 @@ object TagVoteMapMenu {
         MenuType.GENERIC_9X1,
         Component.text()
             .append(TextOffset.getOffsetMinimessage(-8).toComponent().color(NamedTextColor.WHITE))
-            .append(GuiTextures.TAG_CHOOSE_ROLE_MENU!!.toComponent().color(NamedTextColor.WHITE))
+            .append(GuiTextures.MENU_1x9_028!!.toComponent().color(NamedTextColor.WHITE))
             .append(TextOffset.getOffsetMinimessage(-170).toComponent().color(NamedTextColor.WHITE))
             .append(Component.translatable("menu.myshore.minigames"))
             .build(),
     ) {
         set(
             SlotPosition.top(0),
-            GuiButton.of(tagVoteRandomMapMenuItem.getStack(null)) {
-                println("pressed tagVoteMap random")
+            GuiButton.of(tagVoteJungleMapMenuItem.getStack(null)) { ctx ->
+                val player = ctx.view.inventoryView.player as Player
+                voteMap(player, TagGameMaps.JUNGLE.mapProvider())
             }
         )
         set(
-            SlotPosition.top(3),
-            GuiButton.of(tagVoteJungleMapMenuItem.getStack(null)) {
-                println("pressed tagVoteMap jungle")
+            SlotPosition.top(2),
+            GuiButton.of(tagVoteMountainTrackMapMenuItem.getStack(null)) { ctx ->
+                val player = ctx.view.inventoryView.player as Player
+                voteMap(player, TagGameMaps.MOUNTAIN_TRACK.mapProvider(),)
             }
         )
         set(
-            SlotPosition.top(5),
-            GuiButton.of(tagVoteMountainTrackMapMenuItem.getStack(null)) {
-                println("pressed tagVoteMap mountain track")
+            SlotPosition.top(8),
+            GuiButton.of(tagVoteRandomMapMenuItem.getStack(null)) { ctx ->
+                val player = ctx.view.inventoryView.player as Player
+                voteMap(player, TagGameMaps.RANDOM.mapProvider(), true)
             }
         )
     }
 
     private fun voteMap(player: Player, map: TagGameMap, isRandom: Boolean = false) {
-        val mapName = if (isRandom) "Случайная" else map.mapName
+        val mapNameTranlatable = if (isRandom) Component.translatable("name.myshore.tag.map.random") else map.mapName
+        val mapNameComp = ServerTranslator.translate(
+            mapNameTranlatable, player
+        )
+
         val lobby = player.getLobby() ?: return
         val game = lobby.game as? TagGame ?: return
 
@@ -66,16 +75,17 @@ object TagVoteMapMenu {
             2f
         )
 
-        player.sendMessage(
-            Component.text("Вы проголосовали за карту: ")
-                .append(Component.text(mapName))
-        )
+        player.sendMessage(Component.translatable(
+            "msg.myshore.tag.player.map_vote.self",
+            mapNameComp
+        ))
 
         game.players.keys.filter { it != player.uniqueId }.asPlayers().forEach {
-            it.sendMessage(
-                Component.text("${player.name} проголосовал за карту: ")
-                    .append(Component.text(mapName))
-            )
+            it.sendMessage(Component.translatable(
+                "msg.myshore.tag.player.map_vote.other",
+                Component.text(player.name),
+                mapNameComp
+            ))
         }
     }
 }

@@ -19,7 +19,7 @@ object TagChooseRoleMenu {
         MenuType.GENERIC_9X1,
         Component.text()
             .append(TextOffset.getOffsetMinimessage(-8).toComponent().color(NamedTextColor.WHITE))
-            .append(GuiTextures.TAG_CHOOSE_ROLE_MENU!!.toComponent().color(NamedTextColor.WHITE))
+            .append(GuiTextures.MENU_1x9_028!!.toComponent().color(NamedTextColor.WHITE))
             .append(TextOffset.getOffsetMinimessage(-170).toComponent().color(NamedTextColor.WHITE))
             .append(Component.translatable("menu.myshore.minigames"))
             .build(),

@@ -1,13 +1,13 @@
 package ru.ynovka.myShore
 
 import com.github.darksoulq.abyssallib.server.registry.DeferredRegistry
+import com.github.darksoulq.abyssallib.world.data.statistic.Statistic
 import com.github.darksoulq.abyssallib.server.registry.Registries
 import com.github.darksoulq.abyssallib.world.item.Item
-import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIPaperConfig
-import org.bukkit.plugin.java.JavaPlugin
-import ru.ynovka.myShore.hub.Hub
 import ru.ynovka.myShore.texturepack.TexturePack
+import org.bukkit.plugin.java.JavaPlugin
+import dev.jorel.commandapi.CommandAPI
 
 
 class MyShore : JavaPlugin() {
@@ -16,6 +16,7 @@ class MyShore : JavaPlugin() {
             private set
         const val PLUGIN_ID = "myshore"
         val ITEMS: DeferredRegistry<Item> = DeferredRegistry.create(Registries.ITEMS, PLUGIN_ID)
+        val STATS: DeferredRegistry<Statistic> = DeferredRegistry.create(Registries.STATISTICS, PLUGIN_ID)
     }
 
     override fun onLoad() {
@@ -30,10 +31,12 @@ class MyShore : JavaPlugin() {
         Commands.register()
         Events.register()
         Items.register()
-
-        Hub
+        println("000000000")
+        Stats.register()
 
         ITEMS.apply()
+        println("222222222")
+        STATS.apply()
         TexturePack.register()
     }
 

@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import org.bukkit.Bukkit
 import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameId
+import ru.ynovka.myShore.games.pillars.PillarsGame
 import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.utils.PlayerVisibilityController
 import ru.ynovka.myShore.utils.Utils.asPlayers
@@ -41,6 +42,7 @@ object LobbyManager {
 
         val created: Game = when (lobby.gameType) {
             GameId.TAG -> TagGame(lobby)
+            GameId.PILLARS -> PillarsGame(lobby)
         }
 
         lobby.game = created
@@ -104,10 +106,7 @@ object LobbyManager {
 
         lobby.members.addAll(party.members)
 
-        for (memberUuid in lobby.members) {
-            val p = Bukkit.getPlayer(memberUuid) ?: continue
-            PlayerVisibilityController.refreshVisibility(p)
-        }
+        PlayerVisibilityController.refreshAll()
 
         val game = ensureGame(lobby)
         membersOnline.forEach { game.join(it) }
@@ -140,18 +139,14 @@ object LobbyManager {
 
 
     fun leave(player: Player): Boolean {
-        val lobby = player.getLobby() ?: run {
-            // todo перевод
-            player.sendMessage("Вы не находитесь в лобби")
-            return false
-        }
+        val lobby = player.getLobby() ?: run { return false }
 
         val playerId = player.uniqueId
 
         // Удаляем игрока
         lobby.removeMember(playerId)
 
-        PlayerVisibilityController.refreshVisibility(player)
+        PlayerVisibilityController.refreshAll()
 
         // todo перевод
         player.sendMessage("Вы покинули лобби")

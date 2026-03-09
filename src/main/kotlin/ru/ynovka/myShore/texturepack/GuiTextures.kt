@@ -4,13 +4,13 @@ import com.github.darksoulq.abyssallib.server.resource.Namespace
 import com.github.darksoulq.abyssallib.server.resource.asset.Font
 
 object GuiTextures {
-    var PLAY_MENU: Font.TextureGlyph? = null
-    var TAG_CHOOSE_ROLE_MENU: Font.TextureGlyph? = null
+    var MENU_2x9_048_26: Font.TextureGlyph? = null
+    var MENU_1x9_028: Font.TextureGlyph? = null
 
     fun register(ns: Namespace) {
         val fn: Font = ns.font("gui", false)
 
-        PLAY_MENU = fn.glyph(ns.texture("gui/play"), 148, 13)
-        TAG_CHOOSE_ROLE_MENU = fn.glyph(ns.texture("gui/tag_choose_role"), 130, 13)
+        MENU_2x9_048_26 = fn.glyph(ns.texture("gui/menu_2x9_048_26"), 148, 13)
+        MENU_1x9_028 = fn.glyph(ns.texture("gui/menu_1x9_028"), 130, 13)
     }
 }

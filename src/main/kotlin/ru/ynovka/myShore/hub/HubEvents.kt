@@ -74,7 +74,7 @@ object HubEvents : Listener {
         ActionBarController.clear(e.player)
         LobbyManager.leave(e.player)
         PartyManager.leave(e.player, LeftReason.QUIT)
-        PlayerVisibilityController.removePlayer(e.player)
+        PlayerVisibilityController.refreshAll()
         inst.server.scheduler.runTaskLater(
             inst,
             Runnable { TabController.updateAll() },

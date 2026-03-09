@@ -8,11 +8,6 @@ import org.bukkit.Bukkit
 
 
 object PlayerVisibilityController {
-
-    /**
-     * Основная функция. Вызывать, когда у target меняется статус (вход, выход, смена лобби).
-     * Она обновляет видимость ДЛЯ игрока и видимость ИГРОКА для остальных.
-     */
     fun refreshVisibility(target: Player) {
         val targetLobby = target.getLobby()
 
@@ -21,36 +16,36 @@ object PlayerVisibilityController {
 
             val otherLobby = other.getLobby()
 
-            // 1. Настраиваем, кого видит target
-            if (shouldSee(targetLobby, otherLobby)) {
-                target.showPlayer(inst, other)
-            } else {
-                target.hidePlayer(inst, other)
-            }
-
-            // 2. Настраиваем, кто видит target (обновляем зрение остальных игроков)
-            if (shouldSee(otherLobby, targetLobby)) {
-                other.showPlayer(inst, target)
-            } else {
-                other.hidePlayer(inst, target)
-            }
+            updatePair(target, targetLobby, other, otherLobby)
         }
     }
 
-    /**
-     * Логика видимости:
-     * Игрок видит другого, ТОЛЬКО если они находятся в одном и том же лобби.
-     * (null == null) -> Игроки в хабе видят друг друга.
-     */
-    private fun shouldSee(viewerLobby: Lobby?, targetLobby: Lobby?): Boolean {
-        return viewerLobby == targetLobby
+    fun refreshAll() {
+        for (player in Bukkit.getOnlinePlayers()) {
+            refreshVisibility(player)
+        }
     }
 
-    /**
-     * Очистка не требуется, так как мы не храним Map, но метод можно оставить пустым
-     * для совместимости с вашими эвентами.
-     */
-    fun removePlayer(player: Player) {
-        // Ничего не делаем, state-less подход
+    private fun updatePair(
+        p1: Player,
+        lobby1: Lobby?,
+        p2: Player,
+        lobby2: Lobby?
+    ) {
+        if (shouldSee(lobby1, lobby2)) {
+            p1.showPlayer(inst, p2)
+        } else {
+            p1.hidePlayer(inst, p2)
+        }
+
+        if (shouldSee(lobby2, lobby1)) {
+            p2.showPlayer(inst, p1)
+        } else {
+            p2.hidePlayer(inst, p1)
+        }
+    }
+
+    private fun shouldSee(viewerLobby: Lobby?, targetLobby: Lobby?): Boolean {
+        return viewerLobby == targetLobby
     }
 }

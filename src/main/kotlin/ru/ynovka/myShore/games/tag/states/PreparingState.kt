@@ -7,25 +7,29 @@ import net.kyori.adventure.text.format.TextDecoration
 import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.utils.Utils.clearTeams
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.tag.PlayerRoles
+import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.utils.Utils.asPlayers
 import ru.ynovka.myShore.utils.Utils.asPlayer
 import ru.ynovka.myShore.utils.clearActionBar
 import ru.ynovka.myShore.games.tag.TagGame
 import org.bukkit.potion.PotionEffectType
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.title.Title
 import org.bukkit.potion.PotionEffect
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Bukkit
 import org.bukkit.Sound
+import org.bukkit.scoreboard.Team
 import ru.ynovka.myShore.games.tag.teleport
+import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.utils.canMove
+import java.time.Duration
 import java.util.UUID
 
 
 // 5 сек перед началом (что бы у игроков загрузилась карта, они ознакомились со своими ролями)
-object PreparingState : TagState {
+object PreparingState : GameState {
 
     const val MAX_HISTORY = 10
 
@@ -37,11 +41,17 @@ object PreparingState : TagState {
     private val scoreboard by lazy { Bukkit.getScoreboardManager().mainScoreboard }
     private val hunterTeam by lazy {
         (scoreboard.getTeam("tag_hunter") ?: scoreboard.registerNewTeam("tag_hunter"))
-            .apply { color(NamedTextColor.RED) }
+            .apply {
+                color(NamedTextColor.RED)
+                setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER)
+            }
     }
     private val victimTeam by lazy {
         (scoreboard.getTeam("tag_victim") ?: scoreboard.registerNewTeam("tag_victim"))
-            .apply { color(NamedTextColor.GREEN) }
+            .apply {
+                color(NamedTextColor.GREEN)
+                setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER)
+            }
     }
 
     private val glowingEffect = PotionEffect(PotionEffectType.GLOWING, -1, 0, false, false)
@@ -59,10 +69,20 @@ object PreparingState : TagState {
 
             if (isHunter) {
                 hunterTeam.addEntry(player.name)
-                game.players[uuid] = PlayerRoles.HUNTER
+                player.showTitle(Title.title(
+                    Component.text(""),
+                    Component.translatable("sub.title.myshore.tag.player_is_hunter"),
+                    Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
+                ))
+                game.players[uuid] = TagPlayerRoles.HUNTER
             } else {
                 victimTeam.addEntry(player.name)
-                game.players[uuid] = PlayerRoles.VICTIM
+                player.showTitle(Title.title(
+                    Component.text(""),
+                    Component.translatable("sub.title.myshore.tag.player_is_runner"),
+                    Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
+                ))
+                game.players[uuid] = TagPlayerRoles.VICTIM
             }
 
             player.addPotionEffect(glowingEffect)
@@ -126,26 +146,19 @@ object PreparingState : TagState {
             if (game.state != TagGameStates.PREPARING) return
 
             if (timeLeft > 0) {
-                // todo перевод
-                val msg = Component.text()
-                    .append(Component.text("Старт через "))
-                    .append(Component.text(timeLeft).decoration(TextDecoration.BOLD, true))
-                    .append(Component.text(" секунд"))
-                    .build()
-
                 game.lobby.members.asPlayers().forEach { player ->
-                    player.sendPermanentActionBar(msg)
+                    player.sendPermanentActionBar(Component.translatable(
+                        "bar.myshore.tag.start_in",
+                        Component.text(timeLeft)
+                    ))
                     player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 2f)
                 }
 
                 game.scheduler.runTaskLater(inst, Runnable { tick(timeLeft - 1) }, 20L)
             } else {
-                // todo перевод
-                val msg = Component.text("ПОБЕЖАЛИ!")
-
                 game.lobby.members.asPlayers().forEach { player ->
                     player.clearActionBar()
-                    player.sendActionBar(msg)
+                    player.sendActionBar(Component.translatable("bar.myshore.tag.lets_run"))
                     player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
                 }
 

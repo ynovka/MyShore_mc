@@ -1,5 +1,6 @@
 package ru.ynovka.myShore.games.tag.maps
 
+import net.kyori.adventure.text.TranslatableComponent
 import ru.ynovka.myShore.games.tag.maps.impl.JungleMap
 import ru.ynovka.myShore.games.tag.maps.impl.MountainTrackMap
 import java.util.concurrent.ThreadLocalRandom
@@ -9,7 +10,7 @@ import ru.ynovka.myShore.utils.MapSpawn
 interface TagGameMap {
 
     val mapId: String
-    val mapName: String
+    val mapName: TranslatableComponent
     val authors: List<String>
 
     val hunterSpawn: MapSpawn

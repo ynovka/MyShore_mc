@@ -5,9 +5,10 @@ import net.kyori.adventure.text.format.TextDecoration
 import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.utils.Utils.asPlayers
-import ru.ynovka.myShore.games.tag.PlayerRoles
+import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.utils.Utils.asPlayer
 import ru.ynovka.myShore.utils.clearActionBar
+import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.tag.TagGame
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.utils.canMove
@@ -19,8 +20,8 @@ import org.bukkit.boss.BossBar
 import org.bukkit.Bukkit
 
 
-// 60-150 сек (сам геймплей салочек)
-object InProgressState : TagState {
+// 60-120 сек (сам геймплей салочек)
+object InProgressState : GameState {
 
     // BossBar хранится здесь, чтобы его можно было корректно убрать при смене состояния.
     // Если в будущем будет несколько одновременных игр — вынести в TagMiniGame.
@@ -45,7 +46,7 @@ object InProgressState : TagState {
         game.lobby.members.asPlayers().forEach { it.clearActionBar() }
 
         val hunterUuid = game.players
-            .filterValues { it == PlayerRoles.HUNTER }
+            .filterValues { it == TagPlayerRoles.HUNTER }
             .keys.firstOrNull() ?: return
         val hunter = hunterUuid.asPlayer() ?: return
 
@@ -53,7 +54,7 @@ object InProgressState : TagState {
             if (game.state != TagGameStates.IN_PROGRESS) return
 
             game.players
-                .filterValues { it == PlayerRoles.VICTIM }
+                .filterValues { it == TagPlayerRoles.VICTIM }
                 .keys.asPlayers()
                 .forEach { victim ->
                     val distance = ((victim.location.distance(hunter.location) * 10).roundToInt() / 10.0)

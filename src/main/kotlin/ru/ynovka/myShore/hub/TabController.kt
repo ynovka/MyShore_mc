@@ -3,7 +3,6 @@ package ru.ynovka.myShore.hub
 import com.github.darksoulq.abyssallib.extension.mmString
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 
@@ -22,8 +21,8 @@ object TabController {
         for (player in Bukkit.getOnlinePlayers()) {
             val onlineText = ServerTranslator.translate(
                 Component.translatable(
-                    "desc.myshore.hub.online",
-                    online.toString()
+                    "tab.myshore.hub.online",
+                    Component.text(online)
                 ),
                 player.locale()
             )

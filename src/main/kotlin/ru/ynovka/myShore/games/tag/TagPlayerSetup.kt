@@ -42,8 +42,7 @@ object TagPlayerSetup {
         applyWaitingInventory()
         clearActivePotionEffects()
         canMove(true)
-        // todo перевод
-        sendPermanentActionBar(Component.text("ожидание игроков"))
+        sendPermanentActionBar(Component.translatable("bar.myshore.tag.waiting_for_players"))
     }
 
     /** Телепорт + gameMode + инвентарь для состояния VOTING */
@@ -53,8 +52,7 @@ object TagPlayerSetup {
         }
         applyVotingInventory()
         canMove(true)
-        // todo перевод
-        sendPermanentActionBar(Component.text("голосование"))
+        sendPermanentActionBar(Component.translatable("bar.myshore.tag.voting"))
     }
 
     /** Спектатор при входе во время активной игры */

@@ -1,6 +1,7 @@
 package ru.ynovka.myShore.games
 
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.games.tag.TagGame
 
 
 interface Game {
@@ -12,5 +13,13 @@ interface Game {
 
 
 enum class GameId(val maxPlayers: Int) {
-    TAG(5)
+    TAG(5),
+    PILLARS(8)
+}
+
+interface GameState {
+    fun onStateStart(game: TagGame) {}
+    fun onStateEnd(game: TagGame) {}
+    fun onPlayerJoin(game: TagGame, player: Player) {}
+    fun onPlayerLeave(game: TagGame, player: Player) {}
 }

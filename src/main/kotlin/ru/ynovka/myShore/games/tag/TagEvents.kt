@@ -29,7 +29,7 @@ object TagEvents : Listener {
         val game = hunter.getLobby()?.game as? TagGame ?: return
 
         // Только охотник может "пятнать"
-        if (game.players[hunter.uniqueId] != PlayerRoles.HUNTER) {
+        if (game.players[hunter.uniqueId] != TagPlayerRoles.HUNTER) {
             event.isCancelled = true
             return
         }
@@ -42,7 +42,7 @@ object TagEvents : Listener {
     private fun catchVictim(victim: Player, hunter: Player, game: TagGame) {
         victim.gameMode = GameMode.SPECTATOR
         victim.clearActivePotionEffects()
-        game.players[victim.uniqueId] = PlayerRoles.SPECTATOR_VICTIM
+        game.players[victim.uniqueId] = TagPlayerRoles.SPECTATOR_VICTIM
 
         victim.world.playSound(victim.location, Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 2f, 1.2f)
         SphereExplosion.spawn(game.lobby, victim.location.add(0.0, 1.0, 0.0), 40, 5L)

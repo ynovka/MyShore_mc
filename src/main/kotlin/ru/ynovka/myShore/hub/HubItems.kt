@@ -92,8 +92,8 @@ object HubItems {
 
     val playTagItem = cancelItem(Key.key(inst, "play_tag")) {
         tooltip { p ->
-            line(Component.translatable("desc.myshore.minigames.tag.1"))
-            line(Component.translatable("desc.myshore.minigames.tag.2"))
+            line(Component.translatable("desc.myshore.play_tag.1"))
+            line(Component.translatable("desc.myshore.play_tag.2"))
         }
     }
 }

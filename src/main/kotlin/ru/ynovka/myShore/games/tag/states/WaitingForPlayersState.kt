@@ -3,13 +3,14 @@ package ru.ynovka.myShore.games.tag.states
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupForWaiting
 import ru.ynovka.myShore.utils.Utils.asPlayers
 import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.tag.*
 import org.bukkit.entity.Player
 import org.bukkit.Sound
 
 
 // Ожидание игроков (нужно хотя бы 2)
-object WaitingForPlayersState : TagState {
+object WaitingForPlayersState : GameState {
     override fun onStateStart(game: TagGame) {
         game.lobby.members.asPlayers().forEach { player ->
             player.setupForWaiting(game)

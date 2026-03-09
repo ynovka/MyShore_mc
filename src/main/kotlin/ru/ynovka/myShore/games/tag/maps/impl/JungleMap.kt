@@ -1,5 +1,6 @@
 package ru.ynovka.myShore.games.tag.maps.impl
 
+import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.games.tag.maps.TagGameMap
 import ru.ynovka.myShore.utils.MapSpawn
 
@@ -7,7 +8,7 @@ import ru.ynovka.myShore.utils.MapSpawn
 object JungleMap : TagGameMap {
 
     override val mapId = "tag_jungle"
-    override val mapName = "Джунгли"
+    override val mapName = Component.translatable("name.myshore.tag.map.jungle")
 
     override val authors = listOf(
         "Ynovka",
