@@ -98,7 +98,7 @@ object MountainTrackMap : TagGameMap, Listener {
                         player.teleport(player.location.add(0.0, 0.0025, 0.0))
                     }
                     val vec = Location(world, -90.0, player.y.plus(1), 40.0).clone().toVector()
-                        .subtract(player.location.toVector()).normalize().multiply(0.75)
+                        .subtract(player.location.toVector()).normalize().multiply(1.25)
                     player.velocity = player.velocity.add(vec)
                 }
             }
