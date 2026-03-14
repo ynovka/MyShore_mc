@@ -8,65 +8,36 @@ import org.bukkit.entity.Player
 import java.util.UUID
 
 
-/**
- * - Task создаётся при первом permanent-сообщении
- * - 1 task = 1 игрок
- * - Task удаляется при clear()
- */
 object ActionBarController {
-    private const val INITIAL_DELAY = 1L
-    private const val PERIOD_TICKS = 2L
-
-    private val tasks = ConcurrentHashMap<UUID, ScheduledTask>()
     private val messages = ConcurrentHashMap<UUID, Component>()
+    private var taskId = -1
 
     fun send(player: Player, message: Component) {
-        val uuid = player.uniqueId
-        messages[uuid] = message
-
-        tasks.compute(uuid) { _, existing ->
-            if (existing == null || existing.isCancelled) {
-                startTask(player)
-            } else {
-                existing
-            }
-        }
+        messages[player.uniqueId] = message
+        ensureTaskRunning()
     }
 
     fun clear(player: Player) {
-        val uuid = player.uniqueId
-
-        tasks.remove(uuid)?.cancel()
-        messages.remove(uuid)
-
-        player.scheduler.run(
-            inst,
-            { player.sendActionBar(Component.empty()) },
-            null
-        )
+        messages.remove(player.uniqueId)
+        player.sendActionBar(Component.empty())
+        if (messages.isEmpty()) stopTask()
     }
 
-    private fun startTask(player: Player): ScheduledTask {
-        val uuid = player.uniqueId
-
-        return player.scheduler.runAtFixedRate(
-            inst,
-            { task ->
-                val msg = messages[uuid]
-
-                if (!player.isOnline || msg == null) {
-                    task.cancel()
-                    tasks.remove(uuid)
-                    messages.remove(uuid)
-                    return@runAtFixedRate
+    private fun ensureTaskRunning() {
+        if (taskId != -1) return
+        taskId = inst.server.scheduler
+            .runTaskTimer(inst, Runnable {
+                messages.keys.retainAll(inst.server.onlinePlayers.map { it.uniqueId }.toSet())
+                inst.server.onlinePlayers.forEach { p ->
+                    messages[p.uniqueId]?.let { p.sendActionBar(it) }
                 }
+                if (messages.isEmpty()) stopTask()
+            }, 1L, 2L).taskId
+    }
 
-                player.sendActionBar(msg)
-            },
-            null,
-            INITIAL_DELAY,
-            PERIOD_TICKS
-        )!!
+    private fun stopTask() {
+        inst.server.scheduler.cancelTask(taskId)
+        taskId = -1
     }
 }
 

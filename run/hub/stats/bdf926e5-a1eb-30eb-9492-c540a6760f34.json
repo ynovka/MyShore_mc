@@ -1,9 +1,5 @@
 {
   "stats": {
-    "minecraft:mined": {
-      "minecraft:slime_block": 1,
-      "minecraft:structure_void": 2
-    },
     "minecraft:picked_up": {
       "minecraft:lead": 1,
       "minecraft:totem_of_undying": 1,
@@ -12,6 +8,10 @@
       "minecraft:emerald": 1,
       "minecraft:slime_block": 1,
       "minecraft:item_frame": 1
+    },
+    "minecraft:mined": {
+      "minecraft:slime_block": 1,
+      "minecraft:structure_void": 2
     },
     "minecraft:dropped": {
       "minecraft:item_frame": 1,
@@ -40,28 +40,28 @@
     },
     "minecraft:custom": {
       "minecraft:damage_resisted": 18,
-      "minecraft:time_since_rest": 142600,
-      "minecraft:walk_one_cm": 400985,
-      "minecraft:leave_game": 8,
-      "minecraft:walk_under_water_one_cm": 7603,
+      "minecraft:time_since_rest": 181560,
+      "minecraft:walk_one_cm": 445580,
+      "minecraft:leave_game": 14,
+      "minecraft:walk_under_water_one_cm": 8095,
       "minecraft:mob_kills": 2,
       "minecraft:damage_taken": 1010,
-      "minecraft:play_time": 255696,
+      "minecraft:play_time": 294656,
       "minecraft:damage_dealt": 239,
       "minecraft:damage_absorbed": 72,
-      "minecraft:jump": 8470,
-      "minecraft:time_since_death": 142600,
+      "minecraft:jump": 9834,
+      "minecraft:time_since_death": 181560,
       "minecraft:aviate_one_cm": 17001,
       "minecraft:drop": 3,
-      "minecraft:sprint_one_cm": 1033519,
-      "minecraft:fall_one_cm": 487214,
-      "minecraft:total_world_time": 255696,
-      "minecraft:swim_one_cm": 9275,
-      "minecraft:fly_one_cm": 2839974,
-      "minecraft:walk_on_water_one_cm": 4549,
-      "minecraft:crouch_one_cm": 8459,
-      "minecraft:sneak_time": 5409,
-      "minecraft:climb_one_cm": 36088,
+      "minecraft:sprint_one_cm": 1184842,
+      "minecraft:fall_one_cm": 559467,
+      "minecraft:total_world_time": 294656,
+      "minecraft:swim_one_cm": 10142,
+      "minecraft:fly_one_cm": 3254241,
+      "minecraft:walk_on_water_one_cm": 5880,
+      "minecraft:crouch_one_cm": 13180,
+      "minecraft:sneak_time": 7569,
+      "minecraft:climb_one_cm": 44701,
       "minecraft:deaths": 2
     }
   },

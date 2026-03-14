@@ -11,9 +11,11 @@ import ru.ynovka.myShore.MyShore.Companion.inst
 object TexturePack {
     val pack = ResourcePack(inst, PLUGIN_ID)
     val ns = pack.namespace(PLUGIN_ID)
+    val sounds = ns.sounds()
 
     fun register() {
         GuiTextures.register(ns)
+        SoundsPack.register()
 
         pack.register(true)
     }

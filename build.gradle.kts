@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "2.3.20-RC"
     id("com.gradleup.shadow") version "9.3.1"
     id("xyz.jpenilla.run-paper") version "3.0.2"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
 }
 
 group = "ru.ynovka"
@@ -15,9 +16,10 @@ repositories {
 }
 
 dependencies {
-    compileOnly("cn.dreeam.leaf:leaf-api:1.21.11-R0.1-SNAPSHOT")
+    paperweight.devBundle("cn.dreeam.leaf", "1.21.11-R0.1-SNAPSHOT")
 
     compileOnly("com.github.darksoulq:AbyssalLib:v2.0.0-mc1.21.11-dev.11")
+    //compileOnly("com.github.darksoulq:AbyssalLib")
 
     implementation("dev.jorel:commandapi-paper-shade:11.1.0")
     implementation("dev.jorel:commandapi-kotlin-paper:11.1.0")

@@ -1,17 +1,18 @@
 {
   "stats": {
-    "minecraft:killed": {
-      "minecraft:chicken": 1
-    },
-    "minecraft:picked_up": {
-      "minecraft:sugar": 64
-    },
     "minecraft:dropped": {
       "minecraft:sugar": 262,
       "minecraft:arrow": 64,
       "minecraft:stone": 3,
       "minecraft:grass_block": 1,
       "minecraft:cobbled_deepslate": 1
+    },
+    "minecraft:killed": {
+      "minecraft:chicken": 1
+    },
+    "minecraft:picked_up": {
+      "minecraft:rabbit_foot": 2,
+      "minecraft:sugar": 64
     },
     "minecraft:used": {
       "minecraft:brewing_stand": 2,
@@ -33,31 +34,32 @@
       "minecraft:iron_trapdoor": 13,
       "minecraft:green_concrete_powder": 2,
       "minecraft:command_block": 1,
+      "minecraft:black_stained_glass": 2,
       "minecraft:yellow_wool": 9,
       "minecraft:tuff_wall": 1
     },
     "minecraft:custom": {
-      "minecraft:time_since_rest": 18080,
-      "minecraft:walk_one_cm": 74054,
-      "minecraft:leave_game": 10,
+      "minecraft:time_since_rest": 141920,
+      "minecraft:walk_one_cm": 136653,
+      "minecraft:leave_game": 12,
       "minecraft:walk_under_water_one_cm": 600,
       "minecraft:mob_kills": 1,
       "minecraft:damage_taken": 660,
-      "minecraft:play_time": 332440,
+      "minecraft:play_time": 456280,
       "minecraft:damage_dealt": 40,
-      "minecraft:jump": 2581,
-      "minecraft:time_since_death": 18060,
+      "minecraft:jump": 4462,
+      "minecraft:time_since_death": 141900,
       "minecraft:drop": 16,
-      "minecraft:sprint_one_cm": 248547,
-      "minecraft:fall_one_cm": 197952,
-      "minecraft:total_world_time": 332440,
+      "minecraft:sprint_one_cm": 449000,
+      "minecraft:fall_one_cm": 299991,
+      "minecraft:total_world_time": 456280,
       "minecraft:swim_one_cm": 6528,
-      "minecraft:fly_one_cm": 2444515,
+      "minecraft:fly_one_cm": 2954352,
       "minecraft:interact_with_anvil": 1,
-      "minecraft:walk_on_water_one_cm": 2577,
-      "minecraft:crouch_one_cm": 10431,
-      "minecraft:sneak_time": 6920,
-      "minecraft:climb_one_cm": 15533,
+      "minecraft:walk_on_water_one_cm": 2779,
+      "minecraft:crouch_one_cm": 18063,
+      "minecraft:sneak_time": 9520,
+      "minecraft:climb_one_cm": 29771,
       "minecraft:deaths": 3
     }
   },

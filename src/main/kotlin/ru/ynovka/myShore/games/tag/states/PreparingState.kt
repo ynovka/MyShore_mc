@@ -1,30 +1,30 @@
 package ru.ynovka.myShore.games.tag.states
 
+import ru.ynovka.myShore.games.tag.TagPlayerSetup.applyInProgressInventory
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
 import ru.ynovka.myShore.utils.sendPermanentActionBar
 import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
+import ru.ynovka.myShore.games.tag.teleportPlayers
+import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.utils.Utils.clearTeams
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.utils.Utils.asPlayers
 import ru.ynovka.myShore.utils.Utils.asPlayer
 import ru.ynovka.myShore.utils.clearActionBar
 import ru.ynovka.myShore.games.tag.TagGame
 import org.bukkit.potion.PotionEffectType
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.title.Title
-import org.bukkit.potion.PotionEffect
-import org.bukkit.entity.Player
-import org.bukkit.GameMode
-import org.bukkit.Bukkit
-import org.bukkit.Sound
-import org.bukkit.scoreboard.Team
-import ru.ynovka.myShore.games.tag.teleport
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.utils.canMove
+import net.kyori.adventure.title.Title
+import org.bukkit.potion.PotionEffect
+import org.bukkit.scoreboard.Team
+import org.bukkit.entity.Player
+import org.bukkit.GameMode
 import java.time.Duration
+import org.bukkit.Bukkit
+import org.bukkit.Sound
 import java.util.UUID
 
 
@@ -49,7 +49,7 @@ object PreparingState : GameState {
     private val victimTeam by lazy {
         (scoreboard.getTeam("tag_victim") ?: scoreboard.registerNewTeam("tag_victim"))
             .apply {
-                color(NamedTextColor.GREEN)
+                color(NamedTextColor.AQUA)
                 setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER)
             }
     }
@@ -64,7 +64,7 @@ object PreparingState : GameState {
             val player = uuid.asPlayer() ?: return@forEach
             val isHunter = uuid == hunterUuid
 
-            player.inventory.clear()
+            player.applyInProgressInventory()
             player.clearTeams()
 
             if (isHunter) {
@@ -86,14 +86,13 @@ object PreparingState : GameState {
             }
 
             player.addPotionEffect(glowingEffect)
-
-            game.map.teleport(player, game) {
-                player.gameMode = GameMode.ADVENTURE
-            }
+            player.gameMode = GameMode.ADVENTURE
 
             // todo спавним кастомные предметы по позициям на карте
             player.canMove(false)
         }
+
+        game.map.teleportPlayers(game)
 
         startCountdown(game)
     }
@@ -151,7 +150,7 @@ object PreparingState : GameState {
                         "bar.myshore.tag.start_in",
                         Component.text(timeLeft)
                     ))
-                    player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 2f)
+                    player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_ON, 0.5f, 2f)
                 }
 
                 game.scheduler.runTaskLater(inst, Runnable { tick(timeLeft - 1) }, 20L)

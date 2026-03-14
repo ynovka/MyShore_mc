@@ -14,7 +14,7 @@ object WaitingForPlayersState : GameState {
     override fun onStateStart(game: TagGame) {
         game.lobby.members.asPlayers().forEach { player ->
             player.setupForWaiting(game)
-            player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 2f)
+            player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
         }
     }
 

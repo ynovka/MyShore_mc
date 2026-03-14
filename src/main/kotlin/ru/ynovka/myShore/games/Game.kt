@@ -1,16 +1,22 @@
 package ru.ynovka.myShore.games
 
-import org.bukkit.entity.Player
 import ru.ynovka.myShore.games.tag.TagGame
+import org.bukkit.entity.Player
+import java.util.concurrent.atomic.AtomicLong
 
 
 interface Game {
-    val id: GameId
+    val gameId: GameId
     val name: String
     fun join(player: Player)
     fun leave(player: Player)
 }
 
+object GameIdGenerator {
+    private val counter = AtomicLong(System.currentTimeMillis())
+
+    fun next(): Long = counter.incrementAndGet()
+}
 
 enum class GameId(val maxPlayers: Int) {
     TAG(5),

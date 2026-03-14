@@ -1,31 +1,30 @@
-package ru.ynovka.myShore.games.tag
+package ru.ynovka.myShore.games.tag.statistics
 
 import com.github.darksoulq.abyssallib.world.data.statistic.PlayerStatistics
 import com.github.darksoulq.abyssallib.world.data.statistic.Statistic
-import ru.ynovka.myShore.utils.StatsUtils.incrementStat
-import ru.ynovka.myShore.MyShore.Companion.PLUGIN_ID
-import ru.ynovka.myShore.utils.StatsUtils.resetStat
-import ru.ynovka.myShore.MyShore.Companion.STATS
-import ru.ynovka.myShore.utils.Utils.asPlayer
 import net.kyori.adventure.key.Key
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.MyShore
+import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.games.tag.TagPlayerRoles
+import ru.ynovka.myShore.utils.StatsUtils.incrementStat
+import ru.ynovka.myShore.utils.StatsUtils.resetStat
+import ru.ynovka.myShore.utils.Utils.asPlayer
 
+object TagPlayerStatistics {
+    val STAT_TAG_VICTIM_WIN_ID = Key.key(MyShore.Companion.PLUGIN_ID, "tag_victim_win")
+    val STAT_TAG_HUNTER_WIN_ID = Key.key(MyShore.Companion.PLUGIN_ID, "tag_hunter_win")
+    val STAT_TAG_WINSTRIKE_ID = Key.key(MyShore.Companion.PLUGIN_ID, "tag_winstrike")
 
-object TagStats {
-    val STAT_TAG_VICTIM_WIN_ID = Key.key(PLUGIN_ID, "tag_victim_win")
-    val STAT_TAG_HUNTER_WIN_ID = Key.key(PLUGIN_ID, "tag_hunter_win")
-    val STAT_TAG_WINSTRIKE_ID = Key.key(PLUGIN_ID, "tag_winstrike")
-
-    val STAT_TAG_VICTIM_LOSE_DIED_ID = Key.key(PLUGIN_ID, "tag_victim_lose_died")
-    val STAT_TAG_HUNTER_LOSE_ID = Key.key(PLUGIN_ID, "tag_hunter_lose")
+    val STAT_TAG_VICTIM_LOSE_DIED_ID = Key.key(MyShore.Companion.PLUGIN_ID, "tag_victim_lose_died")
+    val STAT_TAG_HUNTER_LOSE_ID = Key.key(MyShore.Companion.PLUGIN_ID, "tag_hunter_lose")
 
     fun register() {
-        println("1111111")
-        STATS.register(STAT_TAG_VICTIM_WIN_ID.value() ) { id -> Statistic.of(id, 0) }
-        STATS.register(STAT_TAG_HUNTER_WIN_ID.value()) { id -> Statistic.of(id, 0) }
-        STATS.register(STAT_TAG_WINSTRIKE_ID.value()) { id -> Statistic.of(id, 0) }
-        STATS.register(STAT_TAG_VICTIM_LOSE_DIED_ID.value()) { id -> Statistic.of(id, 0) }
-        STATS.register(STAT_TAG_HUNTER_LOSE_ID.value()) { id -> Statistic.of(id, 0) }
+        MyShore.Companion.STATS.register(STAT_TAG_VICTIM_WIN_ID.value() ) { id -> Statistic.of(id, 0) }
+        MyShore.Companion.STATS.register(STAT_TAG_HUNTER_WIN_ID.value()) { id -> Statistic.of(id, 0) }
+        MyShore.Companion.STATS.register(STAT_TAG_WINSTRIKE_ID.value()) { id -> Statistic.of(id, 0) }
+        MyShore.Companion.STATS.register(STAT_TAG_VICTIM_LOSE_DIED_ID.value()) { id -> Statistic.of(id, 0) }
+        MyShore.Companion.STATS.register(STAT_TAG_HUNTER_LOSE_ID.value()) { id -> Statistic.of(id, 0) }
     }
 
 
@@ -61,7 +60,7 @@ object TagStats {
 
             val isWinner = when (winnerRole) {
                 TagPlayerRoles.HUNTER if role == TagPlayerRoles.HUNTER -> true
-                TagPlayerRoles.VICTIM if (role ==TagPlayerRoles.VICTIM || role == TagPlayerRoles.SPECTATOR_VICTIM) -> true
+                TagPlayerRoles.VICTIM if (role == TagPlayerRoles.VICTIM || role == TagPlayerRoles.SPECTATOR_VICTIM) -> true
                 else -> false
             }
 

@@ -29,7 +29,6 @@ object PlayMenu {
         set(
             SlotPosition.top(0),
             GuiButton.of(playTagItem.getStack(null)) { ctx ->
-                println("pressed playTag item")
                 val player = ctx.view.inventoryView.player as Player
                 LobbyManager.join(player, GameId.TAG)
             }

@@ -1,22 +1,22 @@
 package ru.ynovka.myShore.games.tag.states
 
-import net.kyori.adventure.text.Component
-import org.bukkit.entity.Player
-import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.tag.TagPlayerRoles
-import ru.ynovka.myShore.games.tag.TagGame
-import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.applyFinishingInventory
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
-import ru.ynovka.myShore.games.tag.TagStats.saveStats
-import ru.ynovka.myShore.games.tag.hasHunter
-import ru.ynovka.myShore.games.tag.hasVictims
-import ru.ynovka.myShore.utils.Utils.asPlayer
-import ru.ynovka.myShore.utils.Utils.asPlayers
+import ru.ynovka.myShore.games.tag.statistics.TagPlayerStatistics.saveStats
+import ru.ynovka.myShore.games.tag.TagPlayerRoles
+import ru.ynovka.myShore.games.tag.TagGameStates
+import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.utils.Utils.clearTeams
-import ru.ynovka.myShore.utils.canMove
-import ru.ynovka.myShore.utils.sendPermanentActionBar
+import ru.ynovka.myShore.utils.Utils.asPlayers
+import ru.ynovka.myShore.games.tag.hasVictims
+import ru.ynovka.myShore.games.tag.hasHunter
+import ru.ynovka.myShore.games.tag.TagGame
+import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.games.GameState
+import ru.ynovka.myShore.utils.canMove
+import net.kyori.adventure.title.Title
+import org.bukkit.entity.Player
+import java.time.Duration
 
 
 // 5 сек после игры - определение победителей
@@ -32,14 +32,10 @@ object FinishingState : GameState {
 
         saveStats(game, winnerRole)
 
-        val actionBarMsg = buildWinnerActionBar(winnerRole)
-        val chatMsg = buildWinnerChatMsg(game, winnerRole)
-
         game.lobby.members.asPlayers().forEach { player ->
             player.clearActivePotionEffects()
             player.applyFinishingInventory()
-            player.sendPermanentActionBar(actionBarMsg)
-            player.sendMessage(chatMsg)
+            player.showTitle(buildWinnerTitle(winnerRole))
             player.canMove(true)
             player.clearTeams()
             game.players[player.uniqueId] = TagPlayerRoles.UNDEFINED
@@ -60,42 +56,21 @@ object FinishingState : GameState {
         player.setupAsSpectator(game)
     }
 
-    // ---------- приватные хелперы ----------
-
-    private fun buildWinnerActionBar(winnerRole: TagPlayerRoles): Component {
-        return if (winnerRole == TagPlayerRoles.VICTIM)
-            Component.translatable("bar.myshore.tag.victory.runners")
-        else
-            Component.translatable("bar.myshore.tag.victory.hunter")
-    }
-
-    private fun buildWinnerChatMsg(game: TagGame, winnerRole: TagPlayerRoles): Component =
-        when (winnerRole) {
+    private fun buildWinnerTitle(winnerRole: TagPlayerRoles): Title {
+        val comp = when (winnerRole) {
             TagPlayerRoles.VICTIM -> {
-                val runnerNames = game.players
-                    .filterValues { it == TagPlayerRoles.VICTIM || it == TagPlayerRoles.SPECTATOR_VICTIM }
-                    .keys.asPlayers()
-                    .joinToString(", ") { it.name }
-
-                Component.translatable(
-                    "msg.myshore.tag.victory.runners",
-                    Component.text(runnerNames)
-                )
+                Component.translatable("sub.title.myshore.tag.victory.runners")
             }
 
             TagPlayerRoles.HUNTER -> {
-                val hunterName = game.players
-                    .filterValues { it == TagPlayerRoles.HUNTER }
-                    .keys.firstOrNull()
-                    ?.asPlayer()?.name
-                    ?: "?"
-
-                Component.translatable(
-                    "msg.myshore.tag.victory.hunter",
-                    Component.text(hunterName)
-                )
+                Component.translatable("sub.title.myshore.tag.victory.hunter")
             }
 
             else -> Component.text("")
         }
+        return Title.title(
+            Component.text(""), comp,
+            Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
+        )
+    }
 }

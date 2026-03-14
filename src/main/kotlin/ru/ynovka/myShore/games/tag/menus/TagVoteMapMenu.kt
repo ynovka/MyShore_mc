@@ -1,18 +1,21 @@
 package ru.ynovka.myShore.games.tag.menus
 
 import ru.ynovka.myShore.games.tag.TagItems.tagVoteMountainTrackMapMenuItem
-import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
+import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import ru.ynovka.myShore.games.tag.TagItems.tagVoteJungleMapMenuItem
 import ru.ynovka.myShore.games.tag.TagItems.tagVoteRandomMapMenuItem
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
+import ru.ynovka.myShore.games.tag.states.VotingState.setupMap
 import com.github.darksoulq.abyssallib.world.gui.SlotPosition
 import net.kyori.adventure.text.format.NamedTextColor
 import com.github.darksoulq.abyssallib.world.gui.Gui
 import com.github.darksoulq.abyssallib.world.gui.gui
+import ru.ynovka.myShore.games.tag.maps.TagGameMaps
 import ru.ynovka.myShore.games.tag.maps.TagGameMap
 import ru.ynovka.myShore.utils.Utils.toComponent
 import ru.ynovka.myShore.texturepack.GuiTextures
+import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.utils.Utils.asPlayers
 import ru.ynovka.myShore.games.tag.TagGame
 import net.kyori.adventure.text.Component
@@ -20,7 +23,6 @@ import ru.ynovka.myShore.lobby.getLobby
 import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
 import org.bukkit.Sound
-import ru.ynovka.myShore.games.tag.maps.TagGameMaps
 
 
 @Suppress("UnstableApiUsage")
@@ -66,11 +68,16 @@ object TagVoteMapMenu {
         val lobby = player.getLobby() ?: return
         val game = lobby.game as? TagGame ?: return
 
+        if (game.state == TagGameStates.WAITING_FOR_PLAYERS) {
+            setupMap(game, map, true)
+            return
+        }
+
         game.mapVotes[player.uniqueId] = map
 
         player.playSound(
             player.location,
-            Sound.BLOCK_NOTE_BLOCK_PLING,
+            Sound.BLOCK_COPPER_BULB_TURN_OFF,
             0.5f,
             2f
         )

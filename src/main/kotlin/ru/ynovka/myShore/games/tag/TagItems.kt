@@ -1,6 +1,7 @@
 package ru.ynovka.myShore.games.tag
 
 import com.github.darksoulq.abyssallib.server.event.ActionResult
+import ru.ynovka.myShore.games.tag.statistics.TagPlayerStatistics.getPlayerTagStats
 import com.github.darksoulq.abyssallib.extension.openGui
 import ru.ynovka.myShore.games.tag.menus.TagVoteMapMenu
 import ru.ynovka.myShore.texturepack.TexturePack
@@ -10,7 +11,7 @@ import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.utils.cancelItem
 import net.kyori.adventure.key.Key
 import org.bukkit.entity.Player
-import ru.ynovka.myShore.games.tag.TagStats.getPlayerTagStats
+import ru.ynovka.myShore.games.tag.maps.impl.JungleMap
 
 
 object TagItems {
@@ -25,11 +26,12 @@ object TagItems {
         TexturePack.createItemTexture(tagVoteRandomMapMenuItem)
         TexturePack.createItemTexture(tagVoteJungleMapMenuItem)
         TexturePack.createItemTexture(tagVoteMountainTrackMapMenuItem)
+
+        JungleMap.Items.register()
     }
 
     val tagMapVoteMenu = cancelItem(Key.key(inst, "tag_map_vote_menu")) {
         tooltip { player ->
-            // todo перевод
             line(Component.translatable("desc.myshore.tag_map_vote_menu.1"))
             line(Component.translatable("desc.myshore.tag_map_vote_menu.2"))
             line(Component.translatable("desc.myshore.tag_map_vote_menu.3"))
@@ -46,22 +48,21 @@ object TagItems {
 
     val tagPlayerStats = cancelItem(Key.key(inst, "tag_player_stats")) {
         tooltip { player ->
-            line(Component.translatable("desc.myshore.tag_player_stats.1"))
             if (player != null) {
                 val stats = getPlayerTagStats(player)
                 line(Component.translatable(
-                    "desc.myshore.tag_player_stats.2",
+                    "desc.myshore.tag_player_stats.1",
                     Component.text(stats.victimWin),
-                    Component.text(stats.hunterWin)
+                    Component.text(stats.victimLose)
                 ))
                 line(Component.translatable(
-                    "desc.myshore.tag_player_stats.3",
-                    Component.text(stats.victimLose),
+                    "desc.myshore.tag_player_stats.2",
+                    Component.text(stats.hunterWin),
                     Component.text(stats.hunterLose)
                 ))
+                line(Component.text(""))
                 line(Component.translatable(
-                    "desc.myshore.tag_player_stats.4",
-                    Component.text(stats.totalPlayed()),
+                    "desc.myshore.tag_player_stats.3",
                     Component.text(stats.winstike)
                 ))
             } else {

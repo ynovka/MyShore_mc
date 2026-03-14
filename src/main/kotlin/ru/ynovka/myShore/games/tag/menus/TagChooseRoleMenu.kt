@@ -26,21 +26,15 @@ object TagChooseRoleMenu {
     ) {
         set(
             SlotPosition.top(0),
-            GuiButton.of(playTagItem.getStack(null)) {
-                println("pressed tagChooseRole random")
-            }
+            GuiButton.of(playTagItem.getStack(null))
         )
         set(
             SlotPosition.top(3),
-            GuiButton.of(playTagItem.getStack(null)) {
-                println("pressed tagChooseRole hunter")
-            }
+            GuiButton.of(playTagItem.getStack(null))
         )
         set(
             SlotPosition.top(5),
-            GuiButton.of(playTagItem.getStack(null)) {
-                println("pressed tagChooseRole victim")
-            }
+            GuiButton.of(playTagItem.getStack(null))
         )
     }
 }

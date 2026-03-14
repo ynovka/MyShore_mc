@@ -20,7 +20,7 @@ import org.bukkit.boss.BossBar
 import org.bukkit.Bukkit
 
 
-// 60-120 сек (сам геймплей салочек)
+// 40-115 сек (сам геймплей салочек)
 object InProgressState : GameState {
 
     // BossBar хранится здесь, чтобы его можно было корректно убрать при смене состояния.
@@ -61,7 +61,7 @@ object InProgressState : GameState {
                     victim.sendActionBar(
                         Component.translatable(
                             "bar.myshore.tag.distance_to_hunter",
-                            Component.text(distance).decoration(TextDecoration.BOLD, true)
+                            Component.text(distance)
                         )
                     )
                 }
@@ -75,7 +75,7 @@ object InProgressState : GameState {
     // ---------- таймер игры ----------
 
     private fun startCountdown(game: TagGame) {
-        game.totalTime = 60
+        game.totalTime = 40
 
         val bar = Bukkit.createBossBar("", BarColor.BLUE, BarStyle.SOLID).also { bar ->
             bar.progress = 1.0

@@ -6,10 +6,12 @@ import ru.ynovka.myShore.games.tag.maps.TagGameMap
 import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.utils.Utils.asPlayers
+import ru.ynovka.myShore.games.tag.teleport
 import ru.ynovka.myShore.games.tag.TagGame
-import ru.ynovka.myShore.games.GameState
 import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.games.GameState
 import org.bukkit.entity.Player
+import org.bukkit.GameMode
 import org.bukkit.Sound
 import kotlin.math.ceil
 
@@ -20,24 +22,13 @@ object VotingState : GameState {
     override fun onStateStart(game: TagGame) {
         game.lobby.members.asPlayers().forEach { player ->
             player.setupForVoting(game)
-            player.playSound(player.location, Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 2f)
+            player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
         }
 
         game.scheduler.runTaskLater(inst, Runnable {
             if (game.state != TagGameStates.VOTING) return@Runnable
 
-            resolveMapVoting(game)?.let { selectedMap ->
-                game.map = selectedMap
-                game.lobby.members.asPlayers().forEach { player ->
-                    val mapNameComp = ServerTranslator.translate(
-                        selectedMap.mapName, player
-                    )
-                    player.sendMessage(
-                        Component.translatable("msg.myshore.tag.choosen_map", mapNameComp)
-                    )
-                    // todo вывести авторов карты и характеристику
-                }
-            }
+            resolveMapVoting(game)?.let { setupMap(game, it) }
             game.mapVotes.clear()
             game.transitionTo(TagGameStates.PREPARING)
         }, 10 * 20L)
@@ -64,5 +55,24 @@ object VotingState : GameState {
         val winners = grouped.filterValues { it == maxVotes }.keys.toList()
 
         return if (winners.size == 1) winners.first() else winners.random()
+    }
+
+    fun setupMap(game: TagGame, map: TagGameMap, shouldTeleport: Boolean = false) {
+        game.map = map
+        game.lobby.members.asPlayers().forEach { player ->
+            val mapNameComp = ServerTranslator.translate(
+                map.mapName, player
+            )
+            player.sendMessage(
+                Component.translatable("msg.myshore.tag.choosen_map", mapNameComp)
+            )
+            // todo вывести авторов карты и характеристику
+
+            if (shouldTeleport) {
+                game.map.teleport(player, game) {
+                    player.gameMode = GameMode.ADVENTURE
+                }
+            }
+        }
     }
 }

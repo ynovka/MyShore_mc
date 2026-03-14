@@ -1,24 +1,24 @@
 package ru.ynovka.myShore.hub
 
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
-import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.utils.PlayerVisibilityController
 import org.bukkit.event.player.PlayerInteractEvent
+import ru.ynovka.myShore.utils.ActionBarController
+import ru.ynovka.myShore.MyShore.Companion.inst
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import ru.ynovka.myShore.party.PartyManager
+import ru.ynovka.myShore.lobby.LobbyManager
+import ru.ynovka.myShore.party.LeftReason
 import net.kyori.adventure.text.Component
 import org.bukkit.potion.PotionEffectType
 import ru.ynovka.myShore.hub.Hub.toHub
 import org.bukkit.potion.PotionEffect
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Material
-import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerQuitEvent
-import ru.ynovka.myShore.lobby.LobbyManager
-import ru.ynovka.myShore.party.LeftReason
-import ru.ynovka.myShore.party.PartyManager
-import ru.ynovka.myShore.utils.ActionBarController
-import ru.ynovka.myShore.utils.PlayerVisibilityController
 
 
 object HubEvents : Listener {
@@ -42,7 +42,7 @@ object HubEvents : Listener {
                         Material.CYAN_STAINED_GLASS_PANE)
                     ) {
                     player.addPotionEffect(PotionEffect(
-                        PotionEffectType.LEVITATION, 15, 2, false, false, false,
+                        PotionEffectType.LEVITATION, 8, 2, false, false, false,
                     ))
                 }
 
@@ -52,7 +52,7 @@ object HubEvents : Listener {
                     player.velocity = player.velocity.add(vec)
                 }
             }
-        }, 0L, 5L)
+        }, 0L, 2L)
     }
 
     @EventHandler
@@ -71,6 +71,12 @@ object HubEvents : Listener {
 
     @EventHandler
     fun onPlayerLeave(e: PlayerQuitEvent) {
+
+        e.quitMessage(Component.translatable(
+            "msg.myshore.hub.player_left",
+            Component.text(e.player.name)
+        ))
+
         ActionBarController.clear(e.player)
         LobbyManager.leave(e.player)
         PartyManager.leave(e.player, LeftReason.QUIT)

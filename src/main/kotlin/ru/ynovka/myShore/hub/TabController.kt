@@ -1,9 +1,8 @@
 package ru.ynovka.myShore.hub
 
-import com.github.darksoulq.abyssallib.extension.mmString
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 
 
@@ -15,7 +14,7 @@ object TabController {
         val online = Bukkit.getOnlinePlayers().size
 
         val header: Component = mm.deserialize(
-            "<newline>\u2007\u2007\u2007\u2007<bold><gradient:#5653c2:#7B79CF>MyShore</gradient></bold>\u2007\u2007\u2007\u2007<newline>"
+            "<newline><bold><gradient:#5653c2:#7B79CF>\u2007\u2007\u2007\u2007MyShore\u2007\u2007\u2007\u2007</gradient></bold><newline>"
         )
 
         for (player in Bukkit.getOnlinePlayers()) {
@@ -26,8 +25,6 @@ object TabController {
                 ),
                 player.locale()
             )
-
-            println("onlineText: ${onlineText.mmString}")
 
             val footer: Component = Component.text()
                 .append(Component.newline())

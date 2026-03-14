@@ -1,5 +1,12 @@
 {
   "stats": {
+    "minecraft:dropped": {
+      "minecraft:lime_shulker_box": 2,
+      "minecraft:black_concrete": 1,
+      "minecraft:light": 65,
+      "minecraft:rabbit_foot": 4,
+      "minecraft:jungle_leaves": 1
+    },
     "minecraft:killed": {
       "minecraft:chicken": 1
     },
@@ -15,13 +22,6 @@
       "minecraft:lime_shulker_box": 1,
       "minecraft:sugar": 70,
       "minecraft:cyan_terracotta": 1
-    },
-    "minecraft:dropped": {
-      "minecraft:lime_shulker_box": 2,
-      "minecraft:black_concrete": 1,
-      "minecraft:light": 65,
-      "minecraft:rabbit_foot": 4,
-      "minecraft:jungle_leaves": 1
     },
     "minecraft:used": {
       "minecraft:polished_tuff": 25,
@@ -146,7 +146,7 @@
       "minecraft:jungle_leaves": 1,
       "minecraft:green_banner": 21,
       "minecraft:cyan_terracotta": 523,
-      "minecraft:smooth_quartz_stairs": 4,
+      "minecraft:smooth_quartz_stairs": 5,
       "minecraft:flint_and_steel": 3,
       "minecraft:warped_trapdoor": 4,
       "minecraft:magenta_terracotta": 1,
@@ -157,31 +157,31 @@
       "minecraft:brown_concrete": 3
     },
     "minecraft:custom": {
-      "minecraft:time_since_rest": 1004740,
-      "minecraft:leave_game": 131,
+      "minecraft:time_since_rest": 1059900,
+      "minecraft:leave_game": 134,
       "minecraft:damage_taken": 2005,
       "minecraft:mob_kills": 1,
       "minecraft:open_shulker_box": 21,
-      "minecraft:time_since_death": 1004740,
-      "minecraft:total_world_time": 2578056,
+      "minecraft:time_since_death": 1059900,
+      "minecraft:total_world_time": 2633216,
       "minecraft:swim_one_cm": 5093,
-      "minecraft:crouch_one_cm": 32117,
+      "minecraft:crouch_one_cm": 34303,
       "minecraft:deaths": 3,
-      "minecraft:climb_one_cm": 30160,
+      "minecraft:climb_one_cm": 36039,
       "minecraft:interact_with_loom": 1,
       "minecraft:interact_with_crafting_table": 3,
-      "minecraft:walk_one_cm": 510079,
+      "minecraft:walk_one_cm": 522113,
       "minecraft:walk_under_water_one_cm": 455,
-      "minecraft:play_time": 2578050,
+      "minecraft:play_time": 2633210,
       "minecraft:damage_dealt": 80,
-      "minecraft:jump": 17745,
+      "minecraft:jump": 18347,
       "minecraft:drop": 10,
-      "minecraft:sprint_one_cm": 2137308,
-      "minecraft:fall_one_cm": 7685534,
-      "minecraft:fly_one_cm": 167616416,
+      "minecraft:sprint_one_cm": 2215688,
+      "minecraft:fall_one_cm": 7722383,
+      "minecraft:fly_one_cm": 167785869,
       "minecraft:interact_with_anvil": 1,
-      "minecraft:walk_on_water_one_cm": 5504,
-      "minecraft:sneak_time": 44200,
+      "minecraft:walk_on_water_one_cm": 5550,
+      "minecraft:sneak_time": 44980,
       "minecraft:interact_with_blast_furnace": 1
     }
   },

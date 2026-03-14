@@ -1,8 +1,9 @@
 package ru.ynovka.myShore.games.tag
 
 import org.bukkit.event.entity.EntityDamageByEntityEvent
-import ru.ynovka.myShore.utils.effects.SphereExplosion
 import org.bukkit.event.player.PlayerInteractEvent
+import ru.ynovka.myShore.utils.effects.RiftEffect
+import ru.ynovka.myShore.texturepack.SoundsPack
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.utils.Utils.asPlayers
 import org.bukkit.event.block.BlockBreakEvent
@@ -13,12 +14,15 @@ import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Sound
+import ru.ynovka.myShore.Database.tagCaughtsRepository
+import ru.ynovka.myShore.games.tag.maps.impl.MountainTrackMap
 
 
 object TagEvents : Listener {
 
     fun register() {
         inst.server.pluginManager.registerEvents(this, inst)
+        MountainTrackMap.Events.register()
     }
 
     @EventHandler
@@ -35,6 +39,7 @@ object TagEvents : Listener {
         }
 
         catchVictim(victim, hunter, game)
+        tagCaughtsRepository.save(victim, hunter, game)
         event.isCancelled = true
     }
 
@@ -45,19 +50,23 @@ object TagEvents : Listener {
         game.players[victim.uniqueId] = TagPlayerRoles.SPECTATOR_VICTIM
 
         victim.world.playSound(victim.location, Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 2f, 1.2f)
-        SphereExplosion.spawn(game.lobby, victim.location.add(0.0, 1.0, 0.0), 40, 5L)
+        RiftEffect.play(game.lobby, victim)
 
         val msg = Component.translatable(
             "msg.myshore.tag.hunter.caught",
             Component.text(hunter.name),
             Component.text(victim.name)
         )
-        game.players.keys.asPlayers().forEach { it.sendMessage(msg) }
+
+        game.lobby.members.asPlayers().forEach {
+            it.sendMessage(msg)
+            SoundsPack.RIFT_SOUND.play(it)
+        }
 
         if (!game.hasVictims()) {
             game.transitionTo(TagGameStates.FINISHING)
         } else {
-            game.totalTime += 20   // +20 сек за поимку жертвы
+            game.totalTime += 25   // +25 сек за поимку жертвы
         }
     }
 

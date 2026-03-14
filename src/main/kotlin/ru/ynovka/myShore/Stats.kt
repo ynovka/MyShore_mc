@@ -1,9 +1,9 @@
 package ru.ynovka.myShore
 
-import ru.ynovka.myShore.games.tag.TagStats
+import ru.ynovka.myShore.games.tag.statistics.TagPlayerStatistics
 
 object Stats {
     fun register() {
-        TagStats.register()
+        TagPlayerStatistics.register()
     }
 }
