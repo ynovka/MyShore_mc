@@ -11,7 +11,7 @@
       "minecraft:chicken": 1
     },
     "minecraft:picked_up": {
-      "minecraft:rabbit_foot": 2,
+      "minecraft:rabbit_foot": 9,
       "minecraft:sugar": 64
     },
     "minecraft:used": {
@@ -39,27 +39,27 @@
       "minecraft:tuff_wall": 1
     },
     "minecraft:custom": {
-      "minecraft:time_since_rest": 141920,
-      "minecraft:walk_one_cm": 136653,
-      "minecraft:leave_game": 12,
-      "minecraft:walk_under_water_one_cm": 600,
+      "minecraft:time_since_rest": 156820,
+      "minecraft:walk_one_cm": 149573,
+      "minecraft:leave_game": 13,
+      "minecraft:walk_under_water_one_cm": 666,
       "minecraft:mob_kills": 1,
       "minecraft:damage_taken": 660,
-      "minecraft:play_time": 456280,
+      "minecraft:play_time": 471180,
       "minecraft:damage_dealt": 40,
-      "minecraft:jump": 4462,
-      "minecraft:time_since_death": 141900,
+      "minecraft:jump": 4973,
+      "minecraft:time_since_death": 156800,
       "minecraft:drop": 16,
-      "minecraft:sprint_one_cm": 449000,
-      "minecraft:fall_one_cm": 299991,
-      "minecraft:total_world_time": 456280,
-      "minecraft:swim_one_cm": 6528,
-      "minecraft:fly_one_cm": 2954352,
+      "minecraft:sprint_one_cm": 503291,
+      "minecraft:fall_one_cm": 323631,
+      "minecraft:total_world_time": 471180,
+      "minecraft:swim_one_cm": 7132,
+      "minecraft:fly_one_cm": 3096333,
       "minecraft:interact_with_anvil": 1,
-      "minecraft:walk_on_water_one_cm": 2779,
-      "minecraft:crouch_one_cm": 18063,
-      "minecraft:sneak_time": 9520,
-      "minecraft:climb_one_cm": 29771,
+      "minecraft:walk_on_water_one_cm": 4146,
+      "minecraft:crouch_one_cm": 18725,
+      "minecraft:sneak_time": 9900,
+      "minecraft:climb_one_cm": 35493,
       "minecraft:deaths": 3
     }
   },

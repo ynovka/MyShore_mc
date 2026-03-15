@@ -20,7 +20,7 @@ import org.bukkit.boss.BossBar
 import org.bukkit.Bukkit
 
 
-// 40-115 сек (сам геймплей салочек)
+// 40-100 сек (сам геймплей салочек)
 object InProgressState : GameState {
 
     // BossBar хранится здесь, чтобы его можно было корректно убрать при смене состояния.

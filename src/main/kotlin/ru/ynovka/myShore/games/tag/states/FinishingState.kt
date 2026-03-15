@@ -16,6 +16,7 @@ import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.utils.canMove
 import net.kyori.adventure.title.Title
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.games.tag.maps.impl.JungleMap
 import java.time.Duration
 
 
@@ -49,6 +50,8 @@ object FinishingState : GameState {
             }
             game.transitionTo(nextState)
         }, 5 * 20L)
+
+        JungleMap.removeDarts(game)
     }
 
     override fun onPlayerJoin(game: TagGame, player: Player) {

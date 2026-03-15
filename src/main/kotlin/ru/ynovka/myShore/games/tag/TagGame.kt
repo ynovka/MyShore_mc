@@ -74,6 +74,7 @@ class TagGame(val lobby: Lobby) : Game {
         player.clearActivePotionEffects()
         player.canMove(true)
         player.clearActionBar()
+        JungleMap.hideDartsFromPlayer(player)
 
         when (state) {
             TagGameStates.VOTING ->

@@ -15,6 +15,7 @@ import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Sound
 import ru.ynovka.myShore.Database.tagCaughtsRepository
+import ru.ynovka.myShore.games.tag.maps.impl.JungleMap
 import ru.ynovka.myShore.games.tag.maps.impl.MountainTrackMap
 
 
@@ -23,6 +24,7 @@ object TagEvents : Listener {
     fun register() {
         inst.server.pluginManager.registerEvents(this, inst)
         MountainTrackMap.Events.register()
+        JungleMap.Events.register()
     }
 
     @EventHandler
@@ -66,7 +68,7 @@ object TagEvents : Listener {
         if (!game.hasVictims()) {
             game.transitionTo(TagGameStates.FINISHING)
         } else {
-            game.totalTime += 25   // +25 сек за поимку жертвы
+            game.totalTime += 20 // +20 сек за поимку жертвы
         }
     }
 

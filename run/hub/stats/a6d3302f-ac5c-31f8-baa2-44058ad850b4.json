@@ -1,5 +1,61 @@
 {
   "stats": {
+    "minecraft:killed": {
+      "minecraft:snow_golem": 1
+    },
+    "minecraft:picked_up": {
+      "minecraft:lime_bed": 7,
+      "minecraft:light_blue_stained_glass_pane": 1,
+      "minecraft:white_wool": 1,
+      "minecraft:repeater": 1,
+      "minecraft:snowball": 9,
+      "minecraft:item_frame": 6,
+      "minecraft:rabbit_foot": 3,
+      "minecraft:lime_carpet": 7,
+      "minecraft:light": 1,
+      "minecraft:grass_block": 2,
+      "minecraft:diamond": 2,
+      "minecraft:ladder": 5,
+      "minecraft:spruce_pressure_plate": 2,
+      "minecraft:barrier": 1,
+      "minecraft:paper": 7
+    },
+    "minecraft:custom": {
+      "minecraft:trigger_trapped_chest": 24,
+      "minecraft:time_since_rest": 1546891,
+      "minecraft:leave_game": 158,
+      "minecraft:damage_taken": 3240,
+      "minecraft:mob_kills": 1,
+      "minecraft:open_shulker_box": 13,
+      "minecraft:time_since_death": 1546861,
+      "minecraft:damage_dealt_absorbed": 72,
+      "minecraft:swim_one_cm": 29912,
+      "minecraft:total_world_time": 3121151,
+      "minecraft:crouch_one_cm": 52379,
+      "minecraft:deaths": 4,
+      "minecraft:climb_one_cm": 109703,
+      "minecraft:walk_one_cm": 899185,
+      "minecraft:walk_under_water_one_cm": 65177,
+      "minecraft:damage_dealt": 442,
+      "minecraft:play_time": 3121151,
+      "minecraft:jump": 38851,
+      "minecraft:drop": 17,
+      "minecraft:open_barrel": 1,
+      "minecraft:sprint_one_cm": 4185629,
+      "minecraft:open_chest": 2,
+      "minecraft:fall_one_cm": 1288020,
+      "minecraft:fly_one_cm": 18364388,
+      "minecraft:interact_with_anvil": 1,
+      "minecraft:walk_on_water_one_cm": 65697,
+      "minecraft:sneak_time": 46430
+    },
+    "minecraft:dropped": {
+      "minecraft:pointed_dripstone": 1,
+      "minecraft:light_gray_concrete": 1,
+      "minecraft:paper": 13,
+      "minecraft:glass": 1,
+      "minecraft:stick": 1
+    },
     "minecraft:used": {
       "minecraft:crying_obsidian": 22,
       "minecraft:andesite_stairs": 2,
@@ -148,66 +204,10 @@
       "minecraft:brown_shulker_box": 8,
       "minecraft:brown_concrete": 804
     },
-    "minecraft:custom": {
-      "minecraft:trigger_trapped_chest": 24,
-      "minecraft:time_since_rest": 1521311,
-      "minecraft:leave_game": 152,
-      "minecraft:damage_taken": 3240,
-      "minecraft:mob_kills": 1,
-      "minecraft:open_shulker_box": 13,
-      "minecraft:time_since_death": 1521281,
-      "minecraft:damage_dealt_absorbed": 72,
-      "minecraft:swim_one_cm": 29912,
-      "minecraft:total_world_time": 3095571,
-      "minecraft:crouch_one_cm": 52342,
-      "minecraft:deaths": 4,
-      "minecraft:climb_one_cm": 109051,
-      "minecraft:walk_one_cm": 895663,
-      "minecraft:walk_under_water_one_cm": 65177,
-      "minecraft:damage_dealt": 442,
-      "minecraft:play_time": 3095571,
-      "minecraft:jump": 38702,
-      "minecraft:drop": 17,
-      "minecraft:open_barrel": 1,
-      "minecraft:sprint_one_cm": 4163045,
-      "minecraft:open_chest": 2,
-      "minecraft:fall_one_cm": 1283629,
-      "minecraft:fly_one_cm": 18337677,
-      "minecraft:interact_with_anvil": 1,
-      "minecraft:walk_on_water_one_cm": 65200,
-      "minecraft:sneak_time": 46390
-    },
-    "minecraft:dropped": {
-      "minecraft:pointed_dripstone": 1,
-      "minecraft:light_gray_concrete": 1,
-      "minecraft:paper": 13,
-      "minecraft:glass": 1,
-      "minecraft:stick": 1
-    },
     "minecraft:mined": {
       "minecraft:short_grass": 1,
       "minecraft:pale_moss_block": 1,
       "minecraft:jungle_leaves": 1
-    },
-    "minecraft:picked_up": {
-      "minecraft:lime_bed": 7,
-      "minecraft:light_blue_stained_glass_pane": 1,
-      "minecraft:white_wool": 1,
-      "minecraft:repeater": 1,
-      "minecraft:snowball": 9,
-      "minecraft:item_frame": 6,
-      "minecraft:rabbit_foot": 3,
-      "minecraft:lime_carpet": 7,
-      "minecraft:light": 1,
-      "minecraft:grass_block": 2,
-      "minecraft:diamond": 2,
-      "minecraft:ladder": 5,
-      "minecraft:spruce_pressure_plate": 2,
-      "minecraft:barrier": 1,
-      "minecraft:paper": 7
-    },
-    "minecraft:killed": {
-      "minecraft:snow_golem": 1
     }
   },
   "DataVersion": 4671

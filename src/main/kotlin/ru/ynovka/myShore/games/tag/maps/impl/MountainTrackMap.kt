@@ -41,7 +41,7 @@ object MountainTrackMap : TagGameMap, Listener {
 
     object Events {
         fun register() {
-            val world = Bukkit.getServer().getWorld("tag_mountain_track")!!
+            val world = Bukkit.getServer().getWorld(mapId)!!
             inst.server.scheduler.runTaskTimer(inst, Runnable {
                 world.players.forEach { player ->
                     if (player.gameMode == GameMode.CREATIVE) return@forEach
@@ -70,7 +70,7 @@ object MountainTrackMap : TagGameMap, Listener {
                             if (!game.hasVictims()) {
                                 game.transitionTo(TagGameStates.FINISHING)
                             } else {
-                                game.totalTime += 25
+                                game.totalTime += 20
                             }
                         }
                         if (role == TagPlayerRoles.UNDEFINED) {

@@ -1,19 +1,23 @@
 {
   "stats": {
+    "minecraft:picked_up": {
+      "minecraft:rabbit_foot": 5
+    },
     "minecraft:custom": {
-      "minecraft:time_since_rest": 6700,
-      "minecraft:walk_one_cm": 13162,
-      "minecraft:leave_game": 1,
-      "minecraft:play_time": 6700,
-      "minecraft:jump": 237,
-      "minecraft:time_since_death": 6700,
-      "minecraft:sprint_one_cm": 36130,
-      "minecraft:fall_one_cm": 19391,
-      "minecraft:total_world_time": 6700,
-      "minecraft:fly_one_cm": 70718,
-      "minecraft:walk_on_water_one_cm": 152,
-      "minecraft:sneak_time": 40,
-      "minecraft:climb_one_cm": 759
+      "minecraft:time_since_rest": 24700,
+      "minecraft:walk_one_cm": 43076,
+      "minecraft:leave_game": 2,
+      "minecraft:walk_under_water_one_cm": 1125,
+      "minecraft:play_time": 24700,
+      "minecraft:jump": 637,
+      "minecraft:time_since_death": 24700,
+      "minecraft:sprint_one_cm": 92713,
+      "minecraft:fall_one_cm": 42242,
+      "minecraft:total_world_time": 24700,
+      "minecraft:fly_one_cm": 218703,
+      "minecraft:walk_on_water_one_cm": 1349,
+      "minecraft:sneak_time": 420,
+      "minecraft:climb_one_cm": 4132
     }
   },
   "DataVersion": 4671
