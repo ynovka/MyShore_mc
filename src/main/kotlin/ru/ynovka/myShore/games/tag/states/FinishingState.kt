@@ -1,8 +1,8 @@
 package ru.ynovka.myShore.games.tag.states
 
+import ru.ynovka.myShore.games.tag.statistics.TagPlayerStatistics.saveStats
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.applyFinishingInventory
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
-import ru.ynovka.myShore.games.tag.statistics.TagPlayerStatistics.saveStats
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.MyShore.Companion.inst
@@ -13,10 +13,9 @@ import ru.ynovka.myShore.games.tag.hasHunter
 import ru.ynovka.myShore.games.tag.TagGame
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.games.GameState
-import ru.ynovka.myShore.utils.canMove
 import net.kyori.adventure.title.Title
+import ru.ynovka.myShore.utils.canMove
 import org.bukkit.entity.Player
-import ru.ynovka.myShore.games.tag.maps.impl.JungleMap
 import java.time.Duration
 
 
@@ -51,7 +50,7 @@ object FinishingState : GameState {
             game.transitionTo(nextState)
         }, 5 * 20L)
 
-        JungleMap.removeDarts(game)
+        game.map.onGameEnd(game)
     }
 
     override fun onPlayerJoin(game: TagGame, player: Player) {

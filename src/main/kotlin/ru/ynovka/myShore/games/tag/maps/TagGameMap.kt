@@ -1,10 +1,12 @@
 package ru.ynovka.myShore.games.tag.maps
 
-import net.kyori.adventure.text.TranslatableComponent
-import ru.ynovka.myShore.games.tag.maps.impl.JungleMap
 import ru.ynovka.myShore.games.tag.maps.impl.MountainTrackMap
+import ru.ynovka.myShore.games.tag.maps.impl.JungleMap
+import net.kyori.adventure.text.TranslatableComponent
 import java.util.concurrent.ThreadLocalRandom
+import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.utils.MapSpawn
+import org.bukkit.entity.Player
 
 
 interface TagGameMap {
@@ -16,12 +18,31 @@ interface TagGameMap {
     val hunterSpawn: MapSpawn
     val victimSpawns: List<MapSpawn>
 
+
+    /** Вызывается после телепорта игроков в начале игры */
+    fun onGameStart(game: TagGame) {}
+
+    /** Вызывается при завершении игры */
+    fun onGameEnd(game: TagGame) {}
+
+    /** Вызывается когда игрок покидает игру */
+    fun onPlayerJoin(game: TagGame, player: Player) {}
+
+    /** Вызывается когда игрок покидает игру */
+    fun onPlayerLeave(game: TagGame, player: Player) {}
+
+    /** Вызывается вместе с TagEvents.register() */
+    fun registerEvents() {}
+
+    /** Вызывается вместе с TagItems.register() */
+    fun registerItems() {}
+
     companion object Registry {
 
-        private val maps = listOf(
+        val maps = listOf(
             JungleMap,
-            MountainTrackMap,
-        )
+            MountainTrackMap)
+            private set
 
         fun random(): TagGameMap {
             require(maps.isNotEmpty()) { "No TagGame maps registered" }

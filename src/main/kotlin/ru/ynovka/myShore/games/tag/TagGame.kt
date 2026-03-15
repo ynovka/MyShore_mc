@@ -19,7 +19,6 @@ import ru.ynovka.myShore.lobby.Lobby
 import ru.ynovka.myShore.games.Game
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
-import ru.ynovka.myShore.games.tag.maps.impl.JungleMap
 import java.util.UUID
 
 
@@ -67,6 +66,7 @@ class TagGame(val lobby: Lobby) : Game {
     override fun join(player: Player) {
         players[player.uniqueId] = TagPlayerRoles.UNDEFINED
         stateImpl.onPlayerJoin(this, player)
+        map.onPlayerJoin(this, player)
     }
 
     override fun leave(player: Player) {
@@ -74,7 +74,7 @@ class TagGame(val lobby: Lobby) : Game {
         player.clearActivePotionEffects()
         player.canMove(true)
         player.clearActionBar()
-        JungleMap.hideDartsFromPlayer(player)
+        map.onPlayerLeave(this, player)
 
         when (state) {
             TagGameStates.VOTING ->
@@ -204,8 +204,6 @@ fun TagGameMap.teleportPlayers(game: TagGame) {
     }
 
     CompletableFuture.allOf(*teleports.toTypedArray())
-
-    if (game.map == JungleMap) JungleMap.spawnPoisonDarts(game)
 }
 
 fun TagGame.hasVictims(): Boolean = players.values.any { it == TagPlayerRoles.VICTIM }

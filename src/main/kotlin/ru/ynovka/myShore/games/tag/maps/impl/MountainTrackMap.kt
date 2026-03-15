@@ -12,7 +12,6 @@ import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.utils.MapSpawn
 import ru.ynovka.myShore.lobby.getLobby
 import org.bukkit.block.BlockFace
-import org.bukkit.event.Listener
 import org.bukkit.block.Block
 import org.bukkit.Material
 import org.bukkit.Location
@@ -20,7 +19,7 @@ import org.bukkit.GameMode
 import org.bukkit.Bukkit
 
 
-object MountainTrackMap : TagGameMap, Listener {
+object MountainTrackMap : TagGameMap {
 
     override val mapId = "tag_mountain_track"
     override val mapName = Component.translatable("name.myshore.tag.map.mountain_track")
@@ -38,6 +37,8 @@ object MountainTrackMap : TagGameMap, Listener {
         MapSpawn("tag_mountain_track", -46.5, 96.0, 13.5, 30f, 0f),
         MapSpawn("tag_mountain_track", -45.5, 96.0, 15.5, 35f, 0f)
     )
+
+    override fun registerEvents() = Events.register()
 
     object Events {
         fun register() {

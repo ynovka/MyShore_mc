@@ -88,11 +88,11 @@ object PreparingState : GameState {
             player.addPotionEffect(glowingEffect)
             player.gameMode = GameMode.ADVENTURE
 
-            // todo спавним кастомные предметы по позициям на карте
             player.canMove(false)
         }
 
         game.map.teleportPlayers(game)
+        game.map.onGameStart(game)
 
         startCountdown(game)
     }

@@ -1,36 +1,34 @@
 package ru.ynovka.myShore.games.tag.maps.impl
 
-import com.github.darksoulq.abyssallib.server.event.ActionResult
 import com.github.darksoulq.abyssallib.world.item.component.builtin.CooldownUse
 import io.papermc.paper.datacomponent.item.UseCooldown.useCooldown
-import net.kyori.adventure.key.Key
+import com.github.darksoulq.abyssallib.server.event.ActionResult
+import ru.ynovka.myShore.games.tag.maps.TagGameMap
+import ru.ynovka.myShore.games.tag.TagPlayerRoles
+import ru.ynovka.myShore.MyShore.Companion.ITEMS
+import ru.ynovka.myShore.texturepack.TexturePack
+import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.utils.Utils.asPlayers
+import ru.ynovka.myShore.utils.Utils.asPlayer
+import java.util.concurrent.ThreadLocalRandom
+import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.utils.cancelItem
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
+import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.potion.PotionEffectType
+import ru.ynovka.myShore.lobby.getLobby
+import ru.ynovka.myShore.utils.MapSpawn
+import org.bukkit.potion.PotionEffect
+import org.bukkit.entity.ItemDisplay
+import kotlin.random.asKotlinRandom
+import net.kyori.adventure.key.Key
+import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Material
-import org.bukkit.Sound
-import org.bukkit.entity.ItemDisplay
-import org.bukkit.entity.Player
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.inventory.EquipmentSlot
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
 import org.joml.Matrix4f
-import ru.ynovka.myShore.MyShore.Companion.ITEMS
-import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.tag.TagGame
-import ru.ynovka.myShore.games.tag.TagPlayerRoles
-import ru.ynovka.myShore.games.tag.maps.TagGameMap
-import ru.ynovka.myShore.lobby.getLobby
-import ru.ynovka.myShore.texturepack.TexturePack
-import ru.ynovka.myShore.utils.MapSpawn
-import ru.ynovka.myShore.utils.Utils.asPlayer
-import ru.ynovka.myShore.utils.Utils.asPlayers
-import ru.ynovka.myShore.utils.cancelItem
-import java.util.concurrent.ThreadLocalRandom
+import org.bukkit.Bukkit
+import org.bukkit.Sound
 import kotlin.math.abs
-import kotlin.random.asKotlinRandom
 
 
 object JungleMap : TagGameMap {
@@ -55,6 +53,11 @@ object JungleMap : TagGameMap {
         MapSpawn("tag_jungle", -2.5, 101.0, 0.5, 180f, 0f),
         MapSpawn("tag_jungle", -4.5, 101.0, -1.5, 180f, 0f)
     )
+
+    override fun onGameStart(game: TagGame) = spawnPoisonDarts(game)
+    override fun onGameEnd(game: TagGame) = removeDarts(game)
+    override fun onPlayerJoin(game: TagGame, player: Player) = showDartsFromPlayer(player)
+    override fun onPlayerLeave(game: TagGame, player: Player) = hideDartsFromPlayer(player)
 
     val poisonDartSpawns = listOf(
         MapSpawn("tag_jungle", -12.5, 106.5, -10.5),
@@ -115,6 +118,14 @@ object JungleMap : TagGameMap {
         }
     }
 
+    fun showDartsFromPlayer(player: Player) {
+        darts.values.flatten().forEach { display ->
+            if (display.isValid) player.showEntity(inst, display)
+        }
+    }
+
+    override fun registerEvents() = Events.register()
+
     object Events {
         fun register() {
             val duration = 20
@@ -162,6 +173,8 @@ object JungleMap : TagGameMap {
             }, 1L, 2L)
         }
     }
+
+    override fun registerItems() = Items.register()
 
     object Items {
         fun register() {

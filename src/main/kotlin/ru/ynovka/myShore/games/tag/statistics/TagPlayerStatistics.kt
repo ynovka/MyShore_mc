@@ -2,14 +2,15 @@ package ru.ynovka.myShore.games.tag.statistics
 
 import com.github.darksoulq.abyssallib.world.data.statistic.PlayerStatistics
 import com.github.darksoulq.abyssallib.world.data.statistic.Statistic
-import net.kyori.adventure.key.Key
-import org.bukkit.entity.Player
-import ru.ynovka.myShore.MyShore
-import ru.ynovka.myShore.games.tag.TagGame
-import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.utils.StatsUtils.incrementStat
 import ru.ynovka.myShore.utils.StatsUtils.resetStat
+import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.utils.Utils.asPlayer
+import ru.ynovka.myShore.games.tag.TagGame
+import net.kyori.adventure.key.Key
+import ru.ynovka.myShore.MyShore
+import org.bukkit.entity.Player
+
 
 object TagPlayerStatistics {
     val STAT_TAG_VICTIM_WIN_ID = Key.key(MyShore.Companion.PLUGIN_ID, "tag_victim_win")
@@ -34,9 +35,7 @@ object TagPlayerStatistics {
         val winstike: Int = 0,
         val victimLose: Int = 0,
         val hunterLose: Int = 0
-    ) {
-        fun totalPlayed(): Int = victimWin + hunterWin + winstike + victimLose + hunterLose
-    }
+    )
 
     private fun PlayerStatistics.getIntValue(id: Key): Int {
         val stat: Statistic.IntStatistic? = this.get(id) as Statistic.IntStatistic?

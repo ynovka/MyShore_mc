@@ -1,8 +1,8 @@
 package ru.ynovka.myShore.games.tag
 
 import dev.jorel.commandapi.kotlindsl.commandAPICommand
-import dev.jorel.commandapi.kotlindsl.playerExecutor
 import ru.ynovka.myShore.Database.tagCaughtsRepository
+import dev.jorel.commandapi.kotlindsl.playerExecutor
 import ru.ynovka.myShore.games.tag.maps.TagGameMaps
 import org.bukkit.Particle
 import org.bukkit.Color

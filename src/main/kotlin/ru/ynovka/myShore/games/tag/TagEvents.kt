@@ -1,6 +1,8 @@
 package ru.ynovka.myShore.games.tag
 
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import ru.ynovka.myShore.Database.tagCaughtsRepository
+import ru.ynovka.myShore.games.tag.maps.TagGameMap
 import org.bukkit.event.player.PlayerInteractEvent
 import ru.ynovka.myShore.utils.effects.RiftEffect
 import ru.ynovka.myShore.texturepack.SoundsPack
@@ -14,17 +16,13 @@ import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Sound
-import ru.ynovka.myShore.Database.tagCaughtsRepository
-import ru.ynovka.myShore.games.tag.maps.impl.JungleMap
-import ru.ynovka.myShore.games.tag.maps.impl.MountainTrackMap
 
 
 object TagEvents : Listener {
 
     fun register() {
         inst.server.pluginManager.registerEvents(this, inst)
-        MountainTrackMap.Events.register()
-        JungleMap.Events.register()
+        TagGameMap.maps.forEach { it.registerEvents() }
     }
 
     @EventHandler

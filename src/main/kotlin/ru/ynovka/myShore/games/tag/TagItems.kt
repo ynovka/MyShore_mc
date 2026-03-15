@@ -1,9 +1,10 @@
 package ru.ynovka.myShore.games.tag
 
-import com.github.darksoulq.abyssallib.server.event.ActionResult
 import ru.ynovka.myShore.games.tag.statistics.TagPlayerStatistics.getPlayerTagStats
+import com.github.darksoulq.abyssallib.server.event.ActionResult
 import com.github.darksoulq.abyssallib.extension.openGui
 import ru.ynovka.myShore.games.tag.menus.TagVoteMapMenu
+import ru.ynovka.myShore.games.tag.maps.TagGameMap
 import ru.ynovka.myShore.texturepack.TexturePack
 import ru.ynovka.myShore.MyShore.Companion.ITEMS
 import ru.ynovka.myShore.MyShore.Companion.inst
@@ -11,7 +12,6 @@ import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.utils.cancelItem
 import net.kyori.adventure.key.Key
 import org.bukkit.entity.Player
-import ru.ynovka.myShore.games.tag.maps.impl.JungleMap
 
 
 object TagItems {
@@ -27,7 +27,7 @@ object TagItems {
         TexturePack.createItemTexture(tagVoteJungleMapMenuItem)
         TexturePack.createItemTexture(tagVoteMountainTrackMapMenuItem)
 
-        JungleMap.Items.register()
+        TagGameMap.maps.forEach { it.registerItems() }
     }
 
     val tagMapVoteMenu = cancelItem(Key.key(inst, "tag_map_vote_menu")) {

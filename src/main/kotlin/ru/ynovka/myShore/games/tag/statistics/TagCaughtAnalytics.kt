@@ -1,9 +1,9 @@
 package ru.ynovka.myShore.games.tag.statistics
 
 import com.github.darksoulq.abyssallib.common.database.relational.sql.Database
-import org.bukkit.entity.Player
-import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.games.tag.maps.TagGameMaps
+import ru.ynovka.myShore.games.tag.TagGame
+import org.bukkit.entity.Player
 import kotlin.math.sqrt
 
 // ═══════════════════════════════════════════════════════════════════════════

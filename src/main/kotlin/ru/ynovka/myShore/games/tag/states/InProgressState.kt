@@ -1,22 +1,21 @@
 package ru.ynovka.myShore.games.tag.states
 
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
-import net.kyori.adventure.text.format.TextDecoration
+import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.utils.Utils.asPlayers
-import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.utils.Utils.asPlayer
 import ru.ynovka.myShore.utils.clearActionBar
-import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.tag.TagGame
 import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.utils.canMove
 import org.bukkit.entity.Player
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
-import kotlin.math.roundToInt
 import org.bukkit.boss.BossBar
+import kotlin.math.roundToInt
 import org.bukkit.Bukkit
 
 

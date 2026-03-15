@@ -2,12 +2,12 @@ package ru.ynovka.myShore.games.tag
 
 import ru.ynovka.myShore.utils.sendPermanentActionBar
 import ru.ynovka.myShore.MyShore.Companion.inst
+import org.bukkit.scheduler.BukkitRunnable
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.hub.HubItems
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
-import org.bukkit.scheduler.BukkitRunnable
 
 
 /**

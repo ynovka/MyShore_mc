@@ -3,14 +3,14 @@ package ru.ynovka.myShore.games.tag.menus
 import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
 import com.github.darksoulq.abyssallib.world.gui.SlotPosition
+import net.kyori.adventure.text.format.NamedTextColor
 import com.github.darksoulq.abyssallib.world.gui.Gui
 import com.github.darksoulq.abyssallib.world.gui.gui
-import net.kyori.adventure.text.format.NamedTextColor
+import ru.ynovka.myShore.hub.HubItems.playTagItem
 import ru.ynovka.myShore.texturepack.GuiTextures
 import ru.ynovka.myShore.utils.Utils.toComponent
 import net.kyori.adventure.text.Component
 import org.bukkit.inventory.MenuType
-import ru.ynovka.myShore.hub.HubItems.playTagItem
 
 
 @Suppress("UnstableApiUsage")
