@@ -41,8 +41,8 @@ interface TagGameMap {
 
         val maps = listOf(
             JungleMap,
-            MountainTrackMap)
-            private set
+            MountainTrackMap
+        )
 
         fun random(): TagGameMap {
             require(maps.isNotEmpty()) { "No TagGame maps registered" }

@@ -97,7 +97,7 @@ object JungleMap : TagGameMap {
                     display.isPersistent = false
                     display.setItemStack(dart.clone())
                     display.isVisibleByDefault = false
-                    victims.forEach { it.asPlayer()?.showEntity(inst, display) }
+                    game.players.keys.forEach { it.asPlayer()?.showEntity(inst, display) }
                     d.add(display)
                 }
             }
