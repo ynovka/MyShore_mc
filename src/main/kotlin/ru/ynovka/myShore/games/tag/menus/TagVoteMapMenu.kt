@@ -6,13 +6,13 @@ import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import ru.ynovka.myShore.games.tag.TagItems.tagVoteJungleMapMenuItem
 import ru.ynovka.myShore.games.tag.TagItems.tagVoteRandomMapMenuItem
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
-import ru.ynovka.myShore.games.tag.states.VotingState.setupMap
+import ru.ynovka.myShore.games.tag.states.TagVotingState.setupMap
 import com.github.darksoulq.abyssallib.world.gui.SlotPosition
 import net.kyori.adventure.text.format.NamedTextColor
 import com.github.darksoulq.abyssallib.world.gui.Gui
 import com.github.darksoulq.abyssallib.world.gui.gui
-import ru.ynovka.myShore.games.tag.maps.TagGameMaps
-import ru.ynovka.myShore.games.tag.maps.TagGameMap
+import ru.ynovka.myShore.games.tag.maps.TagMaps
+import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.utils.Utils.toComponent
 import ru.ynovka.myShore.texturepack.GuiTextures
 import ru.ynovka.myShore.games.tag.TagGameStates
@@ -40,26 +40,26 @@ object TagVoteMapMenu {
             SlotPosition.top(0),
             GuiButton.of(tagVoteJungleMapMenuItem.getStack(null)) { ctx ->
                 val player = ctx.view.inventoryView.player as Player
-                voteMap(player, TagGameMaps.JUNGLE.mapProvider())
+                voteMap(player, TagMaps.JUNGLE.mapProvider())
             }
         )
         set(
             SlotPosition.top(2),
             GuiButton.of(tagVoteMountainTrackMapMenuItem.getStack(null)) { ctx ->
                 val player = ctx.view.inventoryView.player as Player
-                voteMap(player, TagGameMaps.MOUNTAIN_TRACK.mapProvider(),)
+                voteMap(player, TagMaps.MOUNTAIN_TRACK.mapProvider(),)
             }
         )
         set(
             SlotPosition.top(8),
             GuiButton.of(tagVoteRandomMapMenuItem.getStack(null)) { ctx ->
                 val player = ctx.view.inventoryView.player as Player
-                voteMap(player, TagGameMaps.RANDOM.mapProvider(), true)
+                voteMap(player, TagMaps.RANDOM.mapProvider(), true)
             }
         )
     }
 
-    private fun voteMap(player: Player, map: TagGameMap, isRandom: Boolean = false) {
+    private fun voteMap(player: Player, map: TagMap, isRandom: Boolean = false) {
         val mapNameTranlatable = if (isRandom) Component.translatable("name.myshore.tag.map.random") else map.mapName
         val mapNameComp = ServerTranslator.translate(
             mapNameTranlatable, player

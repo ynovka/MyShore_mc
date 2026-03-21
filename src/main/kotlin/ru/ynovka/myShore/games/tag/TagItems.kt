@@ -4,7 +4,7 @@ import ru.ynovka.myShore.games.tag.statistics.TagPlayerStatistics.getPlayerTagSt
 import com.github.darksoulq.abyssallib.server.event.ActionResult
 import com.github.darksoulq.abyssallib.extension.openGui
 import ru.ynovka.myShore.games.tag.menus.TagVoteMapMenu
-import ru.ynovka.myShore.games.tag.maps.TagGameMap
+import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.texturepack.TexturePack
 import ru.ynovka.myShore.MyShore.Companion.ITEMS
 import ru.ynovka.myShore.MyShore.Companion.inst
@@ -27,7 +27,7 @@ object TagItems {
         TexturePack.createItemTexture(tagVoteJungleMapMenuItem)
         TexturePack.createItemTexture(tagVoteMountainTrackMapMenuItem)
 
-        TagGameMap.maps.forEach { it.registerItems() }
+        TagMap.maps.forEach { it.registerItems() }
     }
 
     val tagMapVoteMenu = cancelItem(Key.key(inst, "tag_map_vote_menu")) {

@@ -8,6 +8,7 @@ import org.bukkit.Location
 import org.bukkit.GameMode
 import org.bukkit.Bukkit
 import org.bukkit.World
+import ru.ynovka.myShore.text.ActionBarController
 import ru.ynovka.myShore.utils.canMove
 
 
@@ -22,6 +23,7 @@ object Hub {
         LobbyManager.leave(this)
         PlayerVisibilityController.refreshAll()
         clearTeams()
+        ActionBarController.clear(this)
         canMove(true)
         gameMode = GameMode.ADVENTURE
         saturation = 20f

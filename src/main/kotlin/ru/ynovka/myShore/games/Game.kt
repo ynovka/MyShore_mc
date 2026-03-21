@@ -1,6 +1,5 @@
 package ru.ynovka.myShore.games
 
-import ru.ynovka.myShore.games.tag.TagGame
 import org.bukkit.entity.Player
 import java.util.concurrent.atomic.AtomicLong
 
@@ -10,6 +9,7 @@ interface Game {
     val name: String
     fun join(player: Player)
     fun leave(player: Player)
+    fun reconnect(player: Player) {} // todo сделать команду reconnect и подсказку игроку если есть реализация функции
 }
 
 object GameIdGenerator {
@@ -20,12 +20,13 @@ object GameIdGenerator {
 
 enum class GameId(val maxPlayers: Int) {
     TAG(5),
-    PILLARS(8)
+    PILLARS(8),
+    WORLD_DOMINATION(50) // 10 стран по 5 чел
 }
 
-interface GameState {
-    fun onStateStart(game: TagGame) {}
-    fun onStateEnd(game: TagGame) {}
-    fun onPlayerJoin(game: TagGame, player: Player) {}
-    fun onPlayerLeave(game: TagGame, player: Player) {}
+interface GameState<G : Game> {
+    fun onStateStart(game: G) {}
+    fun onStateEnd(game: G) {}
+    fun onPlayerJoin(game: G, player: Player) {}
+    fun onPlayerLeave(game: G, player: Player) {}
 }

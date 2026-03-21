@@ -25,4 +25,7 @@ object Utils {
             }
         }
     }
+
+    val Boolean.intValue
+        get() = if (this) 1 else 0
 }

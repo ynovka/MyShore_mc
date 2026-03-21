@@ -18,7 +18,7 @@ repositories {
 dependencies {
     paperweight.devBundle("cn.dreeam.leaf", "1.21.11-R0.1-SNAPSHOT")
 
-    compileOnly("com.github.darksoulq:AbyssalLib:v2.0.0-mc1.21.11-dev.11")
+    compileOnly("com.github.darksoulq:AbyssalLib:v2.0.0-mc1.21.11-dev.12")
     //compileOnly("com.github.darksoulq:AbyssalLib")
 
     implementation("dev.jorel:commandapi-paper-shade:11.1.0")

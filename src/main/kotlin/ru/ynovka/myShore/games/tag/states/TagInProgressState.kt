@@ -6,7 +6,7 @@ import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.utils.Utils.asPlayers
 import ru.ynovka.myShore.utils.Utils.asPlayer
-import ru.ynovka.myShore.utils.clearActionBar
+import ru.ynovka.myShore.text.clearActionBar
 import ru.ynovka.myShore.games.tag.TagGame
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.games.GameState
@@ -17,10 +17,11 @@ import org.bukkit.boss.BarStyle
 import org.bukkit.boss.BossBar
 import kotlin.math.roundToInt
 import org.bukkit.Bukkit
+import ru.ynovka.myShore.text.ComponentDecorator
 
 
 // 40-100 сек (сам геймплей салочек)
-object InProgressState : GameState {
+object TagInProgressState : GameState<TagGame> {
 
     // BossBar хранится здесь, чтобы его можно было корректно убрать при смене состояния.
     // Если в будущем будет несколько одновременных игр — вынести в TagMiniGame.
@@ -58,9 +59,12 @@ object InProgressState : GameState {
                 .forEach { victim ->
                     val distance = ((victim.location.distance(hunter.location) * 10).roundToInt() / 10.0)
                     victim.sendActionBar(
-                        Component.translatable(
-                            "bar.myshore.tag.distance_to_hunter",
-                            Component.text(distance)
+                        ComponentDecorator.addBackground(
+                            Component.translatable(
+                                "bar.myshore.tag.distance_to_hunter",
+                                Component.text(distance)
+                            ),
+                            victim
                         )
                     )
                 }

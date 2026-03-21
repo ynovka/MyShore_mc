@@ -1,6 +1,5 @@
-package ru.ynovka.myShore.utils
+package ru.ynovka.myShore.text
 
-import io.papermc.paper.threadedregions.scheduler.ScheduledTask
 import ru.ynovka.myShore.MyShore.Companion.inst
 import java.util.concurrent.ConcurrentHashMap
 import net.kyori.adventure.text.Component

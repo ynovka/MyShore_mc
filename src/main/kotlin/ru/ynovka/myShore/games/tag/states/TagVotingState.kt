@@ -2,7 +2,7 @@ package ru.ynovka.myShore.games.tag.states
 
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupForVoting
-import ru.ynovka.myShore.games.tag.maps.TagGameMap
+import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.utils.Utils.asPlayers
@@ -17,7 +17,7 @@ import kotlin.math.ceil
 
 
 // 10 сек на голосование за карту, режим игры, сменить лобби, посмотреть статистику
-object VotingState : GameState {
+object TagVotingState : GameState<TagGame> {
 
     override fun onStateStart(game: TagGame) {
         game.lobby.members.asPlayers().forEach { player ->
@@ -43,7 +43,7 @@ object VotingState : GameState {
      * Возвращает null, если голосов меньше 1/3 от числа игроков.
      * При равенстве — случайная из лидеров.
      */
-    private fun resolveMapVoting(game: TagGame): TagGameMap? {
+    private fun resolveMapVoting(game: TagGame): TagMap? {
         val votes = game.mapVotes.values
         if (votes.isEmpty()) return null
 
@@ -57,7 +57,7 @@ object VotingState : GameState {
         return if (winners.size == 1) winners.first() else winners.random()
     }
 
-    fun setupMap(game: TagGame, map: TagGameMap, shouldTeleport: Boolean = false) {
+    fun setupMap(game: TagGame, map: TagMap, shouldTeleport: Boolean = false) {
         game.map = map
         game.lobby.members.asPlayers().forEach { player ->
             val mapNameComp = ServerTranslator.translate(

@@ -3,7 +3,7 @@ package ru.ynovka.myShore.games.tag.maps.impl
 import com.github.darksoulq.abyssallib.world.item.component.builtin.CooldownUse
 import io.papermc.paper.datacomponent.item.UseCooldown.useCooldown
 import com.github.darksoulq.abyssallib.server.event.ActionResult
-import ru.ynovka.myShore.games.tag.maps.TagGameMap
+import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.MyShore.Companion.ITEMS
 import ru.ynovka.myShore.texturepack.TexturePack
@@ -31,7 +31,7 @@ import org.bukkit.Sound
 import kotlin.math.abs
 
 
-object JungleMap : TagGameMap {
+object TagJungleMap : TagMap {
 
     override val mapId = "tag_jungle"
     override val mapName = Component.translatable("name.myshore.tag.map.jungle")
@@ -214,15 +214,17 @@ object JungleMap : TagGameMap {
         private fun usePotionDart(player: Player, itemSlot: EquipmentSlot) {
             val i = player.inventory.getItem(itemSlot)
             if (i.type == Material.AIR || player.hasCooldown(i)) return
-            player.setCooldown(Key.key(inst, "tag_jungle_poison_dart"), 20*20)
-            val target = player.getTargetEntity(25, false) as? Player ?: return
-            player.inventory.clear(0)
-            poisonDartEffects.applyRandomTo(target)
-            // playSound "Фью!"
             val game = player.getLobby()?.game as? TagGame ?: return
+            // Ставим КД на использование
+            player.setCooldown(Key.key(inst, "tag_jungle_poison_dart"), 20*20)
+            // playSound "Фью!"
             game.players.keys.asPlayers().forEach { p ->
                 p.playSound(player.location, Sound.BLOCK_BAMBOO_HIT, 1f, 2f)
             }
+            // Удаление дротика
+            player.inventory.clear(0)
+            val target = player.getTargetEntity(25, false) as? Player ?: return
+            poisonDartEffects.applyRandomTo(target)
         }
     }
 }

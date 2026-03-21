@@ -20,7 +20,7 @@ import java.time.Duration
 
 
 // 5 сек после игры - определение победителей
-object FinishingState : GameState {
+object TagFinishingState : GameState<TagGame> {
 
     override fun onStateStart(game: TagGame) {
         // Жертвы живы или охотник отсутствует → победа жертв

@@ -2,7 +2,7 @@ package ru.ynovka.myShore.games.tag
 
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import ru.ynovka.myShore.Database.tagCaughtsRepository
-import ru.ynovka.myShore.games.tag.maps.TagGameMap
+import ru.ynovka.myShore.games.tag.maps.TagMap
 import org.bukkit.event.player.PlayerInteractEvent
 import ru.ynovka.myShore.utils.effects.RiftEffect
 import ru.ynovka.myShore.texturepack.SoundsPack
@@ -22,7 +22,7 @@ object TagEvents : Listener {
 
     fun register() {
         inst.server.pluginManager.registerEvents(this, inst)
-        TagGameMap.maps.forEach { it.registerEvents() }
+        TagMap.maps.forEach { it.registerEvents() }
     }
 
     @EventHandler
@@ -49,8 +49,6 @@ object TagEvents : Listener {
         victim.clearActivePotionEffects()
         game.players[victim.uniqueId] = TagPlayerRoles.SPECTATOR_VICTIM
 
-        victim.world.playSound(victim.location, Sound.ENTITY_FIREWORK_ROCKET_LARGE_BLAST, 2f, 1.2f)
-        RiftEffect.play(game.lobby, victim)
 
         val msg = Component.translatable(
             "msg.myshore.tag.hunter.caught",
@@ -58,9 +56,10 @@ object TagEvents : Listener {
             Component.text(victim.name)
         )
 
+        RiftEffect.play(game.lobby, victim)
         game.lobby.members.asPlayers().forEach {
             it.sendMessage(msg)
-            SoundsPack.RIFT_SOUND.play(it)
+            SoundsPack.RIFT_SOUND.play(it, 0.3f, 2f)
         }
 
         if (!game.hasVictims()) {

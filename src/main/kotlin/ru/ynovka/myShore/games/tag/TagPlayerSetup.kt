@@ -1,6 +1,7 @@
 package ru.ynovka.myShore.games.tag
 
-import ru.ynovka.myShore.utils.sendPermanentActionBar
+import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
+import ru.ynovka.myShore.text.sendPermanentActionBar
 import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.scheduler.BukkitRunnable
 import net.kyori.adventure.text.Component
@@ -8,6 +9,8 @@ import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.hub.HubItems
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
+import ru.ynovka.myShore.text.ComponentDecorator
+import ru.ynovka.myShore.text.clearActionBar
 
 
 /**
@@ -39,7 +42,34 @@ object TagPlayerSetup {
         applyVotingInventory()
         clearActivePotionEffects()
         canMove(true)
-        sendPermanentActionBar(Component.translatable("bar.myshore.tag.waiting_for_players"))
+
+        object : BukkitRunnable() {
+            val frames = arrayOf(".", "..", "...")
+            var frame = 0
+
+            override fun run() {
+                if (game.state != TagGameStates.WAITING_FOR_PLAYERS) {
+                    cancel()
+                    return
+                }
+                if (!game.players.containsKey(uniqueId)) {
+                    clearActionBar()
+                    cancel()
+                    return
+                }
+
+                sendPermanentActionBar(
+                    ComponentDecorator.addBackground(
+                        Component.translatable("bar.myshore.tag.waiting_for_players")
+                            .append(Component.text(frames[frame])),
+                        this@setupForWaiting
+                    )
+                )
+
+                frame++
+                if (frame == frames.size) frame = 0
+            }
+        }.runTaskTimer(inst, 0L, 10L)
     }
 
     /** Телепорт + gameMode + инвентарь для состояния VOTING */
@@ -59,10 +89,18 @@ object TagPlayerSetup {
                     cancel()
                     return
                 }
+                if (!game.players.containsKey(uniqueId)) {
+                    clearActionBar()
+                    cancel()
+                    return
+                }
 
                 sendPermanentActionBar(
-                    Component.translatable("bar.myshore.tag.voting")
-                        .append(Component.text(frames[frame]))
+                    ComponentDecorator.addBackground(
+                        Component.translatable("bar.myshore.tag.voting")
+                            .append(Component.text(frames[frame])),
+                        this@setupForVoting
+                    )
                 )
 
                 frame++

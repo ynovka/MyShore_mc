@@ -1,6 +1,7 @@
 package ru.ynovka.myShore.texturepack
 
 import com.github.darksoulq.abyssallib.server.resource.asset.definition.Selector
+import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import com.github.darksoulq.abyssallib.server.resource.asset.Texture
 import com.github.darksoulq.abyssallib.server.resource.ResourcePack
 import com.github.darksoulq.abyssallib.world.item.Item
@@ -11,11 +12,16 @@ import ru.ynovka.myShore.MyShore.Companion.inst
 object TexturePack {
     val pack = ResourcePack(inst, PLUGIN_ID)
     val ns = pack.namespace(PLUGIN_ID)
+
     val sounds = ns.sounds()
+    val fontGlyphs = ns.font("glyphs", true)
 
     fun register() {
-        GuiTextures.register(ns)
+        ServerTranslator.loadResource(inst, "lang/ru_ru.properties")
+
+        GuiTextures.register()
         SoundsPack.register()
+        Glyphs.register()
 
         pack.register(true)
     }

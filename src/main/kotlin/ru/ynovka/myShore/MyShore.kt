@@ -29,7 +29,6 @@ class MyShore : JavaPlugin() {
         dataFolder.mkdirs()
         CommandAPI.onEnable()
 
-        Translator.register()
         AntiCheat.register()
         Database.register(inst)
         Commands.register()

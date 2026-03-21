@@ -3,9 +3,12 @@ package ru.ynovka.myShore.games.tag
 import dev.jorel.commandapi.kotlindsl.commandAPICommand
 import ru.ynovka.myShore.Database.tagCaughtsRepository
 import dev.jorel.commandapi.kotlindsl.playerExecutor
-import ru.ynovka.myShore.games.tag.maps.TagGameMaps
+import ru.ynovka.myShore.games.tag.maps.TagMaps
 import org.bukkit.Particle
 import org.bukkit.Color
+import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.lobby.getLobby
+import ru.ynovka.myShore.utils.Utils.asPlayers
 
 
 object TagCommands {
@@ -23,7 +26,7 @@ object TagCommands {
                     .substringAfter("tag_")
                     .uppercase()
 
-                val tagMap = runCatching { TagGameMaps.valueOf(rawName) }.getOrElse {
+                val tagMap = runCatching { TagMaps.valueOf(rawName) }.getOrElse {
                     player.sendMessage("Неизвестная карта: $rawName")
                     return@playerExecutor
                 }
@@ -39,15 +42,23 @@ object TagCommands {
                     return@playerExecutor
                 }
 
-                points.forEach { pt ->
-                    val color = Color.fromRGB(pt.r, pt.g, pt.b)
-                    world.spawnParticle(
-                        Particle.DUST,
-                        pt.position.x, pt.position.y, pt.position.z,
-                        1, 0.0, 0.0, 0.0, 0.0,
-                        Particle.DustOptions(color, 1.0f),
-                    )
-                }
+                val game = player.getLobby()?.game as? TagGame ?: return@playerExecutor
+
+                val task = inst.server.scheduler.runTaskTimer(inst, Runnable {
+                    points.forEach { pt ->
+                        val color = Color.fromRGB(pt.r, pt.g, pt.b)
+                        player.spawnParticle(
+                            Particle.DUST,
+                            pt.position.x, pt.position.y, pt.position.z,
+                            1, 0.0, 0.0, 0.0, 0.0,
+                            Particle.DustOptions(color, 1.0f),
+                        )
+                    }
+                }, 0L, 4L)
+
+                inst.server.scheduler.runTaskLater(inst, Runnable {
+                    task.cancel()
+                }, 20L * 10)
 
                 player.sendMessage("Отображено ${points.size} точек тепловой карты.")
             }

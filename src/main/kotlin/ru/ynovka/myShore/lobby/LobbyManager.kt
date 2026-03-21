@@ -8,6 +8,7 @@ import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameId
 import ru.ynovka.myShore.games.pillars.PillarsGame
 import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.utils.PlayerVisibilityController
 import ru.ynovka.myShore.utils.Utils.asPlayers
 
@@ -43,6 +44,7 @@ object LobbyManager {
         val created: Game = when (lobby.gameType) {
             GameId.TAG -> TagGame(lobby)
             GameId.PILLARS -> PillarsGame(lobby)
+            GameId.WORLD_DOMINATION -> WDGame(lobby)
         }
 
         lobby.game = created

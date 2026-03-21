@@ -1,17 +1,18 @@
 package ru.ynovka.myShore.games.tag.states
 
+import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.applyInProgressInventory
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
-import ru.ynovka.myShore.utils.sendPermanentActionBar
+import ru.ynovka.myShore.games.tag.maps.teleportPlayers
+import ru.ynovka.myShore.text.sendPermanentActionBar
 import net.kyori.adventure.text.format.NamedTextColor
-import ru.ynovka.myShore.games.tag.teleportPlayers
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.utils.Utils.clearTeams
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.utils.Utils.asPlayers
 import ru.ynovka.myShore.utils.Utils.asPlayer
-import ru.ynovka.myShore.utils.clearActionBar
+import ru.ynovka.myShore.text.clearActionBar
 import ru.ynovka.myShore.games.tag.TagGame
 import org.bukkit.potion.PotionEffectType
 import net.kyori.adventure.text.Component
@@ -25,11 +26,12 @@ import org.bukkit.GameMode
 import java.time.Duration
 import org.bukkit.Bukkit
 import org.bukkit.Sound
+import ru.ynovka.myShore.text.ComponentDecorator
 import java.util.UUID
 
 
 // 5 сек перед началом (что бы у игроков загрузилась карта, они ознакомились со своими ролями)
-object PreparingState : GameState {
+object TagPreparingState : GameState<TagGame> {
 
     const val MAX_HISTORY = 10
 
@@ -146,10 +148,15 @@ object PreparingState : GameState {
 
             if (timeLeft > 0) {
                 game.lobby.members.asPlayers().forEach { player ->
-                    player.sendPermanentActionBar(Component.translatable(
-                        "bar.myshore.tag.start_in",
-                        Component.text(timeLeft)
-                    ))
+                    player.sendPermanentActionBar(
+                        ComponentDecorator.addBackground(
+                            Component.translatable(
+                                "bar.myshore.tag.start_in",
+                                Component.text(timeLeft)
+                            ),
+                            player
+                        )
+                    )
                     player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_ON, 0.5f, 2f)
                 }
 
@@ -157,7 +164,12 @@ object PreparingState : GameState {
             } else {
                 game.lobby.members.asPlayers().forEach { player ->
                     player.clearActionBar()
-                    player.sendActionBar(Component.translatable("bar.myshore.tag.lets_run"))
+                    player.sendActionBar(
+                        ComponentDecorator.addBackground(
+                            Component.translatable("bar.myshore.tag.lets_run"),
+                            player
+                        )
+                    )
                     player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
                 }
 

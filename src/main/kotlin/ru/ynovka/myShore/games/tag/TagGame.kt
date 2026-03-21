@@ -1,17 +1,15 @@
 package ru.ynovka.myShore.games.tag
 
-import ru.ynovka.myShore.games.tag.states.WaitingForPlayersState
-import ru.ynovka.myShore.games.tag.states.InProgressState
-import ru.ynovka.myShore.games.tag.states.FinishingState
-import ru.ynovka.myShore.games.tag.states.PreparingState
-import ru.ynovka.myShore.games.tag.states.VotingState
-import ru.ynovka.myShore.games.tag.maps.TagGameMaps
-import ru.ynovka.myShore.games.tag.maps.TagGameMap
+import ru.ynovka.myShore.games.tag.states.TagWaitingForPlayersState
+import ru.ynovka.myShore.games.tag.states.TagInProgressState
+import ru.ynovka.myShore.games.tag.states.TagFinishingState
+import ru.ynovka.myShore.games.tag.states.TagPreparingState
+import ru.ynovka.myShore.games.tag.states.TagVotingState
+import ru.ynovka.myShore.games.tag.maps.TagMaps
+import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.utils.Utils.asPlayers
 import ru.ynovka.myShore.utils.Utils.asPlayer
-import ru.ynovka.myShore.utils.clearActionBar
-import java.util.concurrent.CompletableFuture
+import ru.ynovka.myShore.text.clearActionBar
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.games.GameId
@@ -33,8 +31,8 @@ class TagGame(val lobby: Lobby) : Game {
 
     val scheduler = inst.server.scheduler
 
-    var map: TagGameMap = TagGameMaps.RANDOM.mapProvider()
-    val mapVotes: MutableMap<UUID, TagGameMap> = mutableMapOf()
+    var map: TagMap = TagMaps.RANDOM.mapProvider()
+    val mapVotes: MutableMap<UUID, TagMap> = mutableMapOf()
 
     /**
      * Максимальное время игры в секундах.
@@ -57,7 +55,7 @@ class TagGame(val lobby: Lobby) : Game {
     var state: TagGameStates = TagGameStates.WAITING_FOR_PLAYERS
         private set
 
-    private var stateImpl: GameState = stateOf(state)
+    private var stateImpl: GameState<TagGame> = stateOf(state)
 
     init {
         stateImpl.onStateStart(this)
@@ -93,12 +91,12 @@ class TagGame(val lobby: Lobby) : Game {
         stateImpl.onStateStart(this)
     }
 
-    private fun stateOf(state: TagGameStates): GameState = when (state) {
-        TagGameStates.WAITING_FOR_PLAYERS -> WaitingForPlayersState
-        TagGameStates.VOTING              -> VotingState
-        TagGameStates.PREPARING           -> PreparingState
-        TagGameStates.IN_PROGRESS         -> InProgressState
-        TagGameStates.FINISHING           -> FinishingState
+    private fun stateOf(state: TagGameStates): GameState<TagGame> = when (state) {
+        TagGameStates.WAITING_FOR_PLAYERS -> TagWaitingForPlayersState
+        TagGameStates.VOTING              -> TagVotingState
+        TagGameStates.PREPARING           -> TagPreparingState
+        TagGameStates.IN_PROGRESS         -> TagInProgressState
+        TagGameStates.FINISHING           -> TagFinishingState
     }
 }
 
@@ -126,7 +124,7 @@ enum class TagGameStates {
  * Асинхронный телепорт игрока на позицию, соответствующую его роли на этой карте.
  * [onComplete] вызывается в main thread после успешного телепорта.
  */
-fun TagGameMap.teleport(player: Player, game: TagGame, onComplete: () -> Unit = {}) {
+fun TagMap.teleport(player: Player, game: TagGame, onComplete: () -> Unit = {}) {
     val role = game.players[player.uniqueId]
         ?: if (game.state == TagGameStates.IN_PROGRESS || game.state == TagGameStates.PREPARING) {
             TagPlayerRoles.SPECTATOR
@@ -157,53 +155,6 @@ fun TagGameMap.teleport(player: Player, game: TagGame, onComplete: () -> Unit = 
     player.teleportAsync(destination).thenAccept {
         Bukkit.getScheduler().runTask(inst, Runnable { onComplete() })
     }
-}
-
-fun TagGameMap.teleportPlayers(game: TagGame) {
-    val players = game.players.keys.asPlayers()
-
-    val victimPlayers = players.filter {
-        val role = game.players[it.uniqueId]
-        role == TagPlayerRoles.VICTIM || role == TagPlayerRoles.UNDEFINED
-    }
-
-    val hunterPlayers = players.filter {
-        game.players[it.uniqueId] == TagPlayerRoles.HUNTER
-    }
-
-    val spectatorPlayers = players.filter {
-        val role = game.players[it.uniqueId]
-        role == TagPlayerRoles.SPECTATOR || role == TagPlayerRoles.SPECTATOR_VICTIM
-    }
-
-    val shuffledVictimSpawns = victimSpawns.shuffled().toMutableList()
-
-    val teleports = mutableListOf<CompletableFuture<Boolean>>()
-
-    // Victims
-    victimPlayers.forEachIndexed { index, player ->
-        val spawn = shuffledVictimSpawns
-            .getOrNull(index)
-            ?.toLocation()
-            ?: victimSpawns.random().toLocation()
-
-        teleports += player.teleportAsync(spawn)
-    }
-
-    // Hunters
-    hunterPlayers.forEach { player ->
-        teleports += player.teleportAsync(hunterSpawn.toLocation())
-    }
-
-    // Spectators
-    val hunter = hunterPlayers.firstOrNull()
-
-    spectatorPlayers.forEach { player ->
-        val loc = hunter?.location ?: victimSpawns.random().toLocation()
-        teleports += player.teleportAsync(loc)
-    }
-
-    CompletableFuture.allOf(*teleports.toTypedArray())
 }
 
 fun TagGame.hasVictims(): Boolean = players.values.any { it == TagPlayerRoles.VICTIM }

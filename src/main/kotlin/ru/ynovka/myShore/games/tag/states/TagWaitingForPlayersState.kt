@@ -10,7 +10,7 @@ import org.bukkit.Sound
 
 
 // Ожидание игроков (нужно хотя бы 2)
-object WaitingForPlayersState : GameState {
+object TagWaitingForPlayersState : GameState<TagGame> {
     override fun onStateStart(game: TagGame) {
         game.lobby.members.asPlayers().forEach { player ->
             player.setupForWaiting(game)

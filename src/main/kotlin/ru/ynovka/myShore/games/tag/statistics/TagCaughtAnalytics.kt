@@ -1,7 +1,7 @@
 package ru.ynovka.myShore.games.tag.statistics
 
 import com.github.darksoulq.abyssallib.common.database.relational.sql.Database
-import ru.ynovka.myShore.games.tag.maps.TagGameMaps
+import ru.ynovka.myShore.games.tag.maps.TagMaps
 import ru.ynovka.myShore.games.tag.TagGame
 import org.bukkit.entity.Player
 import kotlin.math.sqrt
@@ -106,7 +106,7 @@ class TagCaughtsRepository(private val db: Database) {
      * repo.save(victim, hunter, game)
      * ```
      *
-     * The map is resolved from [game.map.id] to the matching [TagGameMaps] enum entry.
+     * The map is resolved from [game.map.id] to the matching [TagMaps] enum entry.
      * If no match is found (e.g. a custom map) RANDOM is stored as a fallback.
      */
     fun save(victim: Player, hunter: Player, game: TagGame) {
@@ -136,7 +136,7 @@ class TagCaughtsRepository(private val db: Database) {
      * Builds a heatmap of positions where [playerName] was caught.
      *
      * @param playerName  the victim's exact in-game name
-     * @param map         which map to analyse; [TagGameMaps.RANDOM] means ALL maps
+     * @param map         which map to analyse; [TagMaps.RANDOM] means ALL maps
      * @param limit       number of most-recent records to include, or **null** for all
      *
      * @return list of [HeatmapPoint]s — clusters of raw positions coloured by density:
@@ -148,14 +148,14 @@ class TagCaughtsRepository(private val db: Database) {
      */
     fun getVictimHeatmap(
         playerName: String,
-        map: TagGameMaps,
+        map: TagMaps,
         limit:      Int? = null,
     ): List<HeatmapPoint> {
 
         val query = db.executor().table("tag_caughts")
 
         // Build the WHERE clause depending on whether we filter by map
-        if (map == TagGameMaps.RANDOM) {
+        if (map == TagMaps.RANDOM) {
             // RANDOM = no map filter → analyse across all maps
             query.where("victim_name = ?", playerName)
         } else {
@@ -179,17 +179,17 @@ class TagCaughtsRepository(private val db: Database) {
     // ── Private helpers ───────────────────────────────────────────────────────
 
     /**
-     * Tries to match a live map ID (e.g. "tag_jungle") to a [TagGameMaps] entry.
+     * Tries to match a live map ID (e.g. "tag_jungle") to a [TagMaps] entry.
      * RANDOM entries are skipped because their provider returns a different map each time.
      */
     private fun resolveMapLabel(mapId: String): String {
-        return TagGameMaps.entries
+        return TagMaps.entries
             .firstOrNull { entry ->
-                entry != TagGameMaps.RANDOM &&
+                entry != TagMaps.RANDOM &&
                         runCatching { entry.mapProvider().mapId == mapId }.getOrDefault(false)
             }
             ?.name
-            ?: TagGameMaps.RANDOM.name   // fallback
+            ?: TagMaps.RANDOM.name   // fallback
     }
 
     /**

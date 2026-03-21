@@ -1,13 +1,14 @@
 package ru.ynovka.myShore.texturepack
 
-import com.github.darksoulq.abyssallib.server.resource.Namespace
 import com.github.darksoulq.abyssallib.server.resource.asset.Font
+import ru.ynovka.myShore.texturepack.TexturePack.ns
+
 
 object GuiTextures {
     var MENU_2x9_048_26: Font.TextureGlyph? = null
     var MENU_1x9_028: Font.TextureGlyph? = null
 
-    fun register(ns: Namespace) {
+    fun register() {
         val fn: Font = ns.font("gui", false)
 
         MENU_2x9_048_26 = fn.glyph(ns.texture("gui/menu_2x9_048_26"), 148, 13)

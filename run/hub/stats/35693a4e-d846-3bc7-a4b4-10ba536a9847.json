@@ -1,21 +1,5 @@
 {
   "stats": {
-    "minecraft:picked_up": {
-      "minecraft:trial_spawner": 1,
-      "minecraft:flower_pot": 1,
-      "minecraft:sugar_cane": 1,
-      "minecraft:orange_carpet": 3,
-      "minecraft:redstone": 1,
-      "minecraft:paper": 1,
-      "minecraft:kelp": 1,
-      "minecraft:red_candle": 1,
-      "minecraft:stone_slab": 1
-    },
-    "minecraft:dropped": {
-      "minecraft:trial_spawner": 1,
-      "minecraft:stone_slab": 1,
-      "minecraft:light": 2
-    },
     "minecraft:used": {
       "minecraft:oak_trapdoor": 14,
       "minecraft:oak_fence": 1,
@@ -106,36 +90,52 @@
     "minecraft:crafted": {
       "minecraft:decorated_pot": 5
     },
-    "minecraft:custom": {
-      "minecraft:trigger_trapped_chest": 33,
-      "minecraft:time_since_rest": 102900,
-      "minecraft:leave_game": 12,
-      "minecraft:damage_taken": 2133,
-      "minecraft:open_shulker_box": 43,
-      "minecraft:time_since_death": 102900,
-      "minecraft:aviate_one_cm": 130598,
-      "minecraft:total_world_time": 659314,
-      "minecraft:swim_one_cm": 9005,
-      "minecraft:crouch_one_cm": 22647,
-      "minecraft:deaths": 7,
-      "minecraft:climb_one_cm": 34785,
-      "minecraft:interact_with_crafting_table": 5,
-      "minecraft:walk_one_cm": 552262,
-      "minecraft:walk_under_water_one_cm": 5138,
-      "minecraft:play_time": 659314,
-      "minecraft:damage_dealt": 302,
-      "minecraft:jump": 7664,
-      "minecraft:drop": 4,
-      "minecraft:open_barrel": 2,
-      "minecraft:sprint_one_cm": 1168103,
-      "minecraft:open_chest": 5,
-      "minecraft:fall_one_cm": 369555,
-      "minecraft:fly_one_cm": 3919194,
-      "minecraft:walk_on_water_one_cm": 13044,
-      "minecraft:sneak_time": 16602
-    },
     "minecraft:killed_by": {
       "minecraft:player": 1
+    },
+    "minecraft:dropped": {
+      "minecraft:trial_spawner": 1,
+      "minecraft:stone_slab": 1,
+      "minecraft:light": 2
+    },
+    "minecraft:custom": {
+      "minecraft:trigger_trapped_chest": 33,
+      "minecraft:time_since_rest": 105620,
+      "minecraft:leave_game": 13,
+      "minecraft:damage_taken": 2133,
+      "minecraft:open_shulker_box": 43,
+      "minecraft:time_since_death": 105620,
+      "minecraft:aviate_one_cm": 130598,
+      "minecraft:total_world_time": 662034,
+      "minecraft:swim_one_cm": 9005,
+      "minecraft:crouch_one_cm": 22707,
+      "minecraft:deaths": 7,
+      "minecraft:climb_one_cm": 35722,
+      "minecraft:interact_with_crafting_table": 5,
+      "minecraft:walk_one_cm": 555445,
+      "minecraft:walk_under_water_one_cm": 5138,
+      "minecraft:play_time": 662034,
+      "minecraft:damage_dealt": 302,
+      "minecraft:jump": 7755,
+      "minecraft:drop": 4,
+      "minecraft:open_barrel": 2,
+      "minecraft:sprint_one_cm": 1180652,
+      "minecraft:open_chest": 5,
+      "minecraft:fall_one_cm": 375074,
+      "minecraft:fly_one_cm": 3941312,
+      "minecraft:walk_on_water_one_cm": 13044,
+      "minecraft:sneak_time": 16642
+    },
+    "minecraft:picked_up": {
+      "minecraft:trial_spawner": 1,
+      "minecraft:flower_pot": 1,
+      "minecraft:sugar_cane": 1,
+      "minecraft:orange_carpet": 3,
+      "minecraft:redstone": 1,
+      "minecraft:paper": 1,
+      "minecraft:kelp": 1,
+      "minecraft:red_candle": 1,
+      "minecraft:stone_slab": 1
     }
   },
   "DataVersion": 4671

@@ -1,9 +1,10 @@
 package ru.ynovka.myShore.hub
 
+import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
 import ru.ynovka.myShore.utils.PlayerVisibilityController
 import org.bukkit.event.player.PlayerInteractEvent
-import ru.ynovka.myShore.utils.ActionBarController
+import ru.ynovka.myShore.text.ActionBarController
 import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerJoinEvent
@@ -19,6 +20,8 @@ import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Material
+import ru.ynovka.myShore.text.ComponentDecorator
+import ru.ynovka.myShore.text.sendPermanentActionBar
 
 
 object HubEvents : Listener {

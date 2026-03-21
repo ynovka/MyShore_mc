@@ -1,6 +1,6 @@
 package ru.ynovka.myShore.games.tag.maps.impl
 
-import ru.ynovka.myShore.games.tag.maps.TagGameMap
+import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.MyShore.Companion.inst
@@ -19,7 +19,7 @@ import org.bukkit.GameMode
 import org.bukkit.Bukkit
 
 
-object MountainTrackMap : TagGameMap {
+object TagMountainTrackMap : TagMap {
 
     override val mapId = "tag_mountain_track"
     override val mapName = Component.translatable("name.myshore.tag.map.mountain_track")
