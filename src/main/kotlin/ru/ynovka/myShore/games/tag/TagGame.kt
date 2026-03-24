@@ -17,16 +17,20 @@ import ru.ynovka.myShore.lobby.Lobby
 import ru.ynovka.myShore.games.Game
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
+import ru.ynovka.myShore.games.StateMachine
+import ru.ynovka.myShore.games.worldDomination.states.WDWaitingForPlayersState
 import java.util.UUID
 
 
-class TagGame(val lobby: Lobby) : Game {
+class TagGame(val lobby: Lobby) : Game() {
 
     override val gameId: GameId = GameId.TAG
     override val name: String = "Салочки"
+    override val fsm = StateMachine(this, TagWaitingForPlayersState)
+    override val players: Set<Player> = setOf()
 
     /** UUID → роль; синхронизирован с lobby.members */
-    val players: MutableMap<UUID, TagPlayerRoles> =
+    val roles: MutableMap<UUID, TagPlayerRoles> =
         lobby.members.associateWith { TagPlayerRoles.UNDEFINED }.toMutableMap()
 
     val scheduler = inst.server.scheduler
@@ -51,23 +55,13 @@ class TagGame(val lobby: Lobby) : Game {
 
     var remainingTime: Int = 40
 
-    /** Публичный маркер текущего состояния (удобен для UI, логов, условий). */
-    var state: TagGameStates = TagGameStates.WAITING_FOR_PLAYERS
-        private set
 
-    private var stateImpl: GameState<TagGame> = stateOf(state)
-
-    init {
-        stateImpl.onStateStart(this)
+    override fun handlePlayerJoin(p: Player) {
+        roles[p.uniqueId] = TagPlayerRoles.UNDEFINED
+        map.onPlayerJoin(this, p)
     }
 
-    override fun join(player: Player) {
-        players[player.uniqueId] = TagPlayerRoles.UNDEFINED
-        stateImpl.onPlayerJoin(this, player)
-        map.onPlayerJoin(this, player)
-    }
-
-    override fun leave(player: Player) {
+    override fun handlePlayerLeave(p: Player) {
         players.remove(player.uniqueId) ?: return
         player.clearActivePotionEffects()
         player.canMove(true)
@@ -110,13 +104,6 @@ enum class TagPlayerRoles {
     HUNTER
 }
 
-enum class TagGameStates {
-    WAITING_FOR_PLAYERS,  // безлимит — ждём минимум 2 игроков
-    VOTING,               // 10 сек — голосование за карту
-    PREPARING,            // 5 сек  — показываем роли, фриз
-    IN_PROGRESS,          // 40–115 сек — геймплей
-    FINISHING             // 5 сек  — итоги, сброс ролей
-}
 
 // ---------- extension-функции ----------
 

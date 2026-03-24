@@ -1,27 +1,21 @@
 package ru.ynovka.myShore.games.worldDomination
 
-import ru.ynovka.myShore.games.GameId
-import ru.ynovka.myShore.lobby.Lobby
-import ru.ynovka.myShore.games.Game
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.games.worldDomination.states.WDWaitingForPlayersState
+import ru.ynovka.myShore.games.GameFSM
+import ru.ynovka.myShore.games.Game
 
-class WDGame(val lobby: Lobby) : Game {
-    override val gameId = GameId.WORLD_DOMINATION
-    override val name = "Мировое Господство"
-    /** Текущий раунд игры (не состояние) */
+
+class WDGame : Game<WDPlayer>() {
+    override val maxPlayers = 50
+    override val players: MutableList<WDPlayer> = mutableListOf()
+    override val fsm = GameFSM(WDWaitingForPlayersState)
+
+    /** Текущий раунд игры */
     var round = 0
     val ecology: Int
         get() = 100
 
-    override fun join(player: Player) {
 
-    }
-
-    override fun leave(player: Player) {
-
-    }
-
-    override fun reconnect(player: Player) {
-
-    }
+    override fun getOrCreatePlayer(player: Player): WDPlayer =WDPlayer(player)
 }

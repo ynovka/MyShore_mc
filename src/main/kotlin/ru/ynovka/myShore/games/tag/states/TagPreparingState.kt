@@ -1,6 +1,5 @@
 package ru.ynovka.myShore.games.tag.states
 
-import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.applyInProgressInventory
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
 import ru.ynovka.myShore.games.tag.maps.teleportPlayers
