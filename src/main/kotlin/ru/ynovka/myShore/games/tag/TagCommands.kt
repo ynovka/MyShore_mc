@@ -7,8 +7,6 @@ import ru.ynovka.myShore.games.tag.maps.TagMaps
 import org.bukkit.Particle
 import org.bukkit.Color
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.lobby.getLobby
-import ru.ynovka.myShore.utils.Utils.asPlayers
 
 
 object TagCommands {
@@ -42,7 +40,8 @@ object TagCommands {
                     return@playerExecutor
                 }
 
-                val game = player.getLobby()?.game as? TagGame ?: return@playerExecutor
+                // Достаточно найти TagGame через GameManager — lobby больше не нужен
+                player.currentTagGame() ?: return@playerExecutor
 
                 val task = inst.server.scheduler.runTaskTimer(inst, Runnable {
                     points.forEach { pt ->

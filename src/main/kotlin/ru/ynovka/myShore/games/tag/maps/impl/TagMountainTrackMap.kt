@@ -2,21 +2,20 @@ package ru.ynovka.myShore.games.tag.maps.impl
 
 import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
-import ru.ynovka.myShore.games.tag.TagGameStates
+import ru.ynovka.myShore.games.tag.states.TagFinishingState
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.utils.Utils.asPlayers
 import ru.ynovka.myShore.games.tag.hasVictims
 import ru.ynovka.myShore.games.tag.teleport
-import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.games.tag.currentTagGame
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.utils.MapSpawn
-import ru.ynovka.myShore.lobby.getLobby
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Block
 import org.bukkit.Material
 import org.bukkit.Location
 import org.bukkit.GameMode
 import org.bukkit.Bukkit
+import ru.ynovka.myShore.games.tag.findPlayer
 
 
 object TagMountainTrackMap : TagMap {
@@ -48,41 +47,44 @@ object TagMountainTrackMap : TagMap {
                     if (player.gameMode == GameMode.CREATIVE) return@forEach
 
                     if (player.y <= 65) {
-                        val game = player.getLobby()?.game as? TagGame ?: return@forEach
+                        val game = player.currentTagGame() ?: return@forEach
+                        val tagPlayer = game.findPlayer(player) ?: return@forEach
 
-                        val role = game.players[player.uniqueId]
-                        if (role == TagPlayerRoles.HUNTER) {
-                            player.gameMode = GameMode.SPECTATOR
-                            player.clearActivePotionEffects()
-                            game.players[player.uniqueId] = TagPlayerRoles.SPECTATOR
-                            game.transitionTo(TagGameStates.FINISHING)
-                        }
-                        if (role == TagPlayerRoles.VICTIM) {
-                            player.gameMode = GameMode.SPECTATOR
-                            player.clearActivePotionEffects()
-                            game.players[player.uniqueId] = TagPlayerRoles.SPECTATOR_VICTIM
-
-                            val msg = Component.translatable(
-                                "msg.myshore.tag.player.fall_death",
-                                Component.text(player.name)
-                            )
-                            game.players.keys.asPlayers().forEach { it.sendMessage(msg) }
-
-                            if (!game.hasVictims()) {
-                                game.transitionTo(TagGameStates.FINISHING)
-                            } else {
-                                game.totalTime += 20
+                        when (tagPlayer.role) {
+                            TagPlayerRoles.HUNTER -> {
+                                player.gameMode = GameMode.SPECTATOR
+                                player.clearActivePotionEffects()
+                                tagPlayer.role = TagPlayerRoles.SPECTATOR
+                                game.fsm.transitionTo(TagFinishingState)
                             }
-                        }
-                        if (role == TagPlayerRoles.UNDEFINED) {
-                            game.map.teleport(player, game) {
-                                player.gameMode = GameMode.ADVENTURE
+                            TagPlayerRoles.VICTIM -> {
+                                player.gameMode = GameMode.SPECTATOR
+                                player.clearActivePotionEffects()
+                                tagPlayer.role = TagPlayerRoles.SPECTATOR_VICTIM
+
+                                val msg = Component.translatable(
+                                    "msg.myshore.tag.player.fall_death",
+                                    Component.text(player.name)
+                                )
+                                game.players.forEach { it.player.sendMessage(msg) }
+
+                                if (!game.hasVictims()) {
+                                    game.fsm.transitionTo(TagFinishingState)
+                                } else {
+                                    game.totalTime += 20
+                                }
                             }
+                            TagPlayerRoles.UNDEFINED -> {
+                                game.map.teleport(player, game) {
+                                    player.gameMode = GameMode.ADVENTURE
+                                }
+                            }
+                            else -> Unit
                         }
                     }
 
                     val block = player.location.block
-                    val b = hasLihgtBlock(listOf(
+                    val b = hasLightBlock(listOf(
                         block,
                         block.getRelative(BlockFace.WEST),
                         block.getRelative(BlockFace.EAST),
@@ -105,9 +107,7 @@ object TagMountainTrackMap : TagMap {
             }, 0L, 5L)
         }
 
-        private fun hasLihgtBlock(
-            blocks: List<Block>
-        ): Boolean {
+        private fun hasLightBlock(blocks: List<Block>): Boolean {
             blocks.forEach { block ->
                 if (block.type != Material.LIGHT) return@forEach
                 val data = block.blockData

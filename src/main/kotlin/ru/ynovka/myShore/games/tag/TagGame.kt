@@ -8,30 +8,20 @@ import ru.ynovka.myShore.games.tag.states.TagVotingState
 import ru.ynovka.myShore.games.tag.maps.TagMaps
 import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.utils.Utils.asPlayer
 import ru.ynovka.myShore.text.clearActionBar
-import ru.ynovka.myShore.games.GameState
-import ru.ynovka.myShore.utils.canMove
-import ru.ynovka.myShore.games.GameId
-import ru.ynovka.myShore.lobby.Lobby
+import ru.ynovka.myShore.games.GameFSM
 import ru.ynovka.myShore.games.Game
+import ru.ynovka.myShore.utils.canMove
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
-import ru.ynovka.myShore.games.StateMachine
-import ru.ynovka.myShore.games.worldDomination.states.WDWaitingForPlayersState
 import java.util.UUID
 
 
-class TagGame(val lobby: Lobby) : Game() {
+class TagGame : Game<TagPlayer>() {
 
-    override val gameId: GameId = GameId.TAG
-    override val name: String = "Салочки"
-    override val fsm = StateMachine(this, TagWaitingForPlayersState)
-    override val players: Set<Player> = setOf()
-
-    /** UUID → роль; синхронизирован с lobby.members */
-    val roles: MutableMap<UUID, TagPlayerRoles> =
-        lobby.members.associateWith { TagPlayerRoles.UNDEFINED }.toMutableMap()
+    override val maxPlayers: Int = 8
+    override val players: MutableList<TagPlayer> = mutableListOf()
+    override val fsm = GameFSM(TagWaitingForPlayersState)
 
     val scheduler = inst.server.scheduler
 
@@ -55,46 +45,33 @@ class TagGame(val lobby: Lobby) : Game() {
 
     var remainingTime: Int = 40
 
+    override fun getOrCreatePlayer(player: Player): TagPlayer =
+        players.firstOrNull { it.player.uniqueId == player.uniqueId }
+            ?: TagPlayer(player)
 
-    override fun handlePlayerJoin(p: Player) {
-        roles[p.uniqueId] = TagPlayerRoles.UNDEFINED
-        map.onPlayerJoin(this, p)
+    override fun handlePlayerJoin(player: TagPlayer) {
+        map.onPlayerJoin(this, player.player)
     }
 
-    override fun handlePlayerLeave(p: Player) {
-        players.remove(player.uniqueId) ?: return
-        player.clearActivePotionEffects()
-        player.canMove(true)
-        player.clearActionBar()
-        map.onPlayerLeave(this, player)
+    override fun handlePlayerLeave(player: TagPlayer) {
+        player.player.clearActivePotionEffects()
+        player.player.canMove(true)
+        player.player.clearActionBar()
+        map.onPlayerLeave(this, player.player)
 
-        when (state) {
-            TagGameStates.VOTING ->
-                if (players.size <= 1) transitionTo(TagGameStates.WAITING_FOR_PLAYERS)
+        when (fsm.current) {
+            TagVotingState ->
+                if (players.size <= 1) fsm.transitionTo(TagWaitingForPlayersState)
 
-            TagGameStates.PREPARING, TagGameStates.IN_PROGRESS ->
-                if (!hasVictims() || !hasHunter()) transitionTo(TagGameStates.FINISHING)
+            TagPreparingState, TagInProgressState ->
+                if (!hasVictims() || !hasHunter()) fsm.transitionTo(TagFinishingState)
 
             else -> Unit
         }
     }
-
-    fun transitionTo(newState: TagGameStates) {
-        state = newState
-        stateImpl = stateOf(newState)
-        stateImpl.onStateStart(this)
-    }
-
-    private fun stateOf(state: TagGameStates): GameState<TagGame> = when (state) {
-        TagGameStates.WAITING_FOR_PLAYERS -> TagWaitingForPlayersState
-        TagGameStates.VOTING              -> TagVotingState
-        TagGameStates.PREPARING           -> TagPreparingState
-        TagGameStates.IN_PROGRESS         -> TagInProgressState
-        TagGameStates.FINISHING           -> TagFinishingState
-    }
 }
 
-// ---------- роли и состояния ----------
+// ---------- роли ----------
 
 enum class TagPlayerRoles {
     UNDEFINED,
@@ -104,16 +81,28 @@ enum class TagPlayerRoles {
     HUNTER
 }
 
+// ---------- вспомогательные функции поиска игроков ----------
 
-// ---------- extension-функции ----------
+/** Найти TagPlayer по UUID; null если не в игре. */
+fun TagGame.findPlayer(uuid: UUID): TagPlayer? =
+    players.firstOrNull { it.player.uniqueId == uuid }
+
+/** Найти TagPlayer по Bukkit Player. */
+fun TagGame.findPlayer(player: Player): TagPlayer? =
+    players.firstOrNull { it.player.uniqueId == player.uniqueId }
+
+// ---------- extension-функции состояния ----------
+
+fun TagGame.hasVictims(): Boolean = players.any { it.role == TagPlayerRoles.VICTIM }
+fun TagGame.hasHunter(): Boolean  = players.any { it.role == TagPlayerRoles.HUNTER }
 
 /**
  * Асинхронный телепорт игрока на позицию, соответствующую его роли на этой карте.
  * [onComplete] вызывается в main thread после успешного телепорта.
  */
 fun TagMap.teleport(player: Player, game: TagGame, onComplete: () -> Unit = {}) {
-    val role = game.players[player.uniqueId]
-        ?: if (game.state == TagGameStates.IN_PROGRESS || game.state == TagGameStates.PREPARING) {
+    val role = game.findPlayer(player)?.role
+        ?: if (game.fsm.current == TagInProgressState || game.fsm.current == TagPreparingState) {
             TagPlayerRoles.SPECTATOR
         } else {
             TagPlayerRoles.UNDEFINED
@@ -132,9 +121,8 @@ fun TagMap.teleport(player: Player, game: TagGame, onComplete: () -> Unit = {}) 
         TagPlayerRoles.SPECTATOR,
         TagPlayerRoles.SPECTATOR_VICTIM -> {
             val hunter = game.players
-                .filterValues { it == TagPlayerRoles.HUNTER }
-                .keys.firstOrNull()
-                ?.asPlayer()
+                .firstOrNull { it.role == TagPlayerRoles.HUNTER }
+                ?.player
             hunter?.location ?: victimSpawns.random().toLocation()
         }
     }
@@ -143,6 +131,3 @@ fun TagMap.teleport(player: Player, game: TagGame, onComplete: () -> Unit = {}) 
         Bukkit.getScheduler().runTask(inst, Runnable { onComplete() })
     }
 }
-
-fun TagGame.hasVictims(): Boolean = players.values.any { it == TagPlayerRoles.VICTIM }
-fun TagGame.hasHunter(): Boolean = players.values.any { it == TagPlayerRoles.HUNTER }

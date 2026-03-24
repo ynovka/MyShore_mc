@@ -2,16 +2,14 @@ package ru.ynovka.myShore.games.tag.states
 
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
-import ru.ynovka.myShore.games.tag.TagGameStates
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.utils.Utils.asPlayers
-import ru.ynovka.myShore.utils.Utils.asPlayer
 import ru.ynovka.myShore.text.clearActionBar
 import ru.ynovka.myShore.games.tag.TagGame
-import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.games.tag.TagPlayer
+import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.utils.canMove
-import org.bukkit.entity.Player
+import net.kyori.adventure.text.Component
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.boss.BossBar
@@ -21,50 +19,44 @@ import ru.ynovka.myShore.text.ComponentDecorator
 
 
 // 40-100 сек (сам геймплей салочек)
-object TagInProgressState : GameState<TagGame> {
+object TagInProgressState : GameState<TagPlayer> {
 
-    // BossBar хранится здесь, чтобы его можно было корректно убрать при смене состояния.
-    // Если в будущем будет несколько одновременных игр — вынести в TagMiniGame.
     private var bossBar: BossBar? = null
 
-    override fun onStateStart(game: TagGame) {
-        game.lobby.members.asPlayers().forEach { it.canMove(true) }
-        startHunterDistanceRenderer(game)
-        startCountdown(game)
+    override fun onEnter(game: Game<TagPlayer>) {
+        val tagGame = game as TagGame
+        tagGame.players.forEach { it.player.canMove(true) }
+        startHunterDistanceRenderer(tagGame)
+        startCountdown(tagGame)
     }
 
-    override fun onPlayerJoin(game: TagGame, player: Player) {
-        // Новые игроки во время IN_PROGRESS — только зрители
-        player.setupAsSpectator(game)
-        // Добавляем в BossBar, если он уже создан
-        bossBar?.addPlayer(player)
+    override fun onPlayerJoin(game: Game<TagPlayer>, player: TagPlayer) {
+        val tagGame = game as TagGame
+        player.player.setupAsSpectator(tagGame)
+        bossBar?.addPlayer(player.player)
     }
 
     // ---------- отображение расстояния до охотника ----------
 
     private fun startHunterDistanceRenderer(game: TagGame) {
-        game.lobby.members.asPlayers().forEach { it.clearActionBar() }
+        game.players.forEach { it.player.clearActionBar() }
 
-        val hunterUuid = game.players
-            .filterValues { it == TagPlayerRoles.HUNTER }
-            .keys.firstOrNull() ?: return
-        val hunter = hunterUuid.asPlayer() ?: return
+        val hunter = game.players.firstOrNull { it.role == TagPlayerRoles.HUNTER }?.player ?: return
 
         fun tick() {
-            if (game.state != TagGameStates.IN_PROGRESS) return
+            if (game.fsm.current != TagInProgressState) return
 
             game.players
-                .filterValues { it == TagPlayerRoles.VICTIM }
-                .keys.asPlayers()
-                .forEach { victim ->
-                    val distance = ((victim.location.distance(hunter.location) * 10).roundToInt() / 10.0)
-                    victim.sendActionBar(
+                .filter { it.role == TagPlayerRoles.VICTIM }
+                .forEach { tagPlayer ->
+                    val distance = ((tagPlayer.player.location.distance(hunter.location) * 10).roundToInt() / 10.0)
+                    tagPlayer.player.sendActionBar(
                         ComponentDecorator.addBackground(
                             Component.translatable(
                                 "bar.myshore.tag.distance_to_hunter",
                                 Component.text(distance)
                             ),
-                            victim
+                            tagPlayer.player
                         )
                     )
                 }
@@ -83,12 +75,12 @@ object TagInProgressState : GameState<TagGame> {
         val bar = Bukkit.createBossBar("", BarColor.BLUE, BarStyle.SOLID).also { bar ->
             bar.progress = 1.0
             bar.isVisible = true
-            game.lobby.members.asPlayers().forEach(bar::addPlayer)
+            game.players.forEach(bar::addPlayer)
         }
         bossBar = bar
 
         fun tick() {
-            if (game.state != TagGameStates.IN_PROGRESS) {
+            if (game.fsm.current != TagInProgressState) {
                 bar.removeAll()
                 bossBar = null
                 return
@@ -103,10 +95,13 @@ object TagInProgressState : GameState<TagGame> {
             } else {
                 bar.removeAll()
                 bossBar = null
-                game.transitionTo(TagGameStates.FINISHING)
+                game.fsm.transitionTo(TagFinishingState)
             }
         }
 
         tick()
     }
 }
+
+// Расширение, чтобы addPlayer принимал TagPlayer напрямую
+private fun BossBar.addPlayer(tagPlayer: TagPlayer) = addPlayer(tagPlayer.player)

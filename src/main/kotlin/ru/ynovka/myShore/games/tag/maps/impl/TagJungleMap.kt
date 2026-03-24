@@ -8,16 +8,13 @@ import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.MyShore.Companion.ITEMS
 import ru.ynovka.myShore.texturepack.TexturePack
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.utils.Utils.asPlayers
-import ru.ynovka.myShore.utils.Utils.asPlayer
 import java.util.concurrent.ThreadLocalRandom
 import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.games.tag.currentTagGame
 import ru.ynovka.myShore.utils.cancelItem
 import net.kyori.adventure.text.Component
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.potion.PotionEffectType
-import ru.ynovka.myShore.lobby.getLobby
-import ru.ynovka.myShore.utils.MapSpawn
 import org.bukkit.potion.PotionEffect
 import org.bukkit.entity.ItemDisplay
 import kotlin.random.asKotlinRandom
@@ -28,6 +25,8 @@ import org.bukkit.Material
 import org.joml.Matrix4f
 import org.bukkit.Bukkit
 import org.bukkit.Sound
+import ru.ynovka.myShore.games.tag.findPlayer
+import ru.ynovka.myShore.utils.MapSpawn
 import kotlin.math.abs
 
 
@@ -84,8 +83,8 @@ object TagJungleMap : TagMap {
     val darts: MutableMap<TagGame, MutableSet<ItemDisplay>> = mutableMapOf()
 
     fun spawnPoisonDarts(game: TagGame) {
-        val victims = game.players.filter { it.value == TagPlayerRoles.VICTIM }.keys
-        val count = victims.size * 2
+        val victimCount = game.players.count { it.role == TagPlayerRoles.VICTIM }
+        val count = victimCount * 2
 
         val world = Bukkit.getWorld(game.map.mapId) ?: return
         val dart = Items.poisonDart.getStack(null)
@@ -97,7 +96,7 @@ object TagJungleMap : TagMap {
                     display.isPersistent = false
                     display.setItemStack(dart.clone())
                     display.isVisibleByDefault = false
-                    game.players.keys.forEach { it.asPlayer()?.showEntity(inst, display) }
+                    game.players.forEach { it.player.showEntity(inst, display) }
                     d.add(display)
                 }
             }
@@ -130,7 +129,6 @@ object TagJungleMap : TagMap {
         fun register() {
             val duration = 20
             val startTime = System.currentTimeMillis()
-            val world = Bukkit.getServer().getWorld(mapId)!!
 
             Bukkit.getScheduler().runTaskTimer(inst, Runnable {
                 val angle = ((System.currentTimeMillis() - startTime) / 5L % 360).toFloat() * (Math.PI.toFloat() / 180f)
@@ -154,10 +152,11 @@ object TagJungleMap : TagMap {
             }, 1L, duration.toLong())
 
             Bukkit.getScheduler().runTaskTimer(inst, Runnable {
-                world.players.forEach { player ->
+                Bukkit.getWorld(mapId)?.players?.forEach { player ->
                     if (player.gameMode != GameMode.ADVENTURE) return@forEach
-                    val game = player.getLobby()?.game as? TagGame ?: return@forEach
-                    if (game.players[player.uniqueId] != TagPlayerRoles.VICTIM) return@forEach
+                    val game = player.currentTagGame() ?: return@forEach
+                    val tagPlayer = game.findPlayer(player) ?: return@forEach
+                    if (tagPlayer.role != TagPlayerRoles.VICTIM) return@forEach
                     if (player.inventory.getItem(0) != null) return@forEach
                     val d = darts[game] ?: return@forEach
                     val dart = d.firstOrNull { display ->
@@ -206,22 +205,15 @@ object TagJungleMap : TagMap {
 
         private fun List<PotionEffect>.applyRandomTo(player: Player) {
             val random = ThreadLocalRandom.current().asKotlinRandom()
-            val effect = this.random(random)
-
-            player.addPotionEffect(effect)
+            player.addPotionEffect(this.random(random))
         }
 
         private fun usePotionDart(player: Player, itemSlot: EquipmentSlot) {
             val i = player.inventory.getItem(itemSlot)
             if (i.type == Material.AIR || player.hasCooldown(i)) return
-            val game = player.getLobby()?.game as? TagGame ?: return
-            // Ставим КД на использование
-            player.setCooldown(Key.key(inst, "tag_jungle_poison_dart"), 20*20)
-            // playSound "Фью!"
-            game.players.keys.asPlayers().forEach { p ->
-                p.playSound(player.location, Sound.BLOCK_BAMBOO_HIT, 1f, 2f)
-            }
-            // Удаление дротика
+            val game = player.currentTagGame() ?: return
+            player.setCooldown(Key.key(inst, "tag_jungle_poison_dart"), 20 * 20)
+            game.players.forEach { it.player.playSound(player.location, Sound.BLOCK_BAMBOO_HIT, 1f, 2f) }
             player.inventory.clear(0)
             val target = player.getTargetEntity(25, false) as? Player ?: return
             poisonDartEffects.applyRandomTo(target)

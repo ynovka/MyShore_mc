@@ -15,11 +15,10 @@ import ru.ynovka.myShore.games.tag.maps.TagMaps
 import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.utils.Utils.toComponent
 import ru.ynovka.myShore.texturepack.GuiTextures
-import ru.ynovka.myShore.games.tag.TagGameStates
-import ru.ynovka.myShore.utils.Utils.asPlayers
+import ru.ynovka.myShore.games.tag.states.TagWaitingForPlayersState
+import ru.ynovka.myShore.games.tag.currentTagGame
 import ru.ynovka.myShore.games.tag.TagGame
 import net.kyori.adventure.text.Component
-import ru.ynovka.myShore.lobby.getLobby
 import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
 import org.bukkit.Sound
@@ -47,7 +46,7 @@ object TagVoteMapMenu {
             SlotPosition.top(2),
             GuiButton.of(tagVoteMountainTrackMapMenuItem.getStack(null)) { ctx ->
                 val player = ctx.view.inventoryView.player as Player
-                voteMap(player, TagMaps.MOUNTAIN_TRACK.mapProvider(),)
+                voteMap(player, TagMaps.MOUNTAIN_TRACK.mapProvider())
             }
         )
         set(
@@ -60,39 +59,33 @@ object TagVoteMapMenu {
     }
 
     private fun voteMap(player: Player, map: TagMap, isRandom: Boolean = false) {
-        val mapNameTranlatable = if (isRandom) Component.translatable("name.myshore.tag.map.random") else map.mapName
-        val mapNameComp = ServerTranslator.translate(
-            mapNameTranlatable, player
-        )
+        val mapNameTranslatable = if (isRandom) Component.translatable("name.myshore.tag.map.random") else map.mapName
+        val mapNameComp = ServerTranslator.translate(mapNameTranslatable, player)
 
-        val lobby = player.getLobby() ?: return
-        val game = lobby.game as? TagGame ?: return
+        val game = player.currentTagGame() ?: return
 
-        if (game.state == TagGameStates.WAITING_FOR_PLAYERS) {
+        if (game.fsm.current == TagWaitingForPlayersState) {
             setupMap(game, map, true)
             return
         }
 
         game.mapVotes[player.uniqueId] = map
 
-        player.playSound(
-            player.location,
-            Sound.BLOCK_COPPER_BULB_TURN_OFF,
-            0.5f,
-            2f
-        )
+        player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
 
         player.sendMessage(Component.translatable(
             "msg.myshore.tag.player.map_vote.self",
             mapNameComp
         ))
 
-        game.players.keys.filter { it != player.uniqueId }.asPlayers().forEach {
-            it.sendMessage(Component.translatable(
-                "msg.myshore.tag.player.map_vote.other",
-                Component.text(player.name),
-                mapNameComp
-            ))
-        }
+        game.players
+            .filter { it.player.uniqueId != player.uniqueId }
+            .forEach {
+                it.player.sendMessage(Component.translatable(
+                    "msg.myshore.tag.player.map_vote.other",
+                    Component.text(player.name),
+                    mapNameComp
+                ))
+            }
     }
 }

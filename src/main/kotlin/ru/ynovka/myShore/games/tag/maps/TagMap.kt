@@ -5,10 +5,9 @@ import ru.ynovka.myShore.games.tag.maps.impl.TagJungleMap
 import net.kyori.adventure.text.TranslatableComponent
 import java.util.concurrent.ThreadLocalRandom
 import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.utils.MapSpawn
 import org.bukkit.entity.Player
-import ru.ynovka.myShore.games.tag.TagPlayerRoles
-import ru.ynovka.myShore.utils.Utils.asPlayers
 import java.util.concurrent.CompletableFuture
 
 
@@ -29,14 +28,13 @@ interface TagMap {
     val hunterSpawn: MapSpawn
     val victimSpawns: List<MapSpawn>
 
-
     /** Вызывается после телепорта игроков в начале игры */
     fun onGameStart(game: TagGame) {}
 
     /** Вызывается при завершении игры */
     fun onGameEnd(game: TagGame) {}
 
-    /** Вызывается когда игрок покидает игру */
+    /** Вызывается когда игрок присоединяется к игре */
     fun onPlayerJoin(game: TagGame, player: Player) {}
 
     /** Вызывается когда игрок покидает игру */
@@ -68,44 +66,30 @@ interface TagMap {
 }
 
 fun TagMap.teleportPlayers(game: TagGame) {
-    val players = game.players.keys.asPlayers()
-
-    val victimPlayers = players.filter {
-        val role = game.players[it.uniqueId]
-        role == TagPlayerRoles.VICTIM || role == TagPlayerRoles.UNDEFINED
-    }
-
-    val hunterPlayers = players.filter {
-        game.players[it.uniqueId] == TagPlayerRoles.HUNTER
-    }
-
-    val spectatorPlayers = players.filter {
-        val role = game.players[it.uniqueId]
-        role == TagPlayerRoles.SPECTATOR || role == TagPlayerRoles.SPECTATOR_VICTIM
-    }
+    val victims    = game.players.filter { it.role == TagPlayerRoles.VICTIM || it.role == TagPlayerRoles.UNDEFINED }
+    val hunters    = game.players.filter { it.role == TagPlayerRoles.HUNTER }
+    val spectators = game.players.filter { it.role == TagPlayerRoles.SPECTATOR || it.role == TagPlayerRoles.SPECTATOR_VICTIM }
 
     val shuffledVictimSpawns = victimSpawns.shuffled().toMutableList()
-
     val teleports = mutableListOf<CompletableFuture<Boolean>>()
 
     // Victims
-    victimPlayers.forEachIndexed { index, player ->
-        val spawn = shuffledVictimSpawns.getOrNull(index) ?.toLocation() ?: victimSpawns.random().toLocation()
-
-        teleports += player.teleportAsync(spawn)
+    victims.forEachIndexed { index, tagPlayer ->
+        val spawn = shuffledVictimSpawns.getOrNull(index)?.toLocation()
+            ?: victimSpawns.random().toLocation()
+        teleports += tagPlayer.player.teleportAsync(spawn)
     }
 
     // Hunters
-    hunterPlayers.forEach { player ->
-        teleports += player.teleportAsync(hunterSpawn.toLocation())
+    hunters.forEach { tagPlayer ->
+        teleports += tagPlayer.player.teleportAsync(hunterSpawn.toLocation())
     }
 
-    // Spectators
-    val hunter = hunterPlayers.firstOrNull()
-
-    spectatorPlayers.forEach { player ->
-        val loc = hunter?.location ?: victimSpawns.random().toLocation()
-        teleports += player.teleportAsync(loc)
+    // Spectators follow the hunter
+    val hunterLocation = hunters.firstOrNull()?.player?.location
+    spectators.forEach { tagPlayer ->
+        val loc = hunterLocation ?: victimSpawns.random().toLocation()
+        teleports += tagPlayer.player.teleportAsync(loc)
     }
 
     CompletableFuture.allOf(*teleports.toTypedArray())
