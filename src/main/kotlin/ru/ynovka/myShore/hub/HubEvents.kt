@@ -1,6 +1,5 @@
 package ru.ynovka.myShore.hub
 
-import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
 import ru.ynovka.myShore.utils.PlayerVisibilityController
 import org.bukkit.event.player.PlayerInteractEvent
@@ -9,7 +8,6 @@ import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import ru.ynovka.myShore.party.PartyManager
-import ru.ynovka.myShore.lobby.LobbyManager
 import ru.ynovka.myShore.party.LeftReason
 import net.kyori.adventure.text.Component
 import org.bukkit.potion.PotionEffectType
@@ -20,8 +18,7 @@ import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Material
-import ru.ynovka.myShore.text.ComponentDecorator
-import ru.ynovka.myShore.text.sendPermanentActionBar
+import ru.ynovka.myShore.games.GameManager
 
 
 object HubEvents : Listener {
@@ -81,7 +78,7 @@ object HubEvents : Listener {
         ))
 
         ActionBarController.clear(e.player)
-        LobbyManager.leave(e.player)
+        GameManager.leave(e.player)
         PartyManager.leave(e.player, LeftReason.QUIT)
         PlayerVisibilityController.refreshAll()
         inst.server.scheduler.runTaskLater(

@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component
 import org.bukkit.scoreboard.Team
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
+import ru.ynovka.myShore.games.GamePlayer
 import java.util.UUID
 
 

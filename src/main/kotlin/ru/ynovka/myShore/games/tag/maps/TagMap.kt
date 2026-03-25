@@ -66,9 +66,9 @@ interface TagMap {
 }
 
 fun TagMap.teleportPlayers(game: TagGame) {
-    val victims    = game.players.filter { it.role == TagPlayerRoles.VICTIM || it.role == TagPlayerRoles.UNDEFINED }
-    val hunters    = game.players.filter { it.role == TagPlayerRoles.HUNTER }
-    val spectators = game.players.filter { it.role == TagPlayerRoles.SPECTATOR || it.role == TagPlayerRoles.SPECTATOR_VICTIM }
+    val victims    = game.gamePlayers.filter { it.role == TagPlayerRoles.VICTIM || it.role == TagPlayerRoles.UNDEFINED }
+    val hunters    = game.gamePlayers.filter { it.role == TagPlayerRoles.HUNTER }
+    val spectators = game.gamePlayers.filter { it.role == TagPlayerRoles.SPECTATOR || it.role == TagPlayerRoles.SPECTATOR_VICTIM }
 
     val shuffledVictimSpawns = victimSpawns.shuffled().toMutableList()
     val teleports = mutableListOf<CompletableFuture<Boolean>>()

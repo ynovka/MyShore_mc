@@ -83,7 +83,7 @@ object TagJungleMap : TagMap {
     val darts: MutableMap<TagGame, MutableSet<ItemDisplay>> = mutableMapOf()
 
     fun spawnPoisonDarts(game: TagGame) {
-        val victimCount = game.players.count { it.role == TagPlayerRoles.VICTIM }
+        val victimCount = game.gamePlayers.count { it.role == TagPlayerRoles.VICTIM }
         val count = victimCount * 2
 
         val world = Bukkit.getWorld(game.map.mapId) ?: return
@@ -96,7 +96,7 @@ object TagJungleMap : TagMap {
                     display.isPersistent = false
                     display.setItemStack(dart.clone())
                     display.isVisibleByDefault = false
-                    game.players.forEach { it.player.showEntity(inst, display) }
+                    game.gamePlayers.forEach { it.player.showEntity(inst, display) }
                     d.add(display)
                 }
             }
@@ -213,7 +213,7 @@ object TagJungleMap : TagMap {
             if (i.type == Material.AIR || player.hasCooldown(i)) return
             val game = player.currentTagGame() ?: return
             player.setCooldown(Key.key(inst, "tag_jungle_poison_dart"), 20 * 20)
-            game.players.forEach { it.player.playSound(player.location, Sound.BLOCK_BAMBOO_HIT, 1f, 2f) }
+            game.gamePlayers.forEach { it.player.playSound(player.location, Sound.BLOCK_BAMBOO_HIT, 1f, 2f) }
             player.inventory.clear(0)
             val target = player.getTargetEntity(25, false) as? Player ?: return
             poisonDartEffects.applyRandomTo(target)

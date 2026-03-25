@@ -10,7 +10,6 @@ import ru.ynovka.myShore.games.tag.teleport
 import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameState
 import net.kyori.adventure.text.Component
-import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Sound
 import kotlin.math.ceil
@@ -21,7 +20,7 @@ object TagVotingState : GameState<TagPlayer> {
 
     override fun onEnter(game: Game<TagPlayer>) {
         val tagGame = game as TagGame
-        tagGame.players.forEach { tagPlayer ->
+        tagGame.gamePlayers.forEach { tagPlayer ->
             tagPlayer.player.setupForVoting(tagGame)
             tagPlayer.player.playSound(tagPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
         }
@@ -48,7 +47,7 @@ object TagVotingState : GameState<TagPlayer> {
         val votes = game.mapVotes.values
         if (votes.isEmpty()) return null
 
-        val threshold = ceil(game.players.size / 3.0).toInt()
+        val threshold = ceil(game.gamePlayers.size / 3.0).toInt()
         if (votes.size < threshold) return null
 
         val grouped = votes.groupingBy { it }.eachCount()
@@ -60,7 +59,7 @@ object TagVotingState : GameState<TagPlayer> {
 
     fun setupMap(game: TagGame, map: TagMap, shouldTeleport: Boolean = false) {
         game.map = map
-        game.players.forEach { tagPlayer ->
+        game.gamePlayers.forEach { tagPlayer ->
             val mapNameComp = ServerTranslator.translate(map.mapName, tagPlayer.player)
             tagPlayer.player.sendMessage(
                 Component.translatable("msg.myshore.tag.choosen_map", mapNameComp)

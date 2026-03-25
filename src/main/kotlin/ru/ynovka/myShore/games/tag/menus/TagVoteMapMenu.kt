@@ -17,7 +17,6 @@ import ru.ynovka.myShore.utils.Utils.toComponent
 import ru.ynovka.myShore.texturepack.GuiTextures
 import ru.ynovka.myShore.games.tag.states.TagWaitingForPlayersState
 import ru.ynovka.myShore.games.tag.currentTagGame
-import ru.ynovka.myShore.games.tag.TagGame
 import net.kyori.adventure.text.Component
 import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
@@ -78,7 +77,7 @@ object TagVoteMapMenu {
             mapNameComp
         ))
 
-        game.players
+        game.gamePlayers
             .filter { it.player.uniqueId != player.uniqueId }
             .forEach {
                 it.player.sendMessage(Component.translatable(

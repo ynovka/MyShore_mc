@@ -14,6 +14,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
+import ru.ynovka.myShore.games.GamePlayer.Companion.asPlayers
 
 
 object TagEvents : Listener {
@@ -57,9 +58,9 @@ object TagEvents : Listener {
         )
 
         RiftEffect.play(game, victim)
-        game.players.forEach {
-            it.player.sendMessage(msg)
-            SoundsPack.RIFT_SOUND.play(it.player, 0.3f, 2f)
+        game.gamePlayers.asPlayers().forEach {
+            it.sendMessage(msg)
+            SoundsPack.RIFT_SOUND.play(it, 0.3f, 2f)
         }
 
         if (!game.hasVictims()) {

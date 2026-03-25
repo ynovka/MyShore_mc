@@ -1,12 +1,12 @@
 package ru.ynovka.myShore.games.worldDomination
 
-import org.bukkit.entity.Player
 import ru.ynovka.myShore.games.GamePlayer
+import java.util.UUID
 
 class WDPlayer(
-    player: Player,
+    playerId: UUID,
     val role: PlayerRole = PlayerRole.UNDEFINED
-) : GamePlayer(player)
+) : GamePlayer(playerId)
 
 enum class PlayerRole {
     UNDEFINED,

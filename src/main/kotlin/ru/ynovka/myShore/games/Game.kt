@@ -5,19 +5,20 @@ import ru.ynovka.myShore.party.PartyManager.Party
 import java.util.UUID
 
 
-abstract class Game<P : GamePlayer> {
+abstract class Game<P : GamePlayer>(
+    val party: Party? = null  /** null  → публичная игра */
+) {
 
     abstract val fsm: GameFSM<P>
     abstract val maxPlayers: Int
-    abstract val players: MutableList<P>
-    open val party: Party? = null  /** null  → публичная игра */
+    abstract val gamePlayers: MutableList<P>
 
     fun start() = fsm.start(this)
 
     val isPrivate: Boolean get() = party != null
-    fun isFull(): Boolean  = players.size >= maxPlayers
-    fun isEmpty(): Boolean = players.isEmpty()
-    fun hasPlayer(uuid: UUID): Boolean = players.any { it.player.uniqueId == uuid }
+    fun isFull(): Boolean  = gamePlayers.size >= maxPlayers
+    fun isEmpty(): Boolean = gamePlayers.isEmpty()
+    fun hasPlayer(uuid: UUID): Boolean = gamePlayers.any { it.playerId == uuid }
 
     fun onPlayerJoin(player: Player) {
         val p = getOrCreatePlayer(player)

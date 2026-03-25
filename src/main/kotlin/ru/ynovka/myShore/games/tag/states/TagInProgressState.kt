@@ -25,7 +25,7 @@ object TagInProgressState : GameState<TagPlayer> {
 
     override fun onEnter(game: Game<TagPlayer>) {
         val tagGame = game as TagGame
-        tagGame.players.forEach { it.player.canMove(true) }
+        tagGame.gamePlayers.forEach { it.player.canMove(true) }
         startHunterDistanceRenderer(tagGame)
         startCountdown(tagGame)
     }
@@ -39,14 +39,14 @@ object TagInProgressState : GameState<TagPlayer> {
     // ---------- отображение расстояния до охотника ----------
 
     private fun startHunterDistanceRenderer(game: TagGame) {
-        game.players.forEach { it.player.clearActionBar() }
+        game.gamePlayers.forEach { it.player.clearActionBar() }
 
-        val hunter = game.players.firstOrNull { it.role == TagPlayerRoles.HUNTER }?.player ?: return
+        val hunter = game.gamePlayers.firstOrNull { it.role == TagPlayerRoles.HUNTER }?.player ?: return
 
         fun tick() {
             if (game.fsm.current != TagInProgressState) return
 
-            game.players
+            game.gamePlayers
                 .filter { it.role == TagPlayerRoles.VICTIM }
                 .forEach { tagPlayer ->
                     val distance = ((tagPlayer.player.location.distance(hunter.location) * 10).roundToInt() / 10.0)
@@ -75,7 +75,7 @@ object TagInProgressState : GameState<TagPlayer> {
         val bar = Bukkit.createBossBar("", BarColor.BLUE, BarStyle.SOLID).also { bar ->
             bar.progress = 1.0
             bar.isVisible = true
-            game.players.forEach(bar::addPlayer)
+            game.gamePlayers.forEach(bar::addPlayer)
         }
         bossBar = bar
 

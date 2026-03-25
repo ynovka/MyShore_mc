@@ -2,12 +2,12 @@ package ru.ynovka.myShore.hub
 
 import ru.ynovka.myShore.utils.PlayerVisibilityController
 import ru.ynovka.myShore.utils.Utils.clearTeams
-import ru.ynovka.myShore.lobby.LobbyManager
 import org.bukkit.entity.Player
 import org.bukkit.Location
 import org.bukkit.GameMode
 import org.bukkit.Bukkit
 import org.bukkit.World
+import ru.ynovka.myShore.games.GameManager
 import ru.ynovka.myShore.text.ActionBarController
 import ru.ynovka.myShore.utils.canMove
 
@@ -20,7 +20,7 @@ object Hub {
         teleportAsync(spawn)
         clearActivePotionEffects()
         applyHubInventory()
-        LobbyManager.leave(this)
+        GameManager.leave(this)
         PlayerVisibilityController.refreshAll()
         clearTeams()
         ActionBarController.clear(this)

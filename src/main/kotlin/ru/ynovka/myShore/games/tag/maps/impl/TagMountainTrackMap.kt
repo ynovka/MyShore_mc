@@ -66,7 +66,7 @@ object TagMountainTrackMap : TagMap {
                                     "msg.myshore.tag.player.fall_death",
                                     Component.text(player.name)
                                 )
-                                game.players.forEach { it.player.sendMessage(msg) }
+                                game.gamePlayers.forEach { it.player.sendMessage(msg) }
 
                                 if (!game.hasVictims()) {
                                     game.fsm.transitionTo(TagFinishingState)

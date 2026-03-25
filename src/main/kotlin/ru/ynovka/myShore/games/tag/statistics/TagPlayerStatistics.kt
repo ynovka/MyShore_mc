@@ -49,7 +49,7 @@ object TagPlayerStatistics {
     }
 
     fun saveStats(game: TagGame, winnerRole: TagPlayerRoles) {
-        game.players.forEach { tagPlayer ->
+        game.gamePlayers.forEach { tagPlayer ->
             val player = tagPlayer.player
             val role   = tagPlayer.role
 

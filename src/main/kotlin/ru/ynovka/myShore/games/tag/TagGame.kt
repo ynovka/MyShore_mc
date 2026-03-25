@@ -20,7 +20,7 @@ import java.util.UUID
 class TagGame : Game<TagPlayer>() {
 
     override val maxPlayers: Int = 8
-    override val players: MutableList<TagPlayer> = mutableListOf()
+    override val gamePlayers: MutableList<TagPlayer> = mutableListOf()
     override val fsm = GameFSM(TagWaitingForPlayersState)
 
     val scheduler = inst.server.scheduler
@@ -46,8 +46,8 @@ class TagGame : Game<TagPlayer>() {
     var remainingTime: Int = 40
 
     override fun getOrCreatePlayer(player: Player): TagPlayer =
-        players.firstOrNull { it.player.uniqueId == player.uniqueId }
-            ?: TagPlayer(player)
+        gamePlayers.firstOrNull { it.player.uniqueId == player.uniqueId }
+            ?: TagPlayer(player.uniqueId)
 
     override fun handlePlayerJoin(player: TagPlayer) {
         map.onPlayerJoin(this, player.player)
@@ -61,7 +61,7 @@ class TagGame : Game<TagPlayer>() {
 
         when (fsm.current) {
             TagVotingState ->
-                if (players.size <= 1) fsm.transitionTo(TagWaitingForPlayersState)
+                if (gamePlayers.size <= 1) fsm.transitionTo(TagWaitingForPlayersState)
 
             TagPreparingState, TagInProgressState ->
                 if (!hasVictims() || !hasHunter()) fsm.transitionTo(TagFinishingState)
@@ -85,16 +85,16 @@ enum class TagPlayerRoles {
 
 /** Найти TagPlayer по UUID; null если не в игре. */
 fun TagGame.findPlayer(uuid: UUID): TagPlayer? =
-    players.firstOrNull { it.player.uniqueId == uuid }
+    gamePlayers.firstOrNull { it.player.uniqueId == uuid }
 
 /** Найти TagPlayer по Bukkit Player. */
 fun TagGame.findPlayer(player: Player): TagPlayer? =
-    players.firstOrNull { it.player.uniqueId == player.uniqueId }
+    gamePlayers.firstOrNull { it.player.uniqueId == player.uniqueId }
 
 // ---------- extension-функции состояния ----------
 
-fun TagGame.hasVictims(): Boolean = players.any { it.role == TagPlayerRoles.VICTIM }
-fun TagGame.hasHunter(): Boolean  = players.any { it.role == TagPlayerRoles.HUNTER }
+fun TagGame.hasVictims(): Boolean = gamePlayers.any { it.role == TagPlayerRoles.VICTIM }
+fun TagGame.hasHunter(): Boolean  = gamePlayers.any { it.role == TagPlayerRoles.HUNTER }
 
 /**
  * Асинхронный телепорт игрока на позицию, соответствующую его роли на этой карте.
@@ -120,7 +120,7 @@ fun TagMap.teleport(player: Player, game: TagGame, onComplete: () -> Unit = {}) 
 
         TagPlayerRoles.SPECTATOR,
         TagPlayerRoles.SPECTATOR_VICTIM -> {
-            val hunter = game.players
+            val hunter = game.gamePlayers
                 .firstOrNull { it.role == TagPlayerRoles.HUNTER }
                 ?.player
             hunter?.location ?: victimSpawns.random().toLocation()

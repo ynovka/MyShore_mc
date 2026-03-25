@@ -1,13 +1,13 @@
 package ru.ynovka.myShore.party
 
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
+import ru.ynovka.myShore.utils.Utils.asPlayers
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
-import ru.ynovka.myShore.utils.Utils.asPlayers
 import java.util.UUID
 
 

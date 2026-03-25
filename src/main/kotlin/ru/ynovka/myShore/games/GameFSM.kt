@@ -19,7 +19,7 @@ class GameFSM<P : GamePlayer>(initial: GameState<P>) {
     }
 
     fun playerJoin(player: P) {
-        game.players.add(player)
+        game.gamePlayers.add(player)
         current.onPlayerJoin(game, player)
     }
 
@@ -29,7 +29,7 @@ class GameFSM<P : GamePlayer>(initial: GameState<P>) {
     }
 
     fun playerLeave(player: P) {
-        game.players.remove(player)
+        game.gamePlayers.remove(player)
         current.onPlayerLeave(game, player)
     }
 }

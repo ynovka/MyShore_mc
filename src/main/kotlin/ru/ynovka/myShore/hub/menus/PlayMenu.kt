@@ -8,11 +8,11 @@ import com.github.darksoulq.abyssallib.world.gui.Gui
 import com.github.darksoulq.abyssallib.world.gui.gui
 import ru.ynovka.myShore.utils.Utils.toComponent
 import ru.ynovka.myShore.texturepack.GuiTextures
-import ru.ynovka.myShore.lobby.LobbyManager
 import net.kyori.adventure.text.Component
-import ru.ynovka.myShore.games.GameId
 import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.games.GameManager
+import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.hub.HubItems.playTagItem
 
 
@@ -30,7 +30,7 @@ object PlayMenu {
             SlotPosition.top(0),
             GuiButton.of(playTagItem.getStack(null)) { ctx ->
                 val player = ctx.view.inventoryView.player as Player
-                LobbyManager.join(player, GameId.TAG)
+                GameManager.join(player, ::TagGame)
             }
         )
     }

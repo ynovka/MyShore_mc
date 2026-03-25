@@ -13,7 +13,7 @@ object TagWaitingForPlayersState : GameState<TagPlayer> {
 
     override fun onEnter(game: Game<TagPlayer>) {
         val tagGame = game as TagGame
-        tagGame.players.forEach { tagPlayer ->
+        tagGame.gamePlayers.forEach { tagPlayer ->
             tagPlayer.player.setupForWaiting(tagGame)
             tagPlayer.player.playSound(tagPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
         }
@@ -23,7 +23,7 @@ object TagWaitingForPlayersState : GameState<TagPlayer> {
         val tagGame = game as TagGame
         player.player.setupForWaiting(tagGame)
 
-        if (tagGame.players.size >= 2) {
+        if (tagGame.gamePlayers.size >= 2) {
             tagGame.fsm.transitionTo(TagVotingState)
         }
     }

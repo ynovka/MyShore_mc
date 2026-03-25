@@ -1,22 +1,22 @@
 package ru.ynovka.myShore.utils
 
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.lobby.getLobby
-import ru.ynovka.myShore.lobby.Lobby
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
+import ru.ynovka.myShore.games.Game
+import ru.ynovka.myShore.games.GameManager.currentGame
 
 
 object PlayerVisibilityController {
     fun refreshVisibility(target: Player) {
-        val targetLobby = target.getLobby()
+        val targetGame = target.currentGame()
 
         for (other in Bukkit.getOnlinePlayers()) {
             if (other.uniqueId == target.uniqueId) continue
 
-            val otherLobby = other.getLobby()
+            val otherGame = other.currentGame()
 
-            updatePair(target, targetLobby, other, otherLobby)
+            updatePair(target, targetGame, other, otherGame)
         }
     }
 
@@ -28,24 +28,24 @@ object PlayerVisibilityController {
 
     private fun updatePair(
         p1: Player,
-        lobby1: Lobby?,
+        game1: Game<*>?,
         p2: Player,
-        lobby2: Lobby?
+        game2: Game<*>?
     ) {
-        if (shouldSee(lobby1, lobby2)) {
+        if (shouldSee(game1, game2)) {
             p1.showPlayer(inst, p2)
         } else {
             p1.hidePlayer(inst, p2)
         }
 
-        if (shouldSee(lobby2, lobby1)) {
+        if (shouldSee(game2, game1)) {
             p2.showPlayer(inst, p1)
         } else {
             p2.hidePlayer(inst, p1)
         }
     }
 
-    private fun shouldSee(viewerLobby: Lobby?, targetLobby: Lobby?): Boolean {
-        return viewerLobby == targetLobby
+    private fun shouldSee(viewerGame: Game<*>?, targetGame: Game<*>?): Boolean {
+        return viewerGame == targetGame
     }
 }

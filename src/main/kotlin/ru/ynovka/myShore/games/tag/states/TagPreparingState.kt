@@ -55,10 +55,10 @@ object TagPreparingState : GameState<TagPlayer> {
 
     override fun onEnter(game: Game<TagPlayer>) {
         val tagGame = game as TagGame
-        val hunterUuid = chooseHunter(tagGame.players.map { it.player.uniqueId })
+        val hunterUuid = chooseHunter(tagGame.gamePlayers.map { it.player.uniqueId })
         registerHunter(hunterUuid)
 
-        tagGame.players.forEach { tagPlayer ->
+        tagGame.gamePlayers.forEach { tagPlayer ->
             val player = tagPlayer.player
             val isHunter = player.uniqueId == hunterUuid
 
@@ -140,7 +140,7 @@ object TagPreparingState : GameState<TagPlayer> {
             if (game.fsm.current != TagPreparingState) return
 
             if (timeLeft > 0) {
-                game.players.forEach { tagPlayer ->
+                game.gamePlayers.forEach { tagPlayer ->
                     tagPlayer.player.sendPermanentActionBar(
                         ComponentDecorator.addBackground(
                             Component.translatable(
@@ -155,7 +155,7 @@ object TagPreparingState : GameState<TagPlayer> {
 
                 game.scheduler.runTaskLater(inst, Runnable { tick(timeLeft - 1) }, 20L)
             } else {
-                game.players.forEach { tagPlayer ->
+                game.gamePlayers.forEach { tagPlayer ->
                     tagPlayer.player.clearActionBar()
                     tagPlayer.player.sendActionBar(
                         ComponentDecorator.addBackground(

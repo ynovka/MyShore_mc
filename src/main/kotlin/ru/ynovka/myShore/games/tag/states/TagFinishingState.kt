@@ -33,7 +33,7 @@ object TagFinishingState : GameState<TagPlayer> {
 
         saveStats(tagGame, winnerRole)
 
-        tagGame.players.forEach { tagPlayer ->
+        tagGame.gamePlayers.forEach { tagPlayer ->
             val player = tagPlayer.player
             player.clearActivePotionEffects()
             player.applyFinishingInventory()
@@ -44,7 +44,7 @@ object TagFinishingState : GameState<TagPlayer> {
         }
 
         tagGame.scheduler.runTaskLater(inst, Runnable {
-            val nextState = if (tagGame.players.size >= 2) {
+            val nextState = if (tagGame.gamePlayers.size >= 2) {
                 TagVotingState
             } else {
                 TagWaitingForPlayersState
