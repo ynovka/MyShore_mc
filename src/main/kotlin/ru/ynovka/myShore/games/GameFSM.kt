@@ -18,18 +18,24 @@ class GameFSM<P : GamePlayer>(initial: GameState<P>) {
         current.onEnter(game)
     }
 
-    fun playerJoin(player: P) {
-        game.gamePlayers.add(player)
-        current.onPlayerJoin(game, player)
+    fun playerJoin(p: P) {
+        current.onPlayerJoin(game, p)
     }
 
-    fun playerReconnect(player: P) {
-        // todo game.players.add(player)
-        current.onPlayerReconnect(game, player)
+    fun playerReconnect(p: P) {
+        current.onPlayerReconnect(game, p)
     }
 
-    fun playerLeave(player: P) {
-        game.gamePlayers.remove(player)
-        current.onPlayerLeave(game, player)
+    fun playerLeave(p: P) {
+        current.onPlayerLeave(game, p)
+    }
+
+    fun canPlayerJoin(p: P): Boolean {
+        if (game.isFull()) return false
+        return current.canPlayerJoin(game, p)
+    }
+
+    fun spectatorJoin(s: P) {
+        current.onSpectatorJoin(game, s)
     }
 }

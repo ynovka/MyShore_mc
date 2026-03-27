@@ -14,14 +14,15 @@ import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.utils.canMove
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
+import ru.ynovka.myShore.games.GameState
 import java.util.UUID
 
 
 class TagGame : Game<TagPlayer>() {
 
+    override val initialState = TagWaitingForPlayersState
     override val maxPlayers: Int = 8
-    override val gamePlayers: MutableList<TagPlayer> = mutableListOf()
-    override val fsm = GameFSM(TagWaitingForPlayersState)
+    override val gamePlayers: MutableSet<TagPlayer> = mutableSetOf()
 
     val scheduler = inst.server.scheduler
 

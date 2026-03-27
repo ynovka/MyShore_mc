@@ -36,7 +36,6 @@ object GameManager {
 
         val game = existing ?: factory().also { newGame ->
             games.add(newGame)
-            newGame.start()
         }
 
         game.onPlayerJoin(player)
@@ -56,7 +55,6 @@ object GameManager {
 
         val game = existing ?: partyFactory(party).also { newGame ->
             games.add(newGame)
-            newGame.start()
         }
 
         party.members.asPlayers()
@@ -64,11 +62,6 @@ object GameManager {
             .forEach { member -> game.onPlayerJoin(member) }
 
         return Result.success(game)
-    }
-
-    fun reconnect(player: Player) {
-        val game = player.currentGame() ?: return
-        game.onPlayerReconnect(player)
     }
 
     fun leave(player: Player) {

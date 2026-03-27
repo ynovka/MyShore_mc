@@ -9,38 +9,60 @@ abstract class Game<P : GamePlayer>(
     val party: Party? = null  /** null  → публичная игра */
 ) {
 
-    abstract val fsm: GameFSM<P>
+    abstract val initialState: GameState<P>
+    val fsm: GameFSM<P> by lazy {
+        GameFSM(initialState).also { it.start(this) }
+    }
     abstract val maxPlayers: Int
-    abstract val gamePlayers: MutableList<P>
-
-    fun start() = fsm.start(this)
+    abstract val gamePlayers: MutableSet<P>
+    val exitedPlayers: MutableSet<P> = mutableSetOf()
+    val spectatorPlayers: MutableSet<P> = mutableSetOf()
 
     val isPrivate: Boolean get() = party != null
-    fun isFull(): Boolean  = gamePlayers.size >= maxPlayers
     fun isEmpty(): Boolean = gamePlayers.isEmpty()
+    fun isFull(): Boolean = gamePlayers.size >= maxPlayers
     fun hasPlayer(uuid: UUID): Boolean = gamePlayers.any { it.playerId == uuid }
+    private fun isExited(p: P) = exitedPlayers.any { it.playerId == p.playerId }
 
     fun onPlayerJoin(player: Player) {
-        if (this.gamePlayers.map(GamePlayer::playerId).any { it == player.uniqueId }) {
-            onPlayerReconnect(player)
+        val p = getOrCreatePlayer(player)
+
+        val canJoin = fsm.canPlayerJoin(p)
+        if (!canJoin) {
+            spectatorPlayers.add(p)
+            fsm.spectatorJoin(p)
             return
         }
 
-        val p = getOrCreatePlayer(player)
+        if (isExited(p)) {
+            exitedPlayers.removeIf { it.playerId == p.playerId }
+            gamePlayers.add(p)
+
+            fsm.playerReconnect(p)
+            handlePlayerReconnect(p)
+            return
+        }
+
+        gamePlayers.add(p)
+
         fsm.playerJoin(p)
         handlePlayerJoin(p)
     }
 
-    fun onPlayerReconnect(player: Player) {
-        val p = getOrCreatePlayer(player)
-        fsm.playerReconnect(p)
-        handlePlayerReconnect(p)
-    }
-
     fun onPlayerLeave(player: Player) {
-        val p = getOrCreatePlayer(player)
-        fsm.playerLeave(p)
-        handlePlayerLeave(p)
+        val uuid = player.uniqueId
+        val fromGame = gamePlayers.find { it.playerId == uuid }
+        val fromSpec = spectatorPlayers.find { it.playerId == uuid }
+        val p = fromGame ?: fromSpec ?: return
+
+        gamePlayers.removeIf { it.playerId == uuid }
+        spectatorPlayers.removeIf { it.playerId == uuid }
+
+        if (fromGame != null) {
+            exitedPlayers.add(p)
+            fsm.playerLeave(p)
+            handlePlayerLeave(p)
+        }
     }
 
     protected open fun handlePlayerJoin(player: P)  {}

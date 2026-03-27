@@ -11,6 +11,6 @@ abstract class GamePlayer(
         get() = Bukkit.getPlayer(playerId) ?: throw IllegalStateException("Player not found")
 
     companion object {
-        fun Iterable<GamePlayer>.asPlayers(): List<Player> = mapNotNull { it.player }
+        fun Iterable<GamePlayer>.asPlayers(): List<Player> = mapNotNull { Bukkit.getPlayer(it.playerId) }
     }
 }
