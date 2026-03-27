@@ -21,6 +21,11 @@ abstract class Game<P : GamePlayer>(
     fun hasPlayer(uuid: UUID): Boolean = gamePlayers.any { it.playerId == uuid }
 
     fun onPlayerJoin(player: Player) {
+        if (this.gamePlayers.map(GamePlayer::playerId).any { it == player.uniqueId }) {
+            onPlayerReconnect(player)
+            return
+        }
+
         val p = getOrCreatePlayer(player)
         fsm.playerJoin(p)
         handlePlayerJoin(p)
@@ -28,7 +33,7 @@ abstract class Game<P : GamePlayer>(
 
     fun onPlayerReconnect(player: Player) {
         val p = getOrCreatePlayer(player)
-        fsm.playerJoin(p)
+        fsm.playerReconnect(p)
         handlePlayerReconnect(p)
     }
 
