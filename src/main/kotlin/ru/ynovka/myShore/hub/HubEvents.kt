@@ -1,7 +1,6 @@
 package ru.ynovka.myShore.hub
 
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
-import ru.ynovka.myShore.utils.PlayerVisibilityController
 import org.bukkit.event.player.PlayerInteractEvent
 import ru.ynovka.myShore.text.ActionBarController
 import ru.ynovka.myShore.MyShore.Companion.inst
@@ -10,6 +9,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import ru.ynovka.myShore.party.PartyManager
 import ru.ynovka.myShore.party.LeftReason
 import net.kyori.adventure.text.Component
+import org.bukkit.Bukkit
 import org.bukkit.potion.PotionEffectType
 import ru.ynovka.myShore.hub.Hub.toHub
 import org.bukkit.potion.PotionEffect
@@ -18,6 +18,7 @@ import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Material
+import ru.ynovka.myShore.MyShore
 import ru.ynovka.myShore.games.GameManager
 
 
@@ -59,6 +60,19 @@ object HubEvents : Listener {
     fun onPlayerJoin(e: PlayerJoinEvent) {
         val player = e.player
 
+        for (other in Bukkit.getOnlinePlayers()) {
+            player.hidePlayer(inst, other)
+            other.hidePlayer(inst, player)
+        }
+
+        inst.server.scheduler.runTaskLater(inst, Runnable {
+            val isConnected = MyShore.plasmo.isPlayerConnected(player)
+            if (!isConnected) {
+                player.sendMessage("Похоже у вас не установлен мод PlasmoVoice")
+                player.sendMessage("Без него вы не сможете поиграть в некоторые из игр")
+            }
+        }, 5*20L)
+
         player.toHub()
 
         e.joinMessage(Component.translatable(
@@ -80,7 +94,6 @@ object HubEvents : Listener {
         ActionBarController.clear(e.player)
         GameManager.leave(e.player)
         PartyManager.leave(e.player, LeftReason.QUIT)
-        PlayerVisibilityController.refreshAll()
         inst.server.scheduler.runTaskLater(
             inst,
             Runnable { TabController.updateAll() },
@@ -101,5 +114,5 @@ object HubEvents : Listener {
         e.isCancelled = true
     }
 
-    private fun Player.isInHubWorld() = world.name.equals("hub")
+    private fun Player.isInHubWorld() = world.name == "hub"
 }

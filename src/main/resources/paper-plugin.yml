@@ -10,6 +10,9 @@ dependencies:
     AbyssalLib:
       required: true
       load: BEFORE
+    PlasmoVoice:
+      required: true
+      load: BEFORE
   bootstrap:
     AbyssalLib:
       required: true

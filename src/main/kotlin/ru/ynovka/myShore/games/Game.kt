@@ -1,6 +1,7 @@
 package ru.ynovka.myShore.games
 
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.VisibilityGroup
 import ru.ynovka.myShore.party.PartyManager.Party
 import java.util.UUID
 
@@ -15,6 +16,7 @@ abstract class Game<P : GamePlayer>(
     }
     abstract val maxPlayers: Int
     abstract val gamePlayers: MutableSet<P>
+    val gameVisibilityGroup = VisibilityGroup()
     val exitedPlayers: MutableSet<P> = mutableSetOf()
     val spectatorPlayers: MutableSet<P> = mutableSetOf()
 
@@ -25,6 +27,7 @@ abstract class Game<P : GamePlayer>(
     private fun isExited(p: P) = exitedPlayers.any { it.playerId == p.playerId }
 
     fun onPlayerJoin(player: Player) {
+        gameVisibilityGroup.addViewer(player.uniqueId)
         val p = getOrCreatePlayer(player)
 
         val canJoin = fsm.canPlayerJoin(p)
@@ -51,6 +54,8 @@ abstract class Game<P : GamePlayer>(
 
     fun onPlayerLeave(player: Player) {
         val uuid = player.uniqueId
+        gameVisibilityGroup.removeViewer(uuid)
+
         val fromGame = gamePlayers.find { it.playerId == uuid }
         val fromSpec = spectatorPlayers.find { it.playerId == uuid }
         val p = fromGame ?: fromSpec ?: return

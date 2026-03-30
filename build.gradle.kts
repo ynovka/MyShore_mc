@@ -13,6 +13,7 @@ repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://maven.leafmc.one/snapshots/")
     maven("https://jitpack.io")
+    maven("https://repo.plasmoverse.com/releases")
 }
 
 dependencies {
@@ -20,6 +21,7 @@ dependencies {
 
     compileOnly("com.github.darksoulq:AbyssalLib:v2.0.0-mc1.21.11-dev.12")
     //compileOnly("com.github.darksoulq:AbyssalLib")
+    compileOnly("su.plo.voice.server:paper:2.1.8")
 
     implementation("dev.jorel:commandapi-paper-shade:11.1.0")
     implementation("dev.jorel:commandapi-kotlin-paper:11.1.0")

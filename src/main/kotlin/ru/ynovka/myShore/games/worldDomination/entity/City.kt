@@ -4,26 +4,29 @@ import net.kyori.adventure.text.TranslatableComponent
 import ru.ynovka.myShore.utils.Utils.intValue
 import java.util.concurrent.ThreadLocalRandom
 
-
 class City(
     /** Название города - ключ перевода */
     val name: TranslatableComponent,
-    /** Ссылка на класс страну-родитель */
-    val country: Country
+    /** Ссылка на страну-родитель */
+    val country: Country,
+    capitalizationRange: IntRange = 250..275
 ) {
     /** Уровень города */
     var lvl = 0
         private set
+
     /** Жив ли город? */
     var isAlive = true
         private set
+
     var hasShield = false
         private set
-    private val startCapitalization = ThreadLocalRandom.current().nextInt(250, 275)
+
+    private val startCapitalization = ThreadLocalRandom.current()
+        .nextInt(capitalizationRange.first, capitalizationRange.last)
+
     val capitalization
         get() = startCapitalization + lvl * 100 * isAlive.intValue
-
-    /** Публичный апи для изменения состояние города*/
 
     /** Бомбить город */
     fun bombardCity() {
@@ -52,12 +55,9 @@ class City(
     }
 
     companion object {
-        const val UPGRADE_COST: Int = 1
+        const val UPGRADE_COST: Int = 250
 
-        fun getCityById(
-            country: Country,
-            cityid: Int
-        ): City = country.cities[cityid] ?: throw IllegalArgumentException("City not found")
+        fun getCityById(country: Country, cityId: Int): City =
+            country.cities[cityId] ?: throw IllegalArgumentException("City $cityId not found")
     }
 }
-

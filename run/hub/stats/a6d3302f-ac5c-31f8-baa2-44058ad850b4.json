@@ -1,5 +1,37 @@
 {
   "stats": {
+    "minecraft:custom": {
+      "minecraft:trigger_trapped_chest": 24,
+      "minecraft:time_since_rest": 52960,
+      "minecraft:leave_game": 230,
+      "minecraft:damage_taken": 3570,
+      "minecraft:mob_kills": 1,
+      "minecraft:open_shulker_box": 13,
+      "minecraft:time_since_death": 52940,
+      "minecraft:damage_dealt_absorbed": 72,
+      "minecraft:swim_one_cm": 33415,
+      "minecraft:total_world_time": 3578911,
+      "minecraft:crouch_one_cm": 59017,
+      "minecraft:deaths": 5,
+      "minecraft:climb_one_cm": 158438,
+      "minecraft:walk_one_cm": 1026271,
+      "minecraft:walk_under_water_one_cm": 66074,
+      "minecraft:damage_dealt": 442,
+      "minecraft:play_time": 3578911,
+      "minecraft:jump": 47986,
+      "minecraft:drop": 17,
+      "minecraft:open_barrel": 1,
+      "minecraft:sprint_one_cm": 5297676,
+      "minecraft:open_chest": 2,
+      "minecraft:fall_one_cm": 1930367,
+      "minecraft:fly_one_cm": 21476153,
+      "minecraft:interact_with_anvil": 1,
+      "minecraft:walk_on_water_one_cm": 77441,
+      "minecraft:sneak_time": 50650
+    },
+    "minecraft:killed": {
+      "minecraft:snow_golem": 1
+    },
     "minecraft:used": {
       "minecraft:crying_obsidian": 22,
       "minecraft:andesite_stairs": 2,
@@ -183,38 +215,6 @@
       "minecraft:paper": 13,
       "minecraft:glass": 1,
       "minecraft:stick": 1
-    },
-    "minecraft:killed": {
-      "minecraft:snow_golem": 1
-    },
-    "minecraft:custom": {
-      "minecraft:trigger_trapped_chest": 24,
-      "minecraft:time_since_rest": 1925551,
-      "minecraft:leave_game": 214,
-      "minecraft:damage_taken": 3250,
-      "minecraft:mob_kills": 1,
-      "minecraft:open_shulker_box": 13,
-      "minecraft:time_since_death": 1925521,
-      "minecraft:damage_dealt_absorbed": 72,
-      "minecraft:swim_one_cm": 33415,
-      "minecraft:total_world_time": 3499811,
-      "minecraft:crouch_one_cm": 59017,
-      "minecraft:deaths": 4,
-      "minecraft:climb_one_cm": 158438,
-      "minecraft:walk_one_cm": 1021445,
-      "minecraft:walk_under_water_one_cm": 66074,
-      "minecraft:damage_dealt": 442,
-      "minecraft:play_time": 3499811,
-      "minecraft:jump": 47231,
-      "minecraft:drop": 17,
-      "minecraft:open_barrel": 1,
-      "minecraft:sprint_one_cm": 5254350,
-      "minecraft:open_chest": 2,
-      "minecraft:fall_one_cm": 1776378,
-      "minecraft:fly_one_cm": 20695756,
-      "minecraft:interact_with_anvil": 1,
-      "minecraft:walk_on_water_one_cm": 77441,
-      "minecraft:sneak_time": 50650
     }
   },
   "DataVersion": 4671

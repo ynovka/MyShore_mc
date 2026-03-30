@@ -1,47 +1,63 @@
 package ru.ynovka.myShore.games.worldDomination.entity
 
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TranslatableComponent
-import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.VisibilityGroup
+import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
-import java.time.Duration
-import kotlin.time.Clock
-import kotlin.time.Instant
-import kotlin.time.toKotlinDuration
 
-class Country(
+class Country private constructor(
     /** Президент */
     val president: WDPlayer,
-    /** Описание страны */
+    /** Пресет страны */
     val type: CountryType
 ) {
     /** Вице-президент */
     var vicePresident: WDPlayer? = null
         private set
+
     /** Список игроков страны */
-    val citizens: MutableList<WDPlayer> = mutableListOf(president)
-    /** Баланс госудаства */
+    val citizens: MutableList<WDPlayer> = mutableListOf()
+
+    /** Баланс государства */
     var balance: Int = 950
+
     /** Изучена ли ядерная технология */
     var isNuclearLearned: Boolean = false
         private set
+
     /** Бомбы, доступные для использования */
     var bombsAvailable: Int = 0
         private set
+
     /** Бомбы, в процессе создания */
     var bombsMaking: Int = 0
         private set
+
     /** Города страны */
     val cities = mutableMapOf<Int, City>()
 
-    fun collectRoundProfit() {
-        var profit = 0
-        cities.values.forEach { profit += it.capitalization }
-        balance += profit
+    val countryVisibilityGroup = VisibilityGroup()
+
+    init {
+        // Добавляем президента
+        addCitizen(president)
+
+        // Собираем города из пресетов — this уже существует
+        type.cityPresets.forEachIndexed { index, preset ->
+            cities[index] = City(preset.name, this, preset.capitalizationRange)
+        }
     }
 
-    init { addCitizen(president) }
+    fun teleport(player: Player) {
+        countryVisibilityGroup.addViewer(player.uniqueId)
+        val loc = type.location.apply { world = WDGame.world }
+        player.teleportAsync(loc)
+    }
+
+    fun collectRoundProfit() {
+        balance += cities.values.sumOf { it.capitalization }
+    }
 
     fun addCitizen(player: WDPlayer) {
         citizens.add(player)
@@ -54,35 +70,20 @@ class Country(
     }
 
     companion object {
+        /** Единственная точка создания Country */
+        fun create(president: WDPlayer, type: CountryType): Country =
+            Country(president, type)
+
         val pendingInvitesToVicePresident: MutableMap<Country, WDPlayer> = mutableMapOf()
 
-        fun inviteVicePersident(
-            country: Country,
-            target: WDPlayer
-        ) {
-            // Отслыаем сообщение в чате у цели:
-            // "Президент X страны Y предлагает вам должность вице-призедента"
+        fun inviteVicePresident(country: Country, target: WDPlayer) {
+            // Отправляем сообщение в чате у цели:
+            // "Президент X страны Y предлагает вам должность вице-президента"
             // "|-> ПРИНЯТЬ | ОТКЛОНИТЬ"
-
-            // Через 15 секунд удаляем приглашение
             inst.server.scheduler.runTaskLater(inst, Runnable {
-
                 // Пишем в чат президенту: "target не принял ваше приглашение"
-                // Пишем в чат target: "Вы не успели принять приглашение от "
+                // Пишем в чат target: "Вы не успели принять приглашение"
             }, 15 * 20L)
         }
     }
-}
-
-// Список стран для игры доступных
-enum class CountryType(
-    name: TranslatableComponent,
-    cities: List<City>
-) {
-    RUSSIA(
-        Component.translatable("name.myshore.wd.country.russia"),
-        listOf(
-
-        )
-    )
 }
