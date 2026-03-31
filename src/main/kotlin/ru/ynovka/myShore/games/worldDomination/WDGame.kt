@@ -2,13 +2,13 @@ package ru.ynovka.myShore.games.worldDomination
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import ru.ynovka.myShore.games.worldDomination.states.WDWaitingForPlayersState
+import ru.ynovka.myShore.games.worldDomination.states.WDWaitingForPlayers
 import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.worldDomination.entity.Country
 
 
 class WDGame : Game<WDPlayer>() {
-    override val initialState = WDWaitingForPlayersState
+    override val initialState = WDWaitingForPlayers
     override val maxPlayers = 50
     override val gamePlayers: MutableSet<WDPlayer> = mutableSetOf()
 

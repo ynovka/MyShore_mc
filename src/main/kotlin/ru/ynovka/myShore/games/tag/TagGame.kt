@@ -1,26 +1,24 @@
 package ru.ynovka.myShore.games.tag
 
-import ru.ynovka.myShore.games.tag.states.TagWaitingForPlayersState
+import ru.ynovka.myShore.games.tag.states.TagWaitingForPlayers
 import ru.ynovka.myShore.games.tag.states.TagInProgressState
-import ru.ynovka.myShore.games.tag.states.TagFinishingState
-import ru.ynovka.myShore.games.tag.states.TagPreparingState
-import ru.ynovka.myShore.games.tag.states.TagVotingState
+import ru.ynovka.myShore.games.tag.states.TagFinishing
+import ru.ynovka.myShore.games.tag.states.TagPreparing
+import ru.ynovka.myShore.games.tag.states.TagVoting
 import ru.ynovka.myShore.games.tag.maps.TagMaps
 import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.text.clearActionBar
-import ru.ynovka.myShore.games.GameFSM
 import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.utils.canMove
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
-import ru.ynovka.myShore.games.GameState
 import java.util.UUID
 
 
 class TagGame : Game<TagPlayer>() {
 
-    override val initialState = TagWaitingForPlayersState
+    override val initialState = TagWaitingForPlayers
     override val maxPlayers: Int = 8
     override val gamePlayers: MutableSet<TagPlayer> = mutableSetOf()
 
@@ -61,11 +59,11 @@ class TagGame : Game<TagPlayer>() {
         map.onPlayerLeave(this, player.player)
 
         when (fsm.current) {
-            TagVotingState ->
-                if (gamePlayers.size <= 1) fsm.transitionTo(TagWaitingForPlayersState)
+            TagVoting ->
+                if (gamePlayers.size <= 1) fsm.transitionTo(TagWaitingForPlayers)
 
-            TagPreparingState, TagInProgressState ->
-                if (!hasVictims() || !hasHunter()) fsm.transitionTo(TagFinishingState)
+            TagPreparing, TagInProgressState ->
+                if (!hasVictims() || !hasHunter()) fsm.transitionTo(TagFinishing)
 
             else -> Unit
         }
@@ -103,7 +101,7 @@ fun TagGame.hasHunter(): Boolean  = gamePlayers.any { it.role == TagPlayerRoles.
  */
 fun TagMap.teleport(player: Player, game: TagGame, onComplete: () -> Unit = {}) {
     val role = game.findPlayer(player)?.role
-        ?: if (game.fsm.current == TagInProgressState || game.fsm.current == TagPreparingState) {
+        ?: if (game.fsm.current == TagInProgressState || game.fsm.current == TagPreparing) {
             TagPlayerRoles.SPECTATOR
         } else {
             TagPlayerRoles.UNDEFINED

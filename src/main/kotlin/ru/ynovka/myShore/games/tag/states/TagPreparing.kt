@@ -28,7 +28,7 @@ import java.util.UUID
 
 
 // 5 сек перед началом (что бы у игроков загрузилась карта, они ознакомились со своими ролями)
-object TagPreparingState : GameState<TagPlayer> {
+object TagPreparing : GameState<TagPlayer> {
 
     const val MAX_HISTORY = 10
 
@@ -137,7 +137,7 @@ object TagPreparingState : GameState<TagPlayer> {
 
     fun startCountdown(game: TagGame, seconds: Int = 5) {
         fun tick(timeLeft: Int) {
-            if (game.fsm.current != TagPreparingState) return
+            if (game.fsm.current != TagPreparing) return
 
             if (timeLeft > 0) {
                 game.gamePlayers.forEach { tagPlayer ->

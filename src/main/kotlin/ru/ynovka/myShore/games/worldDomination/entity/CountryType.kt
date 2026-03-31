@@ -7,12 +7,10 @@ import org.bukkit.Location
 
 enum class CountryType(
     val nameTranslatable: TranslatableComponent,
-    val location: Location,
     val cityPresets: List<CityPreset>
 ) {
     RUSSIA(
         Component.translatable("name.myshore.wd.country.russia"),
-        Location(null, 1000.0, 100.0, 0.0),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.moscow"), 250..260),
             CityPreset(Component.translatable("name.myshore.wd.city.spb"), 248..258),
@@ -22,7 +20,6 @@ enum class CountryType(
     ),
     USA(
         Component.translatable("name.myshore.wd.country.usa"),
-        Location(null, 2000.0, 100.0, 0.0),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.new_york"), 262..272),
             CityPreset(Component.translatable("name.myshore.wd.city.la"), 260..270),
@@ -32,7 +29,6 @@ enum class CountryType(
     ),
     JAPAN(
         Component.translatable("name.myshore.wd.country.japan"),
-        Location(null, 3000.0, 100.0, 0.0),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.tokyo"), 260..270),
             CityPreset(Component.translatable("name.myshore.wd.city.osaka"), 258..268),
@@ -42,7 +38,6 @@ enum class CountryType(
     ),
     GERMANY(
         Component.translatable("name.myshore.wd.country.germany"),
-        Location(null, 4000.0, 100.0, 0.0),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.berlin"), 259..269),
             CityPreset(Component.translatable("name.myshore.wd.city.hamburg"), 257..267),
@@ -52,7 +47,6 @@ enum class CountryType(
     ),
     NORTH_KOREA(
         Component.translatable("name.myshore.wd.country.north_korea"),
-        Location(null, 5000.0, 100.0, 0.0),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.pyongyang"), 244..254),
             CityPreset(Component.translatable("name.myshore.wd.city.hamhung"), 242..252),
@@ -62,7 +56,6 @@ enum class CountryType(
     ),
     CUBA(
         Component.translatable("name.myshore.wd.country.cuba"),
-        Location(null, 6000.0, 100.0, 0.0),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.havana"), 248..258),
             CityPreset(Component.translatable("name.myshore.wd.city.santiago_de_cuba"), 246..256),
@@ -72,7 +65,6 @@ enum class CountryType(
     ),
     KAZAKHSTAN(
         Component.translatable("name.myshore.wd.country.kazakhstan"),
-        Location(null, 7000.0, 100.0, 0.0),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.almaty"), 249..259),
             CityPreset(Component.translatable("name.myshore.wd.city.astana"), 248..258),
@@ -82,7 +74,6 @@ enum class CountryType(
     ),
     BAHAMAS(
         Component.translatable("name.myshore.wd.country.bahamas"),
-        Location(null, 8000.0, 100.0, 0.0),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.nassau"), 250..260),
             CityPreset(Component.translatable("name.myshore.wd.city.freeport"), 247..257),
@@ -92,7 +83,6 @@ enum class CountryType(
     ),
     ISRAEL(
         Component.translatable("name.myshore.wd.country.israel"),
-        Location(null, 9000.0, 100.0, 0.0),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.jerusalem"), 258..268),
             CityPreset(Component.translatable("name.myshore.wd.city.tel_aviv"), 260..270),
@@ -102,7 +92,6 @@ enum class CountryType(
     ),
     AFGHANISTAN(
         Component.translatable("name.myshore.wd.country.afghanistan"),
-        Location(null, 10000.0, 100.0, 0.0),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.kabul"), 242..252),
             CityPreset(Component.translatable("name.myshore.wd.city.kandahar"), 240..250),

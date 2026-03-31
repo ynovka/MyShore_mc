@@ -3,7 +3,7 @@ package ru.ynovka.myShore.games.tag
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import ru.ynovka.myShore.Database.tagCaughtsRepository
 import ru.ynovka.myShore.games.tag.maps.TagMap
-import ru.ynovka.myShore.games.tag.states.TagFinishingState
+import ru.ynovka.myShore.games.tag.states.TagFinishing
 import org.bukkit.event.player.PlayerInteractEvent
 import ru.ynovka.myShore.utils.effects.RiftEffect
 import ru.ynovka.myShore.texturepack.SoundsPack
@@ -64,7 +64,7 @@ object TagEvents : Listener {
         }
 
         if (!game.hasVictims()) {
-            game.fsm.transitionTo(TagFinishingState)
+            game.fsm.transitionTo(TagFinishing)
         } else {
             game.totalTime += 20 // +20 сек за поимку жертвы
         }

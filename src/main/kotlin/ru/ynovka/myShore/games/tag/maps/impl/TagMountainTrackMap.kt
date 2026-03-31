@@ -2,7 +2,7 @@ package ru.ynovka.myShore.games.tag.maps.impl
 
 import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
-import ru.ynovka.myShore.games.tag.states.TagFinishingState
+import ru.ynovka.myShore.games.tag.states.TagFinishing
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.hasVictims
 import ru.ynovka.myShore.games.tag.teleport
@@ -55,7 +55,7 @@ object TagMountainTrackMap : TagMap {
                                 player.gameMode = GameMode.SPECTATOR
                                 player.clearActivePotionEffects()
                                 tagPlayer.role = TagPlayerRoles.SPECTATOR
-                                game.fsm.transitionTo(TagFinishingState)
+                                game.fsm.transitionTo(TagFinishing)
                             }
                             TagPlayerRoles.VICTIM -> {
                                 player.gameMode = GameMode.SPECTATOR
@@ -69,7 +69,7 @@ object TagMountainTrackMap : TagMap {
                                 game.gamePlayers.forEach { it.player.sendMessage(msg) }
 
                                 if (!game.hasVictims()) {
-                                    game.fsm.transitionTo(TagFinishingState)
+                                    game.fsm.transitionTo(TagFinishing)
                                 } else {
                                     game.totalTime += 20
                                 }

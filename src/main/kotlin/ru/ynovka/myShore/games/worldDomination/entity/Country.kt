@@ -3,7 +3,6 @@ package ru.ynovka.myShore.games.worldDomination.entity
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.VisibilityGroup
-import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 
 class Country private constructor(
@@ -12,6 +11,9 @@ class Country private constructor(
     /** Пресет страны */
     val type: CountryType
 ) {
+    /** Скин страны */
+    val skin = CountrySkin.get(president)
+
     /** Вице-президент */
     var vicePresident: WDPlayer? = null
         private set
@@ -51,8 +53,7 @@ class Country private constructor(
 
     fun teleport(player: Player) {
         countryVisibilityGroup.addViewer(player.uniqueId)
-        val loc = type.location.apply { world = WDGame.world }
-        player.teleportAsync(loc)
+        player.teleportAsync(skin.loc)
     }
 
     fun collectRoundProfit() {

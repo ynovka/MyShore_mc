@@ -1,6 +1,5 @@
 package ru.ynovka.myShore.games.worldDomination.states
 
-import org.bukkit.Bukkit
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.worldDomination.entity.CountryType
 import ru.ynovka.myShore.games.worldDomination.entity.Country
@@ -9,13 +8,13 @@ import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.Game
 
 /**
- * Этап распределния игроков по странам
+ * Этап распределния игроков по странам, длится 3 минуты
  * Снача определяется кол-во стран (кол-во игроков / 2, max 10)
  * Для тестов - минимум 2 игрока (2с по 1и)
  * Минимум 12 игроков (6с по 2и)
  * Максимум 50 игроков (10с по 5и)
  */
-object WDDistributionPlayersState : GameState<WDPlayer> {
+object WDDistributionPlayers : GameState<WDPlayer> {
     /**
      * Случайным образом определяем президентов случайных стран и телепортируем их в штаб-квартиры
      * Остальные игроки остаются в лобби
@@ -40,7 +39,7 @@ object WDDistributionPlayersState : GameState<WDPlayer> {
 
         // Отсчёт 3 минуты, до перехода к следующему этапу
         inst.server.scheduler.runTaskLater(inst, Runnable {
-
+            game.fsm.transitionTo(WDDistributionPlayers)
         }, 3 * 60 * 20L)
     }
 

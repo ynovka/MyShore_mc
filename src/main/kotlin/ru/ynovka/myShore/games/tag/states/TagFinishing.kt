@@ -19,7 +19,7 @@ import java.time.Duration
 
 
 // 5 сек после игры - определение победителей
-object TagFinishingState : GameState<TagPlayer> {
+object TagFinishing : GameState<TagPlayer> {
 
     override fun onEnter(game: Game<TagPlayer>) {
         val tagGame = game as TagGame
@@ -45,9 +45,9 @@ object TagFinishingState : GameState<TagPlayer> {
 
         tagGame.scheduler.runTaskLater(inst, Runnable {
             val nextState = if (tagGame.gamePlayers.size >= 2) {
-                TagVotingState
+                TagVoting
             } else {
-                TagWaitingForPlayersState
+                TagWaitingForPlayers
             }
             tagGame.fsm.transitionTo(nextState)
         }, 5 * 20L)

@@ -2,8 +2,8 @@ package ru.ynovka.myShore.games.tag
 
 import ru.ynovka.myShore.text.sendPermanentActionBar
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.tag.states.TagWaitingForPlayersState
-import ru.ynovka.myShore.games.tag.states.TagVotingState
+import ru.ynovka.myShore.games.tag.states.TagWaitingForPlayers
+import ru.ynovka.myShore.games.tag.states.TagVoting
 import org.bukkit.scheduler.BukkitRunnable
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.utils.canMove
@@ -49,7 +49,7 @@ object TagPlayerSetup {
             var frame = 0
 
             override fun run() {
-                if (game.fsm.current != TagWaitingForPlayersState) {
+                if (game.fsm.current != TagWaitingForPlayers) {
                     cancel()
                     return
                 }
@@ -86,7 +86,7 @@ object TagPlayerSetup {
             var frame = 0
 
             override fun run() {
-                if (game.fsm.current != TagVotingState) {
+                if (game.fsm.current != TagVoting) {
                     cancel()
                     return
                 }

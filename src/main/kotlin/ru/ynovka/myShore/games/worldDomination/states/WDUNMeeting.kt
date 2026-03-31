@@ -16,7 +16,7 @@ import ru.ynovka.myShore.games.worldDomination.WDPlayer
  * - уровень развития
  * - название по алфавиту
  */
-object WDUNMeetingState : GameState<WDPlayer> {
+object WDUNMeeting : GameState<WDPlayer> {
     override fun onEnter(game: Game<WDPlayer>) { }
 
     override fun onExit(game: Game<WDPlayer>) { }
@@ -26,4 +26,6 @@ object WDUNMeetingState : GameState<WDPlayer> {
     override fun onPlayerReconnect(game: Game<WDPlayer>, player: WDPlayer) { }
 
     override fun onPlayerLeave(game: Game<WDPlayer>, player: WDPlayer) { }
+
+    override fun canPlayerJoin(game: Game<WDPlayer>, player: WDPlayer) = false
 }

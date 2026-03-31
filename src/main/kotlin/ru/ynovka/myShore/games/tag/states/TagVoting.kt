@@ -16,7 +16,7 @@ import kotlin.math.ceil
 
 
 // 10 сек на голосование за карту, режим игры, сменить лобби, посмотреть статистику
-object TagVotingState : GameState<TagPlayer> {
+object TagVoting : GameState<TagPlayer> {
 
     override fun onEnter(game: Game<TagPlayer>) {
         val tagGame = game as TagGame
@@ -26,11 +26,11 @@ object TagVotingState : GameState<TagPlayer> {
         }
 
         tagGame.scheduler.runTaskLater(inst, Runnable {
-            if (tagGame.fsm.current != TagVotingState) return@Runnable
+            if (tagGame.fsm.current != TagVoting) return@Runnable
 
             resolveMapVoting(tagGame)?.let { setupMap(tagGame, it) }
             tagGame.mapVotes.clear()
-            tagGame.fsm.transitionTo(TagPreparingState)
+            tagGame.fsm.transitionTo(TagPreparing)
         }, 10 * 20L)
     }
 

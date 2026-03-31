@@ -95,7 +95,7 @@ object TagInProgressState : GameState<TagPlayer> {
             } else {
                 bar.removeAll()
                 bossBar = null
-                game.fsm.transitionTo(TagFinishingState)
+                game.fsm.transitionTo(TagFinishing)
             }
         }
 

@@ -4,10 +4,11 @@ import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
+import ru.ynovka.myShore.hub.Hub
 
 
 // Ожидание игроков (нужно хотя бы 2)
-object WDWaitingForPlayersState : GameState<WDPlayer> {
+object WDWaitingForPlayers : GameState<WDPlayer> {
     override fun onEnter(game: Game<WDPlayer>) {
         // action bar "Ожидание игроков..." с анимацией
     }
@@ -17,6 +18,8 @@ object WDWaitingForPlayersState : GameState<WDPlayer> {
     }
 
     override fun onPlayerJoin(game: Game<WDPlayer>, player: WDPlayer) {
-        if (game.gamePlayers.size >= WDGame.MIN_PLAYERS) game.fsm.transitionTo(WDDistributionPlayersState)
+        player.player.teleportAsync(Hub.spawn)
+
+        if (game.gamePlayers.size >= WDGame.MIN_PLAYERS) game.fsm.transitionTo(WDDistributionPlayers)
     }
 }

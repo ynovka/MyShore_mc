@@ -18,4 +18,6 @@ object WDFinishingState : GameState<WDPlayer> {
     override fun onPlayerReconnect(game: Game<WDPlayer>, player: WDPlayer) { }
 
     override fun onPlayerLeave(game: Game<WDPlayer>, player: WDPlayer) { }
+
+    override fun canPlayerJoin(game: Game<WDPlayer>, player: WDPlayer) = false
 }
