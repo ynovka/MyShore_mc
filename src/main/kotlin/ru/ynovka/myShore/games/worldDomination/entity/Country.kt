@@ -4,6 +4,7 @@ import org.bukkit.entity.Player
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.VisibilityGroup
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
+import ru.ynovka.myShore.texturepack.Glyphs
 
 class Country private constructor(
     /** Президент */
@@ -85,6 +86,11 @@ class Country private constructor(
                 // Пишем в чат президенту: "target не принял ваше приглашение"
                 // Пишем в чат target: "Вы не успели принять приглашение"
             }, 15 * 20L)
+        }
+
+        fun Country?.getFlag(): String {
+
+            return Glyphs.COUNTRY_FLAG
         }
     }
 }

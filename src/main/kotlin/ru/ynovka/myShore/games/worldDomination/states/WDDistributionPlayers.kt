@@ -6,6 +6,7 @@ import ru.ynovka.myShore.games.worldDomination.entity.Country
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.Game
+import ru.ynovka.myShore.games.worldDomination.WDItems
 
 /**
  * Этап распределния игроков по странам, длится 3 минуты
@@ -29,12 +30,14 @@ object WDDistributionPlayers : GameState<WDPlayer> {
 
         players.take(countriesCount).zip(countries)
             .forEach { (president, type) ->
+                val pp = president.player
                 // Создаём страну, телепортируем в неё презиента
                 Country.create(president, type).also { country ->
-                    country.teleport(president.player)
+                    country.teleport(pp)
                 }
 
                 // Выдаём президенту телефон для звонков
+                WDItems.wdPhoneMenu.getStack(pp)
             }
 
         // Отсчёт 3 минуты, до перехода к следующему этапу

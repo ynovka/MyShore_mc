@@ -10,7 +10,9 @@ object Glyphs {
     lateinit var BACKGROUND_LEFT:  String
         private set
     val BACKGROUND_CENTER: MutableMap<Int, String> = mutableMapOf()
-    lateinit var BACKGROUND_RIGHT:  String
+    lateinit var BACKGROUND_RIGHT: String
+        private set
+    lateinit var COUNTRY_FLAG: String
         private set
 
     fun register() {
@@ -22,6 +24,9 @@ object Glyphs {
         }
         BACKGROUND_RIGHT = newGlyph("background_right", 14, 10)
             .toMiniMessageString() + TextOffset.getOffsetMinimessage(-1)
+
+
+        COUNTRY_FLAG = newGlyph("country_flag", 14, 10).toMiniMessageString()
     }
 
     fun newGlyph(name: String, height: Int = 8, ascent: Int = 8): Font.TextureGlyph {

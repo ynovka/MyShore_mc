@@ -7,12 +7,12 @@ import java.util.UUID
 
 class WDPlayer(
     playerId: UUID,
-    val role: PlayerRole = PlayerRole.UNDEFINED
+    val role: WDPlayerRole = WDPlayerRole.UNDEFINED
 ) : GamePlayer(playerId) {
     var country: Country? = null
 }
 
-enum class PlayerRole {
+enum class WDPlayerRole {
     UNDEFINED,
     PRESIDENT,
     VICE_PRESIDENT,
