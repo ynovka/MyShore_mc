@@ -13,7 +13,7 @@ enum class CountrySkin(
     companion object {
         fun get(player: WDPlayer): CountrySkin {
             // todo получаем из данных игрока выбранный им скин
-            return entries.random()
+            return DEFAULT
         }
     }
 }

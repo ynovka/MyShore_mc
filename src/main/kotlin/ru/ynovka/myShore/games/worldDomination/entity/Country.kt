@@ -92,5 +92,8 @@ class Country private constructor(
 
             return Glyphs.COUNTRY_FLAG
         }
+
+        fun WDPlayer.getFormattedName() = "${country.getFlag()} ${player.name}"
+
     }
 }

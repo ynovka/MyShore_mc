@@ -26,6 +26,7 @@ object HubItems {
         ITEMS.register("play_menu") { playMenu }
 
         TexturePack.createItemTexture(playTagItem)
+        TexturePack.createItemTexture(playWDItem)
 
         TexturePack.createItemTexture(hubTeleport)
         ITEMS.register("hub_teleport") { hubTeleport }
@@ -94,6 +95,15 @@ object HubItems {
         tooltip { p ->
             line(Component.translatable("desc.myshore.play_tag.1"))
             line(Component.translatable("desc.myshore.play_tag.2"))
+            line(Component.translatable("desc.myshore.play_tag.3"))
+        }
+    }
+
+    val playWDItem = cancelItem(Key.key(inst, "play_wd")) {
+        tooltip { p ->
+            line(Component.translatable("desc.myshore.play_wd.1"))
+            line(Component.translatable("desc.myshore.play_wd.2"))
+            line(Component.translatable("desc.myshore.play_wd.3"))
         }
     }
 }

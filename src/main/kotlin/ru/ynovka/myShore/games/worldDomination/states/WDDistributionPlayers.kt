@@ -6,7 +6,9 @@ import ru.ynovka.myShore.games.worldDomination.entity.Country
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.Game
+import ru.ynovka.myShore.games.GamePlayer
 import ru.ynovka.myShore.games.worldDomination.WDItems
+import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
 
 /**
  * Этап распределния игроков по странам, длится 3 минуты
@@ -28,6 +30,8 @@ object WDDistributionPlayers : GameState<WDPlayer> {
         val countriesCount = (players.size / 2).coerceIn(2..10)
         val countries = CountryType.entries.shuffled().take(countriesCount)
 
+        players.map(GamePlayer::player).forEach { it.inventory.setItem(8, WDItems.wdNotebook.getStack(it)) }
+
         players.take(countriesCount).zip(countries)
             .forEach { (president, type) ->
                 val pp = president.player
@@ -37,7 +41,7 @@ object WDDistributionPlayers : GameState<WDPlayer> {
                 }
 
                 // Выдаём президенту телефон для звонков
-                WDItems.wdPhoneMenu.getStack(pp)
+                pp.inventory.setItem(0, WDItems.wdPhoneMenu.getStack(pp))
             }
 
         // Отсчёт 3 минуты, до перехода к следующему этапу
@@ -46,7 +50,12 @@ object WDDistributionPlayers : GameState<WDPlayer> {
         }, 3 * 60 * 20L)
     }
 
-    override fun onExit(game: Game<WDPlayer>) { }
+    override fun onExit(game: Game<WDPlayer>) {
+        game.gamePlayers
+            .filter { it.role == WDPlayerRole.PRESIDENT }
+            .map(GamePlayer::player)
+            .forEach { it.inventory.clear(0) }
+    }
 
     override fun onPlayerJoin(game: Game<WDPlayer>, player: WDPlayer) { }
 

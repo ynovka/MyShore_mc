@@ -1,7 +1,6 @@
 package ru.ynovka.myShore.games.worldDomination.menus
 
 import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
-import ru.ynovka.myShore.games.tag.TagItems.tagVoteJungleMapMenuItem
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
 import com.github.darksoulq.abyssallib.world.gui.SlotPosition
 import net.kyori.adventure.text.format.NamedTextColor
@@ -10,12 +9,16 @@ import com.github.darksoulq.abyssallib.world.gui.gui
 import ru.ynovka.myShore.utils.Utils.toComponent
 import ru.ynovka.myShore.texturepack.GuiTextures
 import net.kyori.adventure.text.Component
+import org.bukkit.Bukkit
+import org.bukkit.block.Skull
 import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
+import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
 import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFlag
+import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFormattedName
 
 
 @Suppress("UnstableApiUsage")
@@ -34,8 +37,7 @@ object WDPhoneMenu {
     ) {
         onOpen { e ->
             game.gamePlayers
-                .asSequence()
-                .filter { it.role == targetRole && it.playerId != e.player.uniqueId }
+                // todo раскомментировать .filter { it.role == targetRole && it.playerId != e.player.uniqueId }
                 .sortedBy { it.country?.president?.playerId }
                 .forEachIndexed { index, target ->
                     val targetPlayer = target.player
@@ -49,7 +51,14 @@ object WDPhoneMenu {
                         SlotPosition.top(index),
                         GuiButton.of(icon) { ctx ->
                             val player = ctx.view.inventoryView.player as Player
+                            val item = ctx.currentItem ?: return@of
+                            val targetPlayerUUID = (item as Skull).profile?.uuid() ?: return@of
+                            val targetPlayer = Bukkit.getPlayer(targetPlayerUUID) ?: return@of
+                            val formattedName = targetPlayer.asWDPlayer()?.getFormattedName() ?: return@of
+
                             // todo звоним выбранному игроку
+                            // Отравляем sub title "входящий звонок от $formattedName" на 10 сек
+                            // Отпраялем actionbar "<red>Q сбросить <white>| <green>F ответить" на 10 сек
 
                             // todo отложенная задача через 10 секунд
                             //  если трубку не взяли воспроизводим аудио "Абонент временно недоступен, перезвоните позже"

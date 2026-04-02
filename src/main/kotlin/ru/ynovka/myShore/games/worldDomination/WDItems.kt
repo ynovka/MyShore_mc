@@ -2,8 +2,12 @@ package ru.ynovka.myShore.games.worldDomination
 
 import com.github.darksoulq.abyssallib.extension.openGui
 import com.github.darksoulq.abyssallib.server.event.ActionResult
+import com.github.darksoulq.abyssallib.world.item.component.builtin.ItemModel
+import com.github.darksoulq.abyssallib.world.item.item
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.MyShore.Companion.ITEMS
 import ru.ynovka.myShore.MyShore.Companion.inst
@@ -17,6 +21,17 @@ object WDItems {
     fun register() {
         TexturePack.createItemTexture(wdPhoneMenu)
         ITEMS.register("wd_phone_menu") { wdPhoneMenu }
+        ITEMS.register("wd_notebook") { wdNotebook }
+    }
+
+    val wdNotebook = item(Key.key(inst, "wd_notebook"), Material.WRITABLE_BOOK) {
+        component(ItemModel(NamespacedKey.minecraft(Material.WRITABLE_BOOK.toString().lowercase())))
+        onClick { _, _, _, _ -> return@onClick ActionResult.CANCEL }
+        onSwapHand { _, _ -> return@onSwapHand ActionResult.CANCEL }
+        onDrop { return@onDrop ActionResult.CANCEL }
+        tooltip { player ->
+            line(Component.translatable("desc.myshore.wd_notebook.1"))
+        }
     }
 
     val wdPhoneMenu = cancelItem(Key.key(inst, "wd_phone_menu")) {
@@ -25,23 +40,17 @@ object WDItems {
             line(Component.translatable("desc.myshore.wd_phone_menu.2"))
             line(Component.translatable("desc.myshore.wd_phone_menu.3"))
         }
-        onUse { source, _, _ ->
-            val player = source as Player
-            val game = player.currentGame() ?: return@onUse ActionResult.PASS
-            val wdGame = game as? WDGame ?: return@onUse ActionResult.PASS
-            val wdRole = wdGame.gamePlayers.firstOrNull { it.playerId == player.uniqueId }?.role
-                ?: return@onUse ActionResult.PASS
-            player.openGui(WDPhoneMenu.get(game, wdRole))
-            ActionResult.CANCEL
-        }
-        onUseOn { ctx ->
-            val player = ctx.source as Player
-            val game = player.currentGame() ?: return@onUseOn ActionResult.PASS
-            val wdGame = game as? WDGame ?: return@onUseOn ActionResult.PASS
-            val wdRole = wdGame.gamePlayers.firstOrNull { it.playerId == player.uniqueId }?.role
-                ?: return@onUseOn ActionResult.PASS
-            player.openGui(WDPhoneMenu.get(game, wdRole))
-            ActionResult.CANCEL
-        }
+        onUse { source, _, _ -> return@onUse openPhoneMenu(source as Player) }
+        onUseOn { ctx -> return@onUseOn openPhoneMenu(ctx.source as Player) }
+    }
+    private fun openPhoneMenu(
+        player: Player
+    ): ActionResult {
+        val game = player.currentGame() ?: return ActionResult.PASS
+        val wdGame = game as? WDGame ?: return ActionResult.PASS
+        val wdRole = wdGame.gamePlayers.firstOrNull { it.playerId == player.uniqueId }?.role
+            ?: return ActionResult.PASS
+        player.openGui(WDPhoneMenu.get(game, wdRole))
+        return ActionResult.CANCEL
     }
 }

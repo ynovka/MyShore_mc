@@ -13,7 +13,9 @@ import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.games.GameManager
 import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.hub.HubItems.playTagItem
+import ru.ynovka.myShore.hub.HubItems.playWDItem
 
 
 object PlayMenu {
@@ -31,6 +33,13 @@ object PlayMenu {
             GuiButton.of(playTagItem.getStack(null)) { ctx ->
                 val player = ctx.view.inventoryView.player as Player
                 GameManager.join(player, ::TagGame)
+            }
+        )
+        set(
+            SlotPosition.top(11),
+            GuiButton.of(playWDItem.getStack(null)) { ctx ->
+                val player = ctx.view.inventoryView.player as Player
+                GameManager.join(player, ::WDGame)
             }
         )
     }

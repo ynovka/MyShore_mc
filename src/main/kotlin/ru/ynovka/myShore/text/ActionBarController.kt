@@ -1,37 +1,97 @@
 package ru.ynovka.myShore.text
 
-import ru.ynovka.myShore.MyShore.Companion.inst
-import java.util.concurrent.ConcurrentHashMap
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.MyShore.Companion.inst
 import java.util.UUID
 
+private data class ActionBarEntry(
+    val message: Component,
+    val priority: Int,
+    val expiresAt: Long?
+) {
+    val isPermanent get() = expiresAt == null
+    fun isExpired() = expiresAt != null && System.currentTimeMillis() >= expiresAt
+}
 
 object ActionBarController {
-    private val messages = ConcurrentHashMap<UUID, Component>()
+    private val playerMessages = HashMap<UUID, HashMap<Int, ArrayDeque<ActionBarEntry>>>()
     private var taskId = -1
 
-    fun send(player: Player, message: Component) {
-        messages[player.uniqueId] = message
+    fun send(player: Player, message: Component, priority: Int = 1, durationMs: Long? = null) {
+        val entry = ActionBarEntry(
+            message = message,
+            priority = priority,
+            expiresAt = durationMs?.let { System.currentTimeMillis() + it }
+        )
+        val deque = playerMessages
+            .getOrPut(player.uniqueId) { HashMap() }
+            .getOrPut(priority) { ArrayDeque() }
+
+        merge(deque, entry)
         ensureTaskRunning()
     }
 
     fun clear(player: Player) {
-        messages.remove(player.uniqueId)
+        playerMessages.remove(player.uniqueId)
         player.sendActionBar(Component.empty())
-        if (messages.isEmpty()) stopTask()
+    }
+
+    private fun merge(deque: ArrayDeque<ActionBarEntry>, entry: ActionBarEntry) {
+        if (deque.isEmpty()) {
+            deque.addFirst(entry)
+            return
+        }
+        val current = deque.first()
+        when {
+            current.isPermanent && entry.isPermanent -> {
+                deque.clear()
+                deque.addFirst(entry)
+            }
+            current.isPermanent && !entry.isPermanent -> {
+                deque.addFirst(entry)
+            }
+            !current.isPermanent && entry.isPermanent -> {
+                if (deque.size > 1) deque.removeLast()
+                deque.addLast(entry)
+            }
+            else -> {
+                val now = System.currentTimeMillis()
+                val currentRemaining = current.expiresAt!! - now
+                val newRemaining = entry.expiresAt!! - now
+                if (newRemaining >= currentRemaining) {
+                    deque.clear()
+                    deque.addFirst(entry)
+                } else {
+                    while (deque.size > 1) deque.removeLast()
+                    deque.addFirst(entry)
+                }
+            }
+        }
+    }
+
+    private fun tick() {
+        val online = inst.server.onlinePlayers.associateBy { it.uniqueId }
+        playerMessages.keys.retainAll(online.keys)
+
+        playerMessages.forEach { (uuid, byPriority) ->
+            byPriority.values.forEach { deque ->
+                while (deque.firstOrNull()?.isExpired() == true) deque.removeFirst()
+            }
+            byPriority.values.removeIf { it.isEmpty() }
+
+            val topMessage = byPriority.maxByOrNull { it.key }?.value?.firstOrNull()?.message
+            online[uuid]?.sendActionBar(topMessage ?: Component.empty())
+        }
+
+        playerMessages.values.removeIf { it.isEmpty() }
+        if (playerMessages.isEmpty()) stopTask()
     }
 
     private fun ensureTaskRunning() {
         if (taskId != -1) return
         taskId = inst.server.scheduler
-            .runTaskTimer(inst, Runnable {
-                messages.keys.retainAll(inst.server.onlinePlayers.map { it.uniqueId }.toSet())
-                inst.server.onlinePlayers.forEach { p ->
-                    messages[p.uniqueId]?.let { p.sendActionBar(it) }
-                }
-                if (messages.isEmpty()) stopTask()
-            }, 1L, 2L).taskId
+            .runTaskTimer(inst, Runnable { tick() }, 1L, 2L).taskId
     }
 
     private fun stopTask() {
@@ -40,17 +100,20 @@ object ActionBarController {
     }
 }
 
+/**
+ * Постоянный ActionBar с заданным приоритетом.
+ */
+fun Player.sendPermanentActionBar(message: Component, priority: Int = 1) =
+    ActionBarController.send(this, message, priority)
 
 /**
- * Постоянный ActionBar (обновляется автоматически)
+ * Временный ActionBar с заданной длительностью и приоритетом.
  */
-fun Player.sendPermanentActionBar(message: Component) {
-    ActionBarController.send(this, message)
-}
+fun Player.sendTimedActionBar(message: Component, durationMs: Long, priority: Int = 1) =
+    ActionBarController.send(this, message, priority, durationMs)
 
 /**
- * Очистить ActionBar и остановить рендер
+ * Очищает все ActionBar-сообщения игрока.
  */
-fun Player.clearActionBar() {
+fun Player.clearActionBar() =
     ActionBarController.clear(this)
-}

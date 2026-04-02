@@ -27,7 +27,9 @@ abstract class Game<P : GamePlayer>(
     private fun isExited(p: P) = exitedPlayers.any { it.playerId == p.playerId }
 
     fun onPlayerJoin(player: Player) {
+        player.inventory.close()
         gameVisibilityGroup.addViewer(player.uniqueId)
+
         val p = getOrCreatePlayer(player)
 
         val canJoin = fsm.canPlayerJoin(p)

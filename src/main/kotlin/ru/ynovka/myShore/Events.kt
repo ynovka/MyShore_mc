@@ -5,6 +5,7 @@ import ru.ynovka.myShore.antiCheat.AntiCheatEvents
 import ru.ynovka.myShore.utils.MovementController
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.TagEvents
+import ru.ynovka.myShore.games.worldDomination.WDEvents
 import ru.ynovka.myShore.hub.HubEvents
 
 
@@ -12,6 +13,7 @@ object Events {
     fun register() {
         HubEvents.register()
         TagEvents.register()
+        WDEvents.register()
         MovementController.register()
 
         val bus = EventBus(inst)
