@@ -1,0 +1,163 @@
+package ru.ynovka.myShore.plasmo
+
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.title.Title
+import org.bukkit.Bukkit
+import org.bukkit.entity.Player
+import ru.ynovka.myShore.MyShore
+import ru.ynovka.myShore.text.clearActionBar
+import ru.ynovka.myShore.text.sendTimedActionBar
+import ru.ynovka.myShore.utils.Utils.asPlayer
+import java.time.Duration
+import java.util.UUID
+
+private const val CALL_DURATION_TICKS = 30 * 20L
+
+object PhoneCall {
+
+    private val pendingCalls: MutableList<Call> = mutableListOf()
+    private val calls: MutableList<Call> = mutableListOf()
+
+    fun getActiveCallForPlayer(uuid: UUID): Call? =
+        calls.firstOrNull { it.from == uuid || it.to == uuid }
+
+    /**
+     * Инициирует звонок от [from] к [to].
+     * Не выполняется, если звонящий уже в звонке или получатель занят.
+     */
+    fun call(from: Player, fromName: String, to: Player, toName: String) {
+        if (pendingCalls.any { it.from == from.uniqueId } ||
+            calls.any { it.from == from.uniqueId || it.to == from.uniqueId }) return
+
+        if (pendingCalls.any { it.to == to.uniqueId } ||
+            calls.any { it.from == to.uniqueId || it.to == to.uniqueId }) {
+            from.sendTimedActionBar(
+                Component.translatable("bar.myshore.wd.call_target_is_busy"),
+                5
+            )
+            return
+        }
+
+        pendingCalls += Call(
+            from = from.uniqueId,
+            fromName = fromName,
+            to = to.uniqueId,
+            toName = toName
+        )
+
+        from.sendTimedActionBar(
+            Component.translatable("bar.myshore.wd.call_waiting", Component.text(toName)),
+            10
+        )
+        to.showTitle(
+            Title.title(
+                Component.text(""),
+                Component.translatable("sub.title.myshore.wd.incoming_call", Component.text(fromName)),
+                Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(9), Duration.ofMillis(500))
+            )
+        );
+        to.sendTimedActionBar(
+            Component.translatable("bar.myshore.wd.call_control"),
+            10
+        )
+    }
+
+    /**
+     * Принимает входящий звонок для [player].
+     */
+    fun acceptCall(player: Player) {
+        val call = pendingCalls.firstOrNull { it.to == player.uniqueId } ?: return
+        val fromPlayer = call.from.asPlayer()
+
+        pendingCalls -= call
+
+        if (fromPlayer == null) {
+            player.clearTitle()
+            player.clearActionBar()
+            return
+        }
+
+        val activeCall = call.copy(startTime = System.currentTimeMillis())
+        calls += activeCall
+
+        player.clearTitle()
+        player.clearActionBar()
+        fromPlayer.clearActionBar()
+
+        PhoneCallVoice.startCallAudio(MyShore.plasmo, activeCall)
+
+        Bukkit.getScheduler().runTaskLater(MyShore.inst, Runnable {
+            if (calls.contains(activeCall)) {
+                terminateCall(activeCall)
+                activeCall.from.asPlayer()?.sendTimedActionBar(
+                    Component.translatable("bar.myshore.wd.call_timeout"), 3
+                )
+                activeCall.to.asPlayer()?.sendTimedActionBar(
+                    Component.translatable("bar.myshore.wd.call_timeout"), 3
+                )
+            }
+        }, CALL_DURATION_TICKS)
+    }
+
+    fun endCall(player: Player) {
+        val uuid = player.uniqueId
+
+        // 1. Исходящий pending (игрок сам звонил → отмена)
+        val outgoingPending = pendingCalls.firstOrNull { it.from == uuid }
+        if (outgoingPending != null) {
+            pendingCalls -= outgoingPending
+
+            player.sendTimedActionBar(
+                Component.translatable("bar.myshore.wd.call_cancelled"),
+                3
+            )
+
+            outgoingPending.to.asPlayer()?.clearTitle()
+            outgoingPending.to.asPlayer()?.clearActionBar()
+            return
+        }
+
+        // 2. Входящий pending (игроку звонят → отклонение)
+        val incomingPending = pendingCalls.firstOrNull { it.to == uuid }
+        if (incomingPending != null) {
+            pendingCalls -= incomingPending
+
+            player.clearTitle()
+            player.clearActionBar()
+
+            incomingPending.from.asPlayer()?.sendTimedActionBar(
+                Component.translatable("bar.myshore.wd.call_denied"),
+                3
+            )
+            return
+        }
+
+        // 3. Активный звонок → завершение
+        val activeCall = calls.firstOrNull { it.from == uuid || it.to == uuid } ?: return
+        val otherUuid = if (activeCall.from == uuid) activeCall.to else activeCall.from
+
+        terminateCall(activeCall)
+
+        player.sendTimedActionBar(
+            Component.translatable("bar.myshore.wd.call_hang_up.self"),
+            3
+        )
+        otherUuid.asPlayer()?.sendTimedActionBar(
+            Component.translatable("bar.myshore.wd.call_hang_up.other"),
+            3
+        )
+    }
+
+    private fun terminateCall(call: Call) {
+        calls -= call
+        PhoneCallVoice.stopCallAudio(call)
+    }
+}
+
+data class Call(
+    val from: UUID,
+    val fromName: String,
+    val to: UUID,
+    val toName: String,
+    val startTime: Long? = null
+)

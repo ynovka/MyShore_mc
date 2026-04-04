@@ -13,6 +13,7 @@ import ru.ynovka.myShore.MyShore.Companion.ITEMS
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.GameManager.currentGame
 import ru.ynovka.myShore.games.worldDomination.menus.WDPhoneMenu
+import ru.ynovka.myShore.plasmo.PhoneCall
 import ru.ynovka.myShore.texturepack.TexturePack
 import ru.ynovka.myShore.utils.cancelItem
 
@@ -26,9 +27,8 @@ object WDItems {
 
     val wdNotebook = item(Key.key(inst, "wd_notebook"), Material.WRITABLE_BOOK) {
         component(ItemModel(NamespacedKey.minecraft(Material.WRITABLE_BOOK.toString().lowercase())))
-        onClick { _, _, _, _ -> return@onClick ActionResult.CANCEL }
-        onSwapHand { _, _ -> return@onSwapHand ActionResult.CANCEL }
-        onDrop { return@onDrop ActionResult.CANCEL }
+        onClick { _, _, _, _ -> ActionResult.CANCEL }
+        onSwapHand { _, _ -> ActionResult.CANCEL }
         tooltip { player ->
             line(Component.translatable("desc.myshore.wd_notebook.1"))
         }
@@ -40,8 +40,12 @@ object WDItems {
             line(Component.translatable("desc.myshore.wd_phone_menu.2"))
             line(Component.translatable("desc.myshore.wd_phone_menu.3"))
         }
-        onUse { source, _, _ -> return@onUse openPhoneMenu(source as Player) }
-        onUseOn { ctx -> return@onUseOn openPhoneMenu(ctx.source as Player) }
+        onUse { source, _, _ -> openPhoneMenu(source as Player) }
+        onUseOn { ctx -> openPhoneMenu(ctx.source as Player) }
+        onSwapHand { player, _ ->
+            PhoneCall.acceptCall(player)
+            ActionResult.CANCEL
+        }
     }
     private fun openPhoneMenu(
         player: Player

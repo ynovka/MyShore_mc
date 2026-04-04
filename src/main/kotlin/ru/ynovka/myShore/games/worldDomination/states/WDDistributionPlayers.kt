@@ -41,7 +41,7 @@ object WDDistributionPlayers : GameState<WDPlayer> {
                 }
 
                 // Выдаём президенту телефон для звонков
-                pp.inventory.setItem(0, WDItems.wdPhoneMenu.getStack(pp))
+                pp.inventory.setItem(7, WDItems.wdPhoneMenu.getStack(pp))
             }
 
         // Отсчёт 3 минуты, до перехода к следующему этапу

@@ -59,11 +59,11 @@ object ActionBarController {
                 val now = System.currentTimeMillis()
                 val currentRemaining = current.expiresAt!! - now
                 val newRemaining = entry.expiresAt!! - now
+
                 if (newRemaining >= currentRemaining) {
-                    deque.clear()
+                    deque.removeFirst()
                     deque.addFirst(entry)
                 } else {
-                    while (deque.size > 1) deque.removeLast()
                     deque.addFirst(entry)
                 }
             }
@@ -109,8 +109,8 @@ fun Player.sendPermanentActionBar(message: Component, priority: Int = 1) =
 /**
  * Временный ActionBar с заданной длительностью и приоритетом.
  */
-fun Player.sendTimedActionBar(message: Component, durationMs: Long, priority: Int = 1) =
-    ActionBarController.send(this, message, priority, durationMs)
+fun Player.sendTimedActionBar(message: Component, durationSec: Int, priority: Int = 1) =
+    ActionBarController.send(this, message, priority, durationSec * 1000L)
 
 /**
  * Очищает все ActionBar-сообщения игрока.

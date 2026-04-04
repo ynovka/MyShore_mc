@@ -8,6 +8,7 @@ import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIPaperConfig
 import org.bukkit.plugin.java.JavaPlugin
 import ru.ynovka.myShore.antiCheat.AntiCheat
+import ru.ynovka.myShore.plasmo.PlasmoAddon
 import ru.ynovka.myShore.texturepack.TexturePack
 import su.plo.voice.api.server.PlasmoVoiceServer
 

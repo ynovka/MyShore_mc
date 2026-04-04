@@ -1,4 +1,4 @@
-package ru.ynovka.myShore
+package ru.ynovka.myShore.plasmo
 
 import org.bukkit.entity.Player
 import su.plo.voice.api.addon.AddonInitializer
@@ -8,9 +8,9 @@ import su.plo.voice.api.event.EventSubscribe
 import su.plo.voice.api.server.PlasmoVoiceServer
 import su.plo.voice.api.server.event.connection.UdpClientConnectEvent
 import su.plo.voice.api.server.event.connection.UdpClientDisconnectedEvent
-import java.util.*
+import java.util.Collections
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-
 
 @Addon(
     id = "myshore-plasmo-addon",
@@ -27,10 +27,13 @@ class PlasmoAddon : AddonInitializer {
     fun isPlayerConnected(player: Player): Boolean = connected.contains(player.uniqueId)
 
     override fun onAddonInitialize() {
+        PhoneCallVoice.init(this)
+        voiceServer.eventBus.register(this, PhoneCallVoice)
         println("Addon initialized")
     }
 
     override fun onAddonShutdown() {
+        voiceServer.eventBus.unregister(this, PhoneCallVoice)
         println("Addon shut down")
     }
 

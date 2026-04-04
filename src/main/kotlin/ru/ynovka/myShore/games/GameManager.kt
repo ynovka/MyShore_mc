@@ -15,7 +15,7 @@ object GameManager {
     fun <G : Game<*>> join(
         player: Player,
         factory: () -> G,
-        partyFactory: (Party) -> G = { factory() },  // по умолчанию игнорирует пати
+        partyFactory: (Party) -> G = { factory() },
     ): Result<G> {
         if (player.inGame())
             return Result.failure(IllegalStateException("Player ${player.name} is already in a game"))
