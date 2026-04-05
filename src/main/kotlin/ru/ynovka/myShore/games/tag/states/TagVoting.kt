@@ -16,9 +16,9 @@ import kotlin.math.ceil
 
 
 // 10 сек на голосование за карту, режим игры, сменить лобби, посмотреть статистику
-object TagVoting : GameState<TagPlayer> {
+class TagVoting(game: Game<TagPlayer>) : GameState<TagPlayer>(game) {
 
-    override fun onEnter(game: Game<TagPlayer>) {
+    override fun onEnter() {
         val tagGame = game as TagGame
         tagGame.gamePlayers.forEach { tagPlayer ->
             tagPlayer.player.setupForVoting(tagGame)
@@ -26,15 +26,15 @@ object TagVoting : GameState<TagPlayer> {
         }
 
         tagGame.scheduler.runTaskLater(inst, Runnable {
-            if (tagGame.fsm.current != TagVoting) return@Runnable
+            if (tagGame.fsm.current !is TagVoting) return@Runnable
 
             resolveMapVoting(tagGame)?.let { setupMap(tagGame, it) }
             tagGame.mapVotes.clear()
-            tagGame.fsm.transitionTo(TagPreparing)
+            tagGame.fsm.transitionTo(TagPreparing(game))
         }, 10 * 20L)
     }
 
-    override fun onPlayerJoin(game: Game<TagPlayer>, player: TagPlayer) {
+    override fun onPlayerJoin(player: TagPlayer) {
         player.player.setupForVoting(game as TagGame)
     }
 
@@ -57,17 +57,19 @@ object TagVoting : GameState<TagPlayer> {
         return if (winners.size == 1) winners.first() else winners.random()
     }
 
-    fun setupMap(game: TagGame, map: TagMap, shouldTeleport: Boolean = false) {
-        game.map = map
-        game.gamePlayers.forEach { tagPlayer ->
-            val mapNameComp = ServerTranslator.translate(map.mapName, tagPlayer.player)
-            tagPlayer.player.sendMessage(
-                Component.translatable("msg.myshore.tag.choosen_map", mapNameComp)
-            )
+    companion object {
+        fun setupMap(game: TagGame, map: TagMap, shouldTeleport: Boolean = false) {
+            game.map = map
+            game.gamePlayers.forEach { tagPlayer ->
+                val mapNameComp = ServerTranslator.translate(map.mapName, tagPlayer.player)
+                tagPlayer.player.sendMessage(
+                    Component.translatable("msg.myshore.tag.choosen_map", mapNameComp)
+                )
 
-            if (shouldTeleport) {
-                game.map.teleport(tagPlayer.player, game) {
-                    tagPlayer.player.gameMode = GameMode.ADVENTURE
+                if (shouldTeleport) {
+                    game.map.teleport(tagPlayer.player, game) {
+                        tagPlayer.player.gameMode = GameMode.ADVENTURE
+                    }
                 }
             }
         }

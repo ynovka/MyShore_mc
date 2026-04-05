@@ -6,7 +6,6 @@ import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import ru.ynovka.myShore.games.tag.TagItems.tagVoteJungleMapMenuItem
 import ru.ynovka.myShore.games.tag.TagItems.tagVoteRandomMapMenuItem
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
-import ru.ynovka.myShore.games.tag.states.TagVoting.setupMap
 import com.github.darksoulq.abyssallib.world.gui.SlotPosition
 import net.kyori.adventure.text.format.NamedTextColor
 import com.github.darksoulq.abyssallib.world.gui.Gui
@@ -21,6 +20,7 @@ import net.kyori.adventure.text.Component
 import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
 import org.bukkit.Sound
+import ru.ynovka.myShore.games.tag.states.TagVoting.Companion.setupMap
 
 
 @Suppress("UnstableApiUsage")
@@ -62,8 +62,7 @@ object TagVoteMapMenu {
         val mapNameComp = ServerTranslator.translate(mapNameTranslatable, player)
 
         val game = player.currentTagGame() ?: return
-
-        if (game.fsm.current == TagWaitingForPlayers) {
+        if (game.fsm.current is TagWaitingForPlayers) {
             setupMap(game, map, true)
             return
         }

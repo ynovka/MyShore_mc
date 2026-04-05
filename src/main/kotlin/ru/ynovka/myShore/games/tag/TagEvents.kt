@@ -64,7 +64,7 @@ object TagEvents : Listener {
         }
 
         if (!game.hasVictims()) {
-            game.fsm.transitionTo(TagFinishing)
+            game.fsm.transitionTo(TagFinishing(game))
         } else {
             game.totalTime += 20 // +20 сек за поимку жертвы
         }

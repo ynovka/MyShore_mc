@@ -12,7 +12,7 @@ abstract class Game<P : GamePlayer>(
 
     abstract val initialState: GameState<P>
     val fsm: GameFSM<P> by lazy {
-        GameFSM(initialState).also { it.start(this) }
+        GameFSM(initialState).also { it.start() }
     }
     abstract val maxPlayers: Int
     abstract val gamePlayers: MutableSet<P>
@@ -32,7 +32,7 @@ abstract class Game<P : GamePlayer>(
 
         val p = getOrCreatePlayer(player)
 
-        val canJoin = fsm.canPlayerJoin(p)
+        val canJoin = !isFull() && fsm.canPlayerJoin(p)
         if (!canJoin) {
             spectatorPlayers.add(p)
             fsm.spectatorJoin(p)

@@ -25,7 +25,14 @@ object PhoneCall {
      * Инициирует звонок от [from] к [to].
      * Не выполняется, если звонящий уже в звонке или получатель занят.
      */
-    fun call(from: Player, fromName: String, to: Player, toName: String) {
+    fun call(
+        from: Player,
+        fromName: Component,
+        to: Player,
+        toName: Component,
+        onEnd: ((Call) -> Unit)? = null,
+        onSuccessEnd: ((Call) -> Unit)? = null
+    ) {
         if (pendingCalls.any { it.from == from.uniqueId } ||
             calls.any { it.from == from.uniqueId || it.to == from.uniqueId }) return
 
@@ -42,17 +49,19 @@ object PhoneCall {
             from = from.uniqueId,
             fromName = fromName,
             to = to.uniqueId,
-            toName = toName
+            toName = toName,
+            onEnd = onEnd,
+            onSuccessEnd = onSuccessEnd
         )
 
         from.sendTimedActionBar(
-            Component.translatable("bar.myshore.wd.call_waiting", Component.text(toName)),
+            Component.translatable("bar.myshore.wd.call_waiting", toName),
             10
         )
         to.showTitle(
             Title.title(
                 Component.text(""),
-                Component.translatable("sub.title.myshore.wd.incoming_call", Component.text(fromName)),
+                Component.translatable("sub.title.myshore.wd.incoming_call", fromName),
                 Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(9), Duration.ofMillis(500))
             )
         );
@@ -114,6 +123,8 @@ object PhoneCall {
 
             outgoingPending.to.asPlayer()?.clearTitle()
             outgoingPending.to.asPlayer()?.clearActionBar()
+
+            outgoingPending.onEnd?.invoke(outgoingPending)
             return
         }
 
@@ -129,6 +140,8 @@ object PhoneCall {
                 Component.translatable("bar.myshore.wd.call_denied"),
                 3
             )
+
+            incomingPending.onEnd?.invoke(incomingPending)
             return
         }
 
@@ -137,6 +150,8 @@ object PhoneCall {
         val otherUuid = if (activeCall.from == uuid) activeCall.to else activeCall.from
 
         terminateCall(activeCall)
+        activeCall.onEnd?.invoke(activeCall)
+        activeCall.onSuccessEnd?.invoke(activeCall)
 
         player.sendTimedActionBar(
             Component.translatable("bar.myshore.wd.call_hang_up.self"),
@@ -148,6 +163,46 @@ object PhoneCall {
         )
     }
 
+    fun endAllCalls(players: Collection<UUID>) {
+        if (players.isEmpty()) return
+
+        val playerSet = players.toHashSet()
+
+        // 1. Завершаем активные звонки
+        val toEnd = calls.filter { call ->
+            call.from in playerSet || call.to in playerSet
+        }
+
+        for (call in toEnd) {
+            terminateCall(call)
+
+            call.from.asPlayer()?.sendTimedActionBar(
+                Component.translatable("bar.myshore.wd.call_ended"),
+                3
+            )
+            call.to.asPlayer()?.sendTimedActionBar(
+                Component.translatable("bar.myshore.wd.call_ended"),
+                3
+            )
+
+            call.onEnd?.invoke(call)
+        }
+
+        // 2. Удаляем pending звонки
+        val pendingToRemove = pendingCalls.filter { call ->
+            call.from in playerSet || call.to in playerSet
+        }
+
+        for (call in pendingToRemove) {
+            pendingCalls -= call
+
+            call.from.asPlayer()?.clearTitle()
+            call.to.asPlayer()?.clearTitle()
+
+            call.onEnd?.invoke(call)
+        }
+    }
+
     private fun terminateCall(call: Call) {
         calls -= call
         PhoneCallVoice.stopCallAudio(call)
@@ -156,8 +211,10 @@ object PhoneCall {
 
 data class Call(
     val from: UUID,
-    val fromName: String,
+    val fromName: Component,
     val to: UUID,
-    val toName: String,
-    val startTime: Long? = null
+    val toName: Component,
+    val startTime: Long? = null,
+    val onEnd: ((Call) -> Unit)? = null,
+    val onSuccessEnd: ((Call) -> Unit)? = null,
 )

@@ -9,9 +9,9 @@ import org.bukkit.Sound
 
 
 // Ожидание игроков (нужно хотя бы 2)
-object TagWaitingForPlayers : GameState<TagPlayer> {
+class TagWaitingForPlayers(game: Game<TagPlayer>) : GameState<TagPlayer>(game) {
 
-    override fun onEnter(game: Game<TagPlayer>) {
+    override fun onEnter() {
         val tagGame = game as TagGame
         tagGame.gamePlayers.forEach { tagPlayer ->
             tagPlayer.player.setupForWaiting(tagGame)
@@ -19,12 +19,12 @@ object TagWaitingForPlayers : GameState<TagPlayer> {
         }
     }
 
-    override fun onPlayerJoin(game: Game<TagPlayer>, player: TagPlayer) {
+    override fun onPlayerJoin(player: TagPlayer) {
         val tagGame = game as TagGame
         player.player.setupForWaiting(tagGame)
 
         if (tagGame.gamePlayers.size >= 2) {
-            tagGame.fsm.transitionTo(TagVoting)
+            tagGame.fsm.transitionTo(TagVoting(game))
         }
     }
 }

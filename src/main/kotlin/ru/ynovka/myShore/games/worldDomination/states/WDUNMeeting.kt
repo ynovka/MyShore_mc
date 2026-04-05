@@ -16,16 +16,16 @@ import ru.ynovka.myShore.games.worldDomination.WDPlayer
  * - уровень развития
  * - название по алфавиту
  */
-object WDUNMeeting : GameState<WDPlayer> {
-    override fun onEnter(game: Game<WDPlayer>) { }
+class WDUNMeeting(game: Game<WDPlayer>) : GameState<WDPlayer>(game) {
+    override fun onEnter() { }
 
-    override fun onExit(game: Game<WDPlayer>) { }
+    override fun onExit() { }
 
-    override fun onPlayerJoin(game: Game<WDPlayer>, player: WDPlayer) { }
+    override fun onPlayerJoin(player: WDPlayer) { }
 
-    override fun onPlayerReconnect(game: Game<WDPlayer>, player: WDPlayer) { }
+    override fun onPlayerReconnect(player: WDPlayer) { }
 
-    override fun onPlayerLeave(game: Game<WDPlayer>, player: WDPlayer) { }
+    override fun onPlayerLeave(player: WDPlayer) { }
 
-    override fun canPlayerJoin(game: Game<WDPlayer>, player: WDPlayer) = false
+    override fun canPlayerJoin(player: WDPlayer): Boolean = false
 }

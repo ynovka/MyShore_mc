@@ -8,22 +8,22 @@ import ru.ynovka.myShore.games.Game
 /**
  * Этап знакомства игроков, длится ровно 1 минуту
  */
-object WDIntroductionPlayers : GameState<WDPlayer> {
+class WDIntroductionPlayers(game: Game<WDPlayer>) : GameState<WDPlayer>(game) {
     /**
      * Отправляем сооющение в чат с членами страны
      */
-    override fun onEnter(game: Game<WDPlayer>) {
+    override fun onEnter() {
         // Отсчёт 1 минута, до перехода к следующему этапу
         inst.server.scheduler.runTaskLater(inst, Runnable {
-            game.fsm.transitionTo(WDNegotiations)
+            game.fsm.transitionTo(WDNegotiations(game))
         }, 60 * 20L)
     }
 
-    override fun onExit(game: Game<WDPlayer>) { }
+    override fun onExit() { }
 
-    override fun onPlayerJoin(game: Game<WDPlayer>, player: WDPlayer) { }
+    override fun onPlayerJoin(player: WDPlayer) { }
 
-    override fun onPlayerReconnect(game: Game<WDPlayer>, player: WDPlayer) { }
+    override fun onPlayerReconnect(player: WDPlayer) { }
 
-    override fun onPlayerLeave(game: Game<WDPlayer>, player: WDPlayer) { }
+    override fun onPlayerLeave(player: WDPlayer) { }
 }

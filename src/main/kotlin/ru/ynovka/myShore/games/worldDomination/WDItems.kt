@@ -23,6 +23,11 @@ object WDItems {
         TexturePack.createItemTexture(wdPhoneMenu)
         ITEMS.register("wd_phone_menu") { wdPhoneMenu }
         ITEMS.register("wd_notebook") { wdNotebook }
+        ITEMS.register("wd_invisible_item") { wdInvisibleItem }
+    }
+
+    val wdInvisibleItem = cancelItem(Key.key(inst, "wd_invisible_item")) {
+        component(ItemModel(NamespacedKey.minecraft(Material.AIR.toString().lowercase())))
     }
 
     val wdNotebook = item(Key.key(inst, "wd_notebook"), Material.WRITABLE_BOOK) {
@@ -42,6 +47,7 @@ object WDItems {
         }
         onUse { source, _, _ -> openPhoneMenu(source as Player) }
         onUseOn { ctx -> openPhoneMenu(ctx.source as Player) }
+        onDrop { _ -> ActionResult.CANCEL }
         onSwapHand { player, _ ->
             PhoneCall.acceptCall(player)
             ActionResult.CANCEL

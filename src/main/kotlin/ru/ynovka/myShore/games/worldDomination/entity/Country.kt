@@ -1,10 +1,12 @@
 package ru.ynovka.myShore.games.worldDomination.entity
 
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.VisibilityGroup
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.texturepack.Glyphs
+
 
 class Country private constructor(
     /** Президент */
@@ -53,12 +55,17 @@ class Country private constructor(
     }
 
     fun teleport(player: Player) {
-        countryVisibilityGroup.addViewer(player.uniqueId)
+        //countryVisibilityGroup.addViewer(player.uniqueId)
         player.teleportAsync(skin.loc)
     }
 
     fun collectRoundProfit() {
         balance += cities.values.sumOf { it.capitalization }
+    }
+
+    fun setVicePresident(player: WDPlayer) {
+        addCitizen(player)
+        vicePresident = player
     }
 
     fun addCitizen(player: WDPlayer) {
@@ -93,7 +100,7 @@ class Country private constructor(
             return Glyphs.COUNTRY_FLAG
         }
 
-        fun WDPlayer.getFormattedName() = "${country.getFlag()} ${player.name}"
+        fun WDPlayer.getFormattedName() = MiniMessage.miniMessage().deserialize("${country.getFlag()} ${player.name}")
 
     }
 }

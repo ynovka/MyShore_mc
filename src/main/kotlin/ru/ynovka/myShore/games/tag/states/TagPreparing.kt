@@ -28,9 +28,9 @@ import java.util.UUID
 
 
 // 5 сек перед началом (что бы у игроков загрузилась карта, они ознакомились со своими ролями)
-object TagPreparing : GameState<TagPlayer> {
+class TagPreparing(game: Game<TagPlayer>) : GameState<TagPlayer>(game) {
 
-    const val MAX_HISTORY = 10
+    val MAX_HISTORY = 10
 
     val hunterHistory: ArrayDeque<UUID> = ArrayDeque()
     val hunterCount: MutableMap<UUID, Int> = mutableMapOf()
@@ -53,7 +53,7 @@ object TagPreparing : GameState<TagPlayer> {
 
     private val glowingEffect = PotionEffect(PotionEffectType.GLOWING, -1, 0, false, false)
 
-    override fun onEnter(game: Game<TagPlayer>) {
+    override fun onEnter() {
         val tagGame = game as TagGame
         val hunterUuid = chooseHunter(tagGame.gamePlayers.map { it.player.uniqueId })
         registerHunter(hunterUuid)
@@ -94,7 +94,7 @@ object TagPreparing : GameState<TagPlayer> {
         startCountdown(tagGame)
     }
 
-    override fun onPlayerJoin(game: Game<TagPlayer>, player: TagPlayer) {
+    override fun onPlayerJoin(player: TagPlayer) {
         player.player.setupAsSpectator(game as TagGame)
     }
 
@@ -137,7 +137,7 @@ object TagPreparing : GameState<TagPlayer> {
 
     fun startCountdown(game: TagGame, seconds: Int = 5) {
         fun tick(timeLeft: Int) {
-            if (game.fsm.current != TagPreparing) return
+            if (game.fsm.current !is TagPreparing) return
 
             if (timeLeft > 0) {
                 game.gamePlayers.forEach { tagPlayer ->
@@ -166,7 +166,7 @@ object TagPreparing : GameState<TagPlayer> {
                     tagPlayer.player.playSound(tagPlayer.player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
                 }
 
-                game.fsm.transitionTo(TagInProgressState)
+                game.fsm.transitionTo(TagInProgressState(game))
             }
         }
 

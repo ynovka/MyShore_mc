@@ -49,7 +49,7 @@ object TagPlayerSetup {
             var frame = 0
 
             override fun run() {
-                if (game.fsm.current != TagWaitingForPlayers) {
+                if (game.fsm.current !is TagWaitingForPlayers) {
                     cancel()
                     return
                 }
@@ -86,7 +86,7 @@ object TagPlayerSetup {
             var frame = 0
 
             override fun run() {
-                if (game.fsm.current != TagVoting) {
+                if (game.fsm.current !is TagVoting) {
                     cancel()
                     return
                 }

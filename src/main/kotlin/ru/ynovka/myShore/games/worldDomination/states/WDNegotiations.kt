@@ -14,8 +14,8 @@ import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
  * В это время каждая страна может принять 1 другую страну на переговоры (5 минут)
  * И может отправить запрес на переговоры 1 другой страной (5 минут) (если страна откланила - не считается)
  */
-object WDNegotiations : GameState<WDPlayer> {
-    override fun onEnter(game: Game<WDPlayer>) {
+class WDNegotiations(game: Game<WDPlayer>) : GameState<WDPlayer>(game) {
+    override fun onEnter() {
         game.gamePlayers
             .filter { it.role == WDPlayerRole.PRESIDENT }
             .map(GamePlayer::player)
@@ -23,18 +23,18 @@ object WDNegotiations : GameState<WDPlayer> {
 
     }
 
-    override fun onExit(game: Game<WDPlayer>) {
+    override fun onExit() {
         game.gamePlayers
             .filter { it.role == WDPlayerRole.PRESIDENT }
             .map(GamePlayer::player)
             .forEach { it.inventory.clear(7) }
     }
 
-    override fun onPlayerJoin(game: Game<WDPlayer>, player: WDPlayer) { }
+    override fun onPlayerJoin(player: WDPlayer) { }
 
-    override fun onPlayerReconnect(game: Game<WDPlayer>, player: WDPlayer) { }
+    override fun onPlayerReconnect(player: WDPlayer) { }
 
-    override fun onPlayerLeave(game: Game<WDPlayer>, player: WDPlayer) { }
+    override fun onPlayerLeave(player: WDPlayer) { }
 
-    override fun canPlayerJoin(game: Game<WDPlayer>, player: WDPlayer) = false
+    override fun canPlayerJoin(player: WDPlayer): Boolean = false
 }

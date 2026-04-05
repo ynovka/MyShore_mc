@@ -19,18 +19,18 @@ import ru.ynovka.myShore.text.ComponentDecorator
 
 
 // 40-100 сек (сам геймплей салочек)
-object TagInProgressState : GameState<TagPlayer> {
+class TagInProgressState(game: Game<TagPlayer>) : GameState<TagPlayer>(game) {
 
     private var bossBar: BossBar? = null
 
-    override fun onEnter(game: Game<TagPlayer>) {
+    override fun onEnter() {
         val tagGame = game as TagGame
         tagGame.gamePlayers.forEach { it.player.canMove(true) }
         startHunterDistanceRenderer(tagGame)
         startCountdown(tagGame)
     }
 
-    override fun onPlayerJoin(game: Game<TagPlayer>, player: TagPlayer) {
+    override fun onPlayerJoin(player: TagPlayer) {
         val tagGame = game as TagGame
         player.player.setupAsSpectator(tagGame)
         bossBar?.addPlayer(player.player)
@@ -44,7 +44,7 @@ object TagInProgressState : GameState<TagPlayer> {
         val hunter = game.gamePlayers.firstOrNull { it.role == TagPlayerRoles.HUNTER }?.player ?: return
 
         fun tick() {
-            if (game.fsm.current != TagInProgressState) return
+            if (game.fsm.current !is TagInProgressState) return
 
             game.gamePlayers
                 .filter { it.role == TagPlayerRoles.VICTIM }
@@ -80,7 +80,7 @@ object TagInProgressState : GameState<TagPlayer> {
         bossBar = bar
 
         fun tick() {
-            if (game.fsm.current != TagInProgressState) {
+            if (game.fsm.current !is TagInProgressState) {
                 bar.removeAll()
                 bossBar = null
                 return
@@ -95,7 +95,7 @@ object TagInProgressState : GameState<TagPlayer> {
             } else {
                 bar.removeAll()
                 bossBar = null
-                game.fsm.transitionTo(TagFinishing)
+                game.fsm.transitionTo(TagFinishing(game))
             }
         }
 

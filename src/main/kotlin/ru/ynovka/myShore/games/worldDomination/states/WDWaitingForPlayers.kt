@@ -1,5 +1,6 @@
 package ru.ynovka.myShore.games.worldDomination.states
 
+import org.bukkit.scheduler.BukkitTask
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameState
@@ -10,31 +11,35 @@ import ru.ynovka.myShore.text.ActionBarController
 
 
 // Ожидание игроков (нужно хотя бы 12)
-object WDWaitingForPlayers : GameState<WDPlayer> {
-    override fun onEnter(game: Game<WDPlayer>) {
+class WDWaitingForPlayers(game: Game<WDPlayer>) : GameState<WDPlayer>(game) {
+    private var startTask: BukkitTask? = null
+
+    override fun onEnter() {
         game.gamePlayers.map(WDPlayer::player).forEach {
             it.teleportAsync(Hub.spawn)
             it.inventory.clear()
         }
-        // action bar "Ожидание игроков..." с анимацией
+        // if (task == null) action bar "Ожидание игроков..." с анимацией
     }
 
-    override fun onExit(game: Game<WDPlayer>) {
+    override fun onExit() {
+        startTask?.cancel()
+        startTask = null
         game.gamePlayers.map(WDPlayer::player).forEach {
             ActionBarController.clear(it)
         }
     }
 
-    override fun onPlayerJoin(game: Game<WDPlayer>, player: WDPlayer) {
+    override fun onPlayerJoin(player: WDPlayer) {
         val pp = player.player
         pp.teleportAsync(Hub.spawn)
         pp.inventory.clear()
 
+        if (startTask != null) return
         if (game.gamePlayers.size >= WDGame.MIN_PLAYERS) {
-            inst.server.scheduler.runTaskLater(inst, Runnable {
+            startTask = inst.server.scheduler.runTaskLater(inst, Runnable {
                 // todo пишем всем игрокам отсчёт до начала в actionbar + тем кто только зашёл в лобби
-                if (game.fsm.current != WDWaitingForPlayers) return@Runnable
-                if (game.gamePlayers.size >= WDGame.MIN_PLAYERS) game.fsm.transitionTo(WDDistributionPlayers)
+                if (game.gamePlayers.size >= WDGame.MIN_PLAYERS) game.fsm.transitionTo(WDDistributionPlayers(game))
             }, 10 * 20L) // todo заменить на 60 * 20L - 1 минута до начала
         }
     }

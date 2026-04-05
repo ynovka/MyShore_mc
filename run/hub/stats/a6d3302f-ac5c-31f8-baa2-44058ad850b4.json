@@ -1,49 +1,38 @@
 {
   "stats": {
+    "minecraft:custom": {
+      "minecraft:trigger_trapped_chest": 24,
+      "minecraft:time_since_rest": 306580,
+      "minecraft:leave_game": 276,
+      "minecraft:damage_taken": 4710,
+      "minecraft:mob_kills": 1,
+      "minecraft:open_shulker_box": 13,
+      "minecraft:time_since_death": 306560,
+      "minecraft:damage_dealt_absorbed": 72,
+      "minecraft:swim_one_cm": 36413,
+      "minecraft:total_world_time": 3901431,
+      "minecraft:crouch_one_cm": 60971,
+      "minecraft:deaths": 8,
+      "minecraft:climb_one_cm": 168688,
+      "minecraft:walk_one_cm": 1088521,
+      "minecraft:walk_under_water_one_cm": 69955,
+      "minecraft:damage_dealt": 442,
+      "minecraft:play_time": 3901431,
+      "minecraft:jump": 52070,
+      "minecraft:drop": 18,
+      "minecraft:open_barrel": 1,
+      "minecraft:sprint_one_cm": 5789192,
+      "minecraft:open_chest": 2,
+      "minecraft:fall_one_cm": 2237608,
+      "minecraft:fly_one_cm": 23258427,
+      "minecraft:interact_with_anvil": 1,
+      "minecraft:walk_on_water_one_cm": 80683,
+      "minecraft:sneak_time": 52350
+    },
     "minecraft:mined": {
       "minecraft:short_grass": 1,
       "minecraft:pale_moss_block": 1,
       "minecraft:jungle_leaves": 1
-    },
-    "minecraft:dropped": {
-      "minecraft:pointed_dripstone": 1,
-      "minecraft:light_gray_concrete": 1,
-      "minecraft:writable_book": 1,
-      "minecraft:paper": 13,
-      "minecraft:glass": 1,
-      "minecraft:stick": 1
-    },
-    "minecraft:killed": {
-      "minecraft:snow_golem": 1
-    },
-    "minecraft:custom": {
-      "minecraft:trigger_trapped_chest": 24,
-      "minecraft:time_since_rest": 231720,
-      "minecraft:leave_game": 262,
-      "minecraft:damage_taken": 4710,
-      "minecraft:mob_kills": 1,
-      "minecraft:open_shulker_box": 13,
-      "minecraft:time_since_death": 231700,
-      "minecraft:damage_dealt_absorbed": 72,
-      "minecraft:swim_one_cm": 35779,
-      "minecraft:total_world_time": 3826571,
-      "minecraft:crouch_one_cm": 60834,
-      "minecraft:deaths": 8,
-      "minecraft:climb_one_cm": 167768,
-      "minecraft:walk_one_cm": 1081587,
-      "minecraft:walk_under_water_one_cm": 69811,
-      "minecraft:damage_dealt": 442,
-      "minecraft:play_time": 3826571,
-      "minecraft:jump": 51786,
-      "minecraft:drop": 18,
-      "minecraft:open_barrel": 1,
-      "minecraft:sprint_one_cm": 5746931,
-      "minecraft:open_chest": 2,
-      "minecraft:fall_one_cm": 2209251,
-      "minecraft:fly_one_cm": 23106786,
-      "minecraft:interact_with_anvil": 1,
-      "minecraft:walk_on_water_one_cm": 80557,
-      "minecraft:sneak_time": 51890
     },
     "minecraft:picked_up": {
       "minecraft:lime_bed": 7,
@@ -174,7 +163,7 @@
       "minecraft:green_concrete_powder": 7,
       "minecraft:cyan_concrete": 24,
       "minecraft:gray_shulker_box": 1,
-      "minecraft:acacia_wood": 2,
+      "minecraft:acacia_wood": 4,
       "minecraft:gold_block": 27,
       "minecraft:lime_stained_glass_pane": 46,
       "minecraft:brown_terracotta": 3,
@@ -220,6 +209,17 @@
       "minecraft:red_sandstone_wall": 4,
       "minecraft:brown_shulker_box": 8,
       "minecraft:brown_concrete": 804
+    },
+    "minecraft:killed": {
+      "minecraft:snow_golem": 1
+    },
+    "minecraft:dropped": {
+      "minecraft:pointed_dripstone": 1,
+      "minecraft:light_gray_concrete": 1,
+      "minecraft:writable_book": 1,
+      "minecraft:paper": 13,
+      "minecraft:glass": 1,
+      "minecraft:stick": 1
     }
   },
   "DataVersion": 4671

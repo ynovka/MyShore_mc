@@ -9,7 +9,7 @@ import ru.ynovka.myShore.games.worldDomination.entity.Country
 
 
 class WDGame : Game<WDPlayer>() {
-    override val initialState = WDWaitingForPlayers
+    override val initialState = WDWaitingForPlayers(this)
     override val maxPlayers = 50
     override val gamePlayers: MutableSet<WDPlayer> = mutableSetOf()
 
