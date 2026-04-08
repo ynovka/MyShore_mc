@@ -1,15 +1,13 @@
-package ru.ynovka.myShore.text
+package ru.ynovka.myShore.text.actionBar
 
 import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.MyShore
 import ru.ynovka.myShore.texturepack.Glyphs
-import ru.ynovka.myShore.texturepack.Glyphs.BACKGROUND_LEFT
-import ru.ynovka.myShore.texturepack.Glyphs.BACKGROUND_RIGHT
 
 /**
  * Оборачивает Adventure-компонент фоновыми глифами переменной ширины.
@@ -30,8 +28,6 @@ import ru.ynovka.myShore.texturepack.Glyphs.BACKGROUND_RIGHT
  * Если рендер "плывёт" — измени формулу returnShift в [buildBgEntry].
  */
 object ComponentDecorator {
-
-    private val mm = MiniMessage.miniMessage()
 
     // ── Публичное API ────────────────────────────────────────────────────────
 
@@ -85,10 +81,10 @@ object ComponentDecorator {
     }
 
     private fun buildLeft(): Component =
-        mm.deserialize("<white><shadow:#00000000>$BACKGROUND_LEFT</shadow></white>")
+        MyShore.Companion.mm.deserialize("<white><shadow:#00000000>${Glyphs.BACKGROUND_LEFT}</shadow></white>")
 
     private fun buildRight(): Component =
-        mm.deserialize("<white><shadow:#00000000>$BACKGROUND_RIGHT</shadow></white>")
+        MyShore.Companion.mm.deserialize("<white><shadow:#00000000>${Glyphs.BACKGROUND_RIGHT}</shadow></white>")
 
     /**
      * Возвращает: BACKGROUND_CENTER[w] + returnShift, цвет принудительно белый.
@@ -97,6 +93,6 @@ object ComponentDecorator {
     private fun buildBgEntry(w: Int): Component {
         val bgStr = Glyphs.BACKGROUND_CENTER[w] ?: Glyphs.BACKGROUND_CENTER[6]!!
         val shift = TextOffset.getOffsetMinimessage(-(w - 1))
-        return mm.deserialize("<white><shadow:#00000000>$bgStr$shift</shadow></white>")
+        return MyShore.Companion.mm.deserialize("<white><shadow:#00000000>$bgStr$shift</shadow></white>")
     }
 }

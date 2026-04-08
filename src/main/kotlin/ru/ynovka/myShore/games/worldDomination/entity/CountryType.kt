@@ -4,16 +4,16 @@ import com.github.darksoulq.abyssallib.extension.text
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
-import ru.ynovka.myShore.texturepack.Glyphs.COUNTRY_FLAG
+import ru.ynovka.myShore.texturepack.Glyphs.COUNTRY_FLAGS
 
 
 enum class CountryType(
-    val flag: TextComponent,
+    val flag: TextComponent?,
     val nameTranslatable: TranslatableComponent,
     val cityPresets: List<CityPreset>
 ) {
     RUSSIA(
-        COUNTRY_FLAG.text,
+        COUNTRY_FLAGS["russia"]?.text,
         Component.translatable("name.myshore.wd.country.russia"),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.moscow"), 250..260),
@@ -23,7 +23,7 @@ enum class CountryType(
         )
     ),
     USA(
-        COUNTRY_FLAG.text,
+        COUNTRY_FLAGS["usa"]?.text,
         Component.translatable("name.myshore.wd.country.usa"),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.new_york"), 262..272),
@@ -33,7 +33,7 @@ enum class CountryType(
         )
     ),
     JAPAN(
-        COUNTRY_FLAG.text,
+        COUNTRY_FLAGS["japan"]?.text,
         Component.translatable("name.myshore.wd.country.japan"),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.tokyo"), 260..270),
@@ -43,7 +43,7 @@ enum class CountryType(
         )
     ),
     GERMANY(
-        COUNTRY_FLAG.text,
+        COUNTRY_FLAGS["germany"]?.text,
         Component.translatable("name.myshore.wd.country.germany"),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.berlin"), 259..269),
@@ -53,7 +53,7 @@ enum class CountryType(
         )
     ),
     NORTH_KOREA(
-        COUNTRY_FLAG.text,
+        COUNTRY_FLAGS["north_korea"]?.text,
         Component.translatable("name.myshore.wd.country.north_korea"),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.pyongyang"), 244..254),
@@ -63,7 +63,7 @@ enum class CountryType(
         )
     ),
     CUBA(
-        COUNTRY_FLAG.text,
+        COUNTRY_FLAGS["cuba"]?.text,
         Component.translatable("name.myshore.wd.country.cuba"),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.havana"), 248..258),
@@ -73,7 +73,7 @@ enum class CountryType(
         )
     ),
     KAZAKHSTAN(
-        COUNTRY_FLAG.text,
+        COUNTRY_FLAGS["kazakhstan"]?.text,
         Component.translatable("name.myshore.wd.country.kazakhstan"),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.almaty"), 249..259),
@@ -83,7 +83,7 @@ enum class CountryType(
         )
     ),
     BAHAMAS(
-        COUNTRY_FLAG.text,
+        COUNTRY_FLAGS["bahamas"]?.text,
         Component.translatable("name.myshore.wd.country.bahamas"),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.nassau"), 250..260),
@@ -93,7 +93,7 @@ enum class CountryType(
         )
     ),
     ISRAEL(
-        COUNTRY_FLAG.text,
+        COUNTRY_FLAGS["israel"]?.text,
         Component.translatable("name.myshore.wd.country.israel"),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.jerusalem"), 258..268),
@@ -103,7 +103,7 @@ enum class CountryType(
         )
     ),
     AFGHANISTAN(
-        COUNTRY_FLAG.text,
+        COUNTRY_FLAGS["afghanistan"]?.text,
         Component.translatable("name.myshore.wd.country.afghanistan"),
         listOf(
             CityPreset(Component.translatable("name.myshore.wd.city.kabul"), 242..252),

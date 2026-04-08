@@ -3,10 +3,11 @@ package ru.ynovka.myShore.games.tag.maps
 import ru.ynovka.myShore.games.tag.maps.impl.TagMountainTrackMap
 import ru.ynovka.myShore.games.tag.maps.impl.TagJungleMap
 import net.kyori.adventure.text.TranslatableComponent
+import org.bukkit.Bukkit
+import org.bukkit.Location
 import java.util.concurrent.ThreadLocalRandom
 import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
-import ru.ynovka.myShore.utils.MapSpawn
 import org.bukkit.entity.Player
 import java.util.concurrent.CompletableFuture
 
@@ -93,4 +94,19 @@ fun TagMap.teleportPlayers(game: TagGame) {
     }
 
     CompletableFuture.allOf(*teleports.toTypedArray())
+}
+
+data class MapSpawn(
+    val worldName: String,
+    val x: Double,
+    val y: Double,
+    val z: Double,
+    val yaw: Float = 0f,
+    val pitch: Float = 0f
+) {
+    fun toLocation(): Location {
+        val world = Bukkit.getWorld(worldName)
+            ?: error("World '$worldName' is not loaded")
+        return Location(world, x, y, z, yaw, pitch)
+    }
 }

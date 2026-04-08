@@ -1,14 +1,12 @@
 package ru.ynovka.myShore.hub
 
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
-import net.kyori.adventure.text.minimessage.MiniMessage
+import ru.ynovka.myShore.MyShore.Companion.mm
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 
 
 object TabController {
-
-    private val mm = MiniMessage.miniMessage()
 
     fun updateAll() {
         val online = Bukkit.getOnlinePlayers().size

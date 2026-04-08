@@ -1,20 +1,11 @@
-package ru.ynovka.myShore.text
+package ru.ynovka.myShore.text.actionBar
 
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.MyShore.Companion.inst
 import java.util.UUID
 
-private data class ActionBarEntry(
-    val message: Component,
-    val priority: Int,
-    val expiresAt: Long?
-) {
-    val isPermanent get() = expiresAt == null
-    fun isExpired() = expiresAt != null && System.currentTimeMillis() >= expiresAt
-}
-
-object ActionBarController {
+object ActionBar {
     private val playerMessages = HashMap<UUID, HashMap<Int, ArrayDeque<ActionBarEntry>>>()
     private var taskId = -1
 
@@ -100,20 +91,29 @@ object ActionBarController {
     }
 }
 
+private data class ActionBarEntry(
+    val message: Component,
+    val priority: Int,
+    val expiresAt: Long?
+) {
+    val isPermanent get() = expiresAt == null
+    fun isExpired() = expiresAt != null && System.currentTimeMillis() >= expiresAt
+}
+
 /**
  * Постоянный ActionBar с заданным приоритетом.
  */
 fun Player.sendPermanentActionBar(message: Component, priority: Int = 1) =
-    ActionBarController.send(this, message, priority)
+    ActionBar.send(this, message, priority)
 
 /**
  * Временный ActionBar с заданной длительностью и приоритетом.
  */
 fun Player.sendTimedActionBar(message: Component, durationSec: Int, priority: Int = 1) =
-    ActionBarController.send(this, message, priority, durationSec * 1000L)
+    ActionBar.send(this, message, priority, durationSec * 1000L)
 
 /**
  * Очищает все ActionBar-сообщения игрока.
  */
 fun Player.clearActionBar() =
-    ActionBarController.clear(this)
+    ActionBar.clear(this)

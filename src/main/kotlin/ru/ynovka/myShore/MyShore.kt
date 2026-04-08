@@ -6,6 +6,7 @@ import com.github.darksoulq.abyssallib.world.data.statistic.Statistic
 import com.github.darksoulq.abyssallib.world.item.Item
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIPaperConfig
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.plugin.java.JavaPlugin
 import ru.ynovka.myShore.antiCheat.AntiCheat
 import ru.ynovka.myShore.plasmo.PlasmoAddon
@@ -18,6 +19,7 @@ class MyShore : JavaPlugin() {
         lateinit var inst: MyShore
             private set
         const val PLUGIN_ID = "myshore"
+        val mm = MiniMessage.miniMessage()
         val ITEMS: DeferredRegistry<Item> = DeferredRegistry.create(Registries.ITEMS, PLUGIN_ID)
         val STATS: DeferredRegistry<Statistic> = DeferredRegistry.create(Registries.STATISTICS, PLUGIN_ID)
         val plasmo = PlasmoAddon()

@@ -7,7 +7,7 @@ import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.hub.Hub
-import ru.ynovka.myShore.text.ActionBarController
+import ru.ynovka.myShore.text.actionBar.ActionBar
 
 
 // Ожидание игроков (нужно хотя бы 12)
@@ -26,7 +26,7 @@ class WDWaitingForPlayers(game: Game<WDPlayer>) : GameState<WDPlayer>(game) {
         startTask?.cancel()
         startTask = null
         game.gamePlayers.map(WDPlayer::player).forEach {
-            ActionBarController.clear(it)
+            ActionBar.clear(it)
         }
     }
 

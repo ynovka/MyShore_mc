@@ -8,12 +8,11 @@ import ru.ynovka.myShore.games.tag.states.TagVoting
 import ru.ynovka.myShore.games.tag.maps.TagMaps
 import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.text.clearActionBar
+import ru.ynovka.myShore.text.actionBar.clearActionBar
 import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.utils.canMove
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
-import ru.ynovka.myShore.games.worldDomination.states.WDWaitingForPlayers
 import java.util.UUID
 
 

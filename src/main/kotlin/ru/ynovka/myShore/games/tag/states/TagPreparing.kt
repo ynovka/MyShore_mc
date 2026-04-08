@@ -3,13 +3,13 @@ package ru.ynovka.myShore.games.tag.states
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.applyInProgressInventory
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
 import ru.ynovka.myShore.games.tag.maps.teleportPlayers
-import ru.ynovka.myShore.text.sendPermanentActionBar
+import ru.ynovka.myShore.text.actionBar.sendPermanentActionBar
 import net.kyori.adventure.text.format.NamedTextColor
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.games.tag.TagPlayer
-import ru.ynovka.myShore.text.clearActionBar
+import ru.ynovka.myShore.text.actionBar.clearActionBar
 import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.utils.canMove
@@ -22,7 +22,7 @@ import org.bukkit.GameMode
 import java.time.Duration
 import org.bukkit.Bukkit
 import org.bukkit.Sound
-import ru.ynovka.myShore.text.ComponentDecorator
+import ru.ynovka.myShore.text.actionBar.ComponentDecorator
 import ru.ynovka.myShore.utils.Utils.clearTeams
 import java.util.UUID
 

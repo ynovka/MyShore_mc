@@ -1,25 +1,25 @@
 package ru.ynovka.myShore.hub
 
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import ru.ynovka.myShore.text.ActionBarController
-import ru.ynovka.myShore.MyShore.Companion.inst
-import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import ru.ynovka.myShore.party.PartyManager
-import ru.ynovka.myShore.party.LeftReason
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
-import org.bukkit.potion.PotionEffectType
-import ru.ynovka.myShore.hub.Hub.toHub
-import org.bukkit.potion.PotionEffect
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
-import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 import ru.ynovka.myShore.MyShore
+import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.GameManager
+import ru.ynovka.myShore.hub.Hub.toHub
+import ru.ynovka.myShore.party.LeftReason
+import ru.ynovka.myShore.party.PartyManager
+import ru.ynovka.myShore.text.actionBar.ActionBar
 
 
 object HubEvents : Listener {
@@ -56,7 +56,7 @@ object HubEvents : Listener {
         }, 0L, 2L)
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerJoin(e: PlayerJoinEvent) {
         val player = e.player
 
@@ -75,23 +75,13 @@ object HubEvents : Listener {
 
         player.toHub()
 
-        e.joinMessage(Component.translatable(
-            "msg.myshore.hub.player_join",
-            Component.text(player.name)
-        ))
-
         TabController.updateAll()
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerLeave(e: PlayerQuitEvent) {
 
-        e.quitMessage(Component.translatable(
-            "msg.myshore.hub.player_left",
-            Component.text(e.player.name)
-        ))
-
-        ActionBarController.clear(e.player)
+        ActionBar.clear(e.player)
         GameManager.leave(e.player)
         PartyManager.leave(e.player, LeftReason.QUIT)
         inst.server.scheduler.runTaskLater(

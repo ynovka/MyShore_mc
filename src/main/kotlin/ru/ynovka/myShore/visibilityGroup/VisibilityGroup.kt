@@ -1,6 +1,8 @@
-package ru.ynovka.myShore
+package ru.ynovka.myShore.visibilityGroup
 
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
+import ru.ynovka.myShore.MyShore
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -16,6 +18,16 @@ class VisibilityGroup {
         fun onPlayerQuit(uuid: UUID) {
             playerGroupIndex[uuid]?.removeMember(uuid)
         }
+
+        fun UUID.getVisiblePlayers(include: Boolean = false): MutableSet<UUID> {
+            return playerGroupIndex[this]
+                ?.members
+                ?.filter { include || it != this }
+                ?.toMutableSet()
+                ?: mutableSetOf()
+        }
+
+        fun Player.getVisiblePlayers(include: Boolean = false) = this.uniqueId.getVisiblePlayers(include)
     }
 
     // --- Public API ---

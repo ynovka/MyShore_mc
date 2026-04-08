@@ -8,7 +8,6 @@ import ru.ynovka.myShore.games.tag.hasVictims
 import ru.ynovka.myShore.games.tag.teleport
 import ru.ynovka.myShore.games.tag.currentTagGame
 import net.kyori.adventure.text.Component
-import ru.ynovka.myShore.utils.MapSpawn
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Block
 import org.bukkit.Material

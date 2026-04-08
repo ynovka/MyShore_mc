@@ -5,8 +5,8 @@ import net.kyori.adventure.title.Title
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.MyShore
-import ru.ynovka.myShore.text.clearActionBar
-import ru.ynovka.myShore.text.sendTimedActionBar
+import ru.ynovka.myShore.text.actionBar.clearActionBar
+import ru.ynovka.myShore.text.actionBar.sendTimedActionBar
 import ru.ynovka.myShore.utils.Utils.asPlayer
 import java.time.Duration
 import java.util.UUID

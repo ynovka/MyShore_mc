@@ -1,7 +1,7 @@
 package ru.ynovka.myShore.games
 
 import org.bukkit.entity.Player
-import ru.ynovka.myShore.VisibilityGroup
+import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
 import ru.ynovka.myShore.party.PartyManager.Party
 import java.util.UUID
 

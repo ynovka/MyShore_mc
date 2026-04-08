@@ -3,7 +3,7 @@ package ru.ynovka.myShore.games.tag.states
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.text.clearActionBar
+import ru.ynovka.myShore.text.actionBar.clearActionBar
 import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.games.tag.TagPlayer
 import ru.ynovka.myShore.games.Game
@@ -15,7 +15,7 @@ import org.bukkit.boss.BarStyle
 import org.bukkit.boss.BossBar
 import kotlin.math.roundToInt
 import org.bukkit.Bukkit
-import ru.ynovka.myShore.text.ComponentDecorator
+import ru.ynovka.myShore.text.actionBar.ComponentDecorator
 
 
 // 40-100 сек (сам геймплей салочек)

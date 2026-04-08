@@ -2,6 +2,7 @@ package ru.ynovka.myShore.texturepack
 
 import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import com.github.darksoulq.abyssallib.server.resource.asset.Font
+import ru.ynovka.myShore.games.worldDomination.entity.CountryType
 import ru.ynovka.myShore.texturepack.TexturePack.fontGlyphs
 import ru.ynovka.myShore.texturepack.TexturePack.ns
 
@@ -12,8 +13,7 @@ object Glyphs {
     val BACKGROUND_CENTER: MutableMap<Int, String> = mutableMapOf()
     lateinit var BACKGROUND_RIGHT: String
         private set
-    lateinit var COUNTRY_FLAG: String
-        private set
+    val COUNTRY_FLAGS: MutableMap<String, String> = mutableMapOf()
 
     fun register() {
         BACKGROUND_LEFT = newGlyph("background_left", 14, 10)
@@ -25,8 +25,9 @@ object Glyphs {
         BACKGROUND_RIGHT = newGlyph("background_right", 14, 10)
             .toMiniMessageString() + TextOffset.getOffsetMinimessage(-1)
 
-
-        COUNTRY_FLAG = newGlyph("country_flag", 14, 10).toMiniMessageString()
+        for (country in CountryType.entries) {
+            COUNTRY_FLAGS[country.name] = newGlyph("${country.name.lowercase()}_flag", 8, 10).toMiniMessageString()
+        }
     }
 
     fun newGlyph(name: String, height: Int = 8, ascent: Int = 8): Font.TextureGlyph {

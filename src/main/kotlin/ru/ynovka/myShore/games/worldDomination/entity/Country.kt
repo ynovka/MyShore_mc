@@ -3,7 +3,7 @@ package ru.ynovka.myShore.games.worldDomination.entity
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.VisibilityGroup
+import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.texturepack.Glyphs
 
@@ -55,7 +55,7 @@ class Country private constructor(
     }
 
     fun teleport(player: Player) {
-        //countryVisibilityGroup.addViewer(player.uniqueId)
+        // countryVisibilityGroup.addViewer(player.uniqueId) todo раскоментить
         player.teleportAsync(skin.loc)
     }
 
@@ -96,8 +96,7 @@ class Country private constructor(
         }
 
         fun Country?.getFlag(): String {
-
-            return Glyphs.COUNTRY_FLAG
+            return Glyphs.COUNTRY_FLAGS[this?.type?.name] ?: ""
         }
 
         fun WDPlayer.getFormattedName() = MiniMessage.miniMessage().deserialize("${country.getFlag()} ${player.name}")

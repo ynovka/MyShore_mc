@@ -1,16 +1,15 @@
 package ru.ynovka.myShore.utils
 
-import net.kyori.adventure.text.minimessage.MiniMessage
+import ru.ynovka.myShore.MyShore.Companion.mm
 import net.kyori.adventure.text.Component
 import org.bukkit.scoreboard.Team
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
-import ru.ynovka.myShore.games.GamePlayer
 import java.util.UUID
 
 
 object Utils {
-    fun String.toComponent(): Component = MiniMessage.miniMessage().deserialize(this)
+    fun String.toComponent(): Component = mm.deserialize(this)
 
 
     fun UUID.asPlayer(): Player? = Bukkit.getPlayer(this)

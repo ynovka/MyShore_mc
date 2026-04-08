@@ -5,7 +5,7 @@ import ru.ynovka.myShore.Database.tagCaughtsRepository
 import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.games.tag.states.TagFinishing
 import org.bukkit.event.player.PlayerInteractEvent
-import ru.ynovka.myShore.utils.effects.RiftEffect
+import ru.ynovka.myShore.games.tag.effects.RiftEffect
 import ru.ynovka.myShore.texturepack.SoundsPack
 import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.event.block.BlockBreakEvent

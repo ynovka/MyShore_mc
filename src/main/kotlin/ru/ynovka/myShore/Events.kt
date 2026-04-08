@@ -7,14 +7,19 @@ import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.TagEvents
 import ru.ynovka.myShore.games.worldDomination.WDEvents
 import ru.ynovka.myShore.hub.HubEvents
+import ru.ynovka.myShore.text.chat.ChatEvents
+import ru.ynovka.myShore.visibilityGroup.VisibilityGroupEvents
 
 
 object Events {
     fun register() {
+
+        WDEvents.register()
         HubEvents.register()
         TagEvents.register()
-        WDEvents.register()
+        ChatEvents.register()
         MovementController.register()
+        VisibilityGroupEvents.register()
 
         val bus = EventBus(inst)
         bus.register(AntiCheatEvents)

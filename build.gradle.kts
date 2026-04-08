@@ -10,16 +10,16 @@ version = "0.0.1"
 
 repositories {
     mavenCentral()
-    maven("https://repo.papermc.io/repository/maven-public/")
-    maven("https://maven.leafmc.one/snapshots/")
     maven("https://jitpack.io")
+    maven("https://maven.leafmc.one/snapshots/")
     maven("https://repo.plasmoverse.com/releases")
+    maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 dependencies {
     paperweight.devBundle("cn.dreeam.leaf", "1.21.11-R0.1-SNAPSHOT")
 
-    compileOnly("com.github.darksoulq:AbyssalLib:v2.0.0-mc1.21.11-dev.12")
+    compileOnly("com.github.darksoulq:AbyssalLib:v2.0.0-mc1.21.11-dev.14")
     //compileOnly("com.github.darksoulq:AbyssalLib")
     compileOnly("su.plo.voice.server:paper:2.1.8")
 
