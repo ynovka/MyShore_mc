@@ -14,6 +14,7 @@ import org.bukkit.Material
 import org.bukkit.GameMode
 import org.bukkit.Bukkit
 import ru.ynovka.myShore.games.tag.findPlayer
+import ru.ynovka.myShore.games.tag.maps.MapSpawn
 import kotlin.math.sqrt
 
 

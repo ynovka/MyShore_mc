@@ -19,7 +19,7 @@ import java.util.UUID
 class TagGame : Game<TagPlayer>() {
 
     override val initialState = TagWaitingForPlayers(this)
-    override val maxPlayers: Int = 8
+    override val maxPlayers: Int = 5
     override val gamePlayers: MutableSet<TagPlayer> = mutableSetOf()
 
     val scheduler = inst.server.scheduler

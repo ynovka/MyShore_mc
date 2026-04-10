@@ -2,13 +2,13 @@ package ru.ynovka.myShore.games.tag.statistics
 
 import com.github.darksoulq.abyssallib.world.data.statistic.PlayerStatistics
 import com.github.darksoulq.abyssallib.world.data.statistic.Statistic
-import ru.ynovka.myShore.utils.StatsUtils.incrementStat
-import ru.ynovka.myShore.utils.StatsUtils.resetStat
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.games.tag.TagGame
 import net.kyori.adventure.key.Key
 import ru.ynovka.myShore.MyShore
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.utils.StatsUtils.incrementStat
+import ru.ynovka.myShore.utils.StatsUtils.resetStat
 
 
 object TagPlayerStatistics {
