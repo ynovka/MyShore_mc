@@ -12,7 +12,6 @@ import ru.ynovka.myShore.games.worldDomination.entity.CountryType
 import ru.ynovka.myShore.games.worldDomination.entity.Country
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.games.GameState
-import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GamePlayer
 import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.worldDomination.WDItems
@@ -20,6 +19,7 @@ import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
 import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
 import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFormattedName
 import ru.ynovka.myShore.plasmo.PhoneCall
+import ru.ynovka.myShore.utils.Utils.distribute
 import java.util.UUID
 
 
@@ -31,7 +31,7 @@ import java.util.UUID
  * Максимум 50 игроков (10с по 5и)
  */
 
-class WDDistributionPlayers(game: Game<WDPlayer>) : GameState<WDPlayer>(game) {
+class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
     /**
      * Случайным образом определяем президентов случайных стран и телепортируем их в штаб-квартиры
      * Остальные игроки остаются в лобби
@@ -42,17 +42,18 @@ class WDDistributionPlayers(game: Game<WDPlayer>) : GameState<WDPlayer>(game) {
         // Случайное распределение стран и президентов
         val players = game.gamePlayers.shuffled()
         val countriesCount = (players.size / 2).coerceIn(2..10)
-        val countries = CountryType.entries.shuffled().take(countriesCount)
+        val countriesList = CountryType.entries.shuffled().take(countriesCount)
 
         players.map(GamePlayer::player).forEach { it.inventory.setItem(8, WDItems.wdNotebook.getStack(it)) }
 
-        players.take(countriesCount).zip(countries)
+        players.take(countriesCount).zip(countriesList)
             .forEach { (president, type) ->
                 val pp = president.player
                 // Создаём страну, телепортируем в неё презиента
-                Country.create(president, type).also { country ->
+                val country = Country.create(president, type).also { country ->
                     country.teleport(pp)
                 }
+                game.countries += country
 
                 // Выдаём президенту телефон для звонков
                 pp.inventory.setItem(7, WDItems.wdPhoneMenu.getStack(pp))
@@ -72,14 +73,39 @@ class WDDistributionPlayers(game: Game<WDPlayer>) : GameState<WDPlayer>(game) {
 
         invites.clear()
 
+        val unassignedPlayers = game.gamePlayers.filter { it.country == null }.shuffled().toMutableSet()
+        game.countries.forEach { country ->
+            if (country.vicePresident == null) {
+                val newVice = unassignedPlayers.random()
+                unassignedPlayers.remove(newVice)
+                country.setVicePresident(newVice)
+            }
+        }
+        val chunkedPlayers = unassignedPlayers.distribute(game.countries.size)
+        chunkedPlayers.zip(game.countries).forEach { (players, country) ->
+            players.forEach { player ->
+                country.addCitizen(player)
+            }
+        }
+
         PhoneCall.endAllCalls(game.gamePlayers.map(GamePlayer::playerId))
+
     }
 
-    override fun onPlayerJoin(player: WDPlayer) { }
+    override fun onPlayerJoin(gamePlayer: WDPlayer) {
+        gamePlayer.player.teleportAsync(WDGame.hubLoc)
+    }
 
-    override fun onPlayerReconnect(player: WDPlayer) { }
+    override fun onPlayerReconnect(gamePlayer: WDPlayer) {
+        val player = gamePlayer.player
+        val country = gamePlayer.country
+        if (country != null) {
+            country.teleport(player)
+            return
+        }
+        player.teleportAsync(WDGame.hubLoc)
+    }
 
-    override fun onPlayerLeave(player: WDPlayer) { }
 
     private val invites: MutableSet<ViceInvite> = mutableSetOf()
     data class ViceInvite(
@@ -153,6 +179,7 @@ class WDDistributionPlayers(game: Game<WDPlayer>) : GameState<WDPlayer>(game) {
         val country = game.countries.firstOrNull { it.president.playerId == president } ?: return
         val wdPlayer = game.getOrCreatePlayer(vice)
         country.setVicePresident(wdPlayer)
+        country.teleport(wdPlayer.player)
 
         // Пишем в чат президенту, сообщение "{игрок} принял приглашение"
     }

@@ -6,7 +6,6 @@ import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.text.actionBar.clearActionBar
 import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.games.tag.TagPlayer
-import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.utils.canMove
 import net.kyori.adventure.text.Component
@@ -19,21 +18,19 @@ import ru.ynovka.myShore.text.actionBar.ComponentDecorator
 
 
 // 40-100 сек (сам геймплей салочек)
-class TagInProgressState(game: Game<TagPlayer>) : GameState<TagPlayer>(game) {
+class TagInProgressState(game: TagGame) : GameState<TagPlayer, TagGame>(game) {
 
     private var bossBar: BossBar? = null
 
     override fun onEnter() {
-        val tagGame = game as TagGame
-        tagGame.gamePlayers.forEach { it.player.canMove(true) }
-        startHunterDistanceRenderer(tagGame)
-        startCountdown(tagGame)
+        game.gamePlayers.forEach { it.player.canMove(true) }
+        startHunterDistanceRenderer(game)
+        startCountdown(game)
     }
 
-    override fun onPlayerJoin(player: TagPlayer) {
-        val tagGame = game as TagGame
-        player.player.setupAsSpectator(tagGame)
-        bossBar?.addPlayer(player.player)
+    override fun onPlayerJoin(gamePlayer: TagPlayer) {
+        gamePlayer.player.setupAsSpectator(game)
+        bossBar?.addPlayer(gamePlayer.player)
     }
 
     // ---------- отображение расстояния до охотника ----------

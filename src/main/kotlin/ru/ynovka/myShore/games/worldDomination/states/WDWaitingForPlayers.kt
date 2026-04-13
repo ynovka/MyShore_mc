@@ -2,7 +2,6 @@ package ru.ynovka.myShore.games.worldDomination.states
 
 import org.bukkit.scheduler.BukkitTask
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
@@ -11,7 +10,7 @@ import ru.ynovka.myShore.text.actionBar.ActionBar
 
 
 // Ожидание игроков (нужно хотя бы 12)
-class WDWaitingForPlayers(game: Game<WDPlayer>) : GameState<WDPlayer>(game) {
+class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
     private var startTask: BukkitTask? = null
 
     override fun onEnter() {
@@ -30,10 +29,10 @@ class WDWaitingForPlayers(game: Game<WDPlayer>) : GameState<WDPlayer>(game) {
         }
     }
 
-    override fun onPlayerJoin(player: WDPlayer) {
-        val pp = player.player
-        pp.teleportAsync(Hub.spawn)
-        pp.inventory.clear()
+    override fun onPlayerJoin(gamePlayer: WDPlayer) {
+        val player = gamePlayer.player
+        player.teleportAsync(WDGame.hubLoc)
+        player.inventory.clear()
 
         if (startTask != null) return
         if (game.gamePlayers.size >= WDGame.MIN_PLAYERS) {

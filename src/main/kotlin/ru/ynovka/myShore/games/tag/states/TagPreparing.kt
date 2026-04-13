@@ -10,7 +10,6 @@ import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.games.tag.TagPlayer
 import ru.ynovka.myShore.text.actionBar.clearActionBar
-import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.utils.canMove
 import org.bukkit.potion.PotionEffectType
@@ -28,7 +27,7 @@ import java.util.UUID
 
 
 // 5 сек перед началом (что бы у игроков загрузилась карта, они ознакомились со своими ролями)
-class TagPreparing(game: Game<TagPlayer>) : GameState<TagPlayer>(game) {
+class TagPreparing(game: TagGame) : GameState<TagPlayer, TagGame>(game) {
 
     val MAX_HISTORY = 10
 
@@ -54,11 +53,10 @@ class TagPreparing(game: Game<TagPlayer>) : GameState<TagPlayer>(game) {
     private val glowingEffect = PotionEffect(PotionEffectType.GLOWING, -1, 0, false, false)
 
     override fun onEnter() {
-        val tagGame = game as TagGame
-        val hunterUuid = chooseHunter(tagGame.gamePlayers.map { it.player.uniqueId })
+        val hunterUuid = chooseHunter(game.gamePlayers.map { it.player.uniqueId })
         registerHunter(hunterUuid)
 
-        tagGame.gamePlayers.forEach { tagPlayer ->
+        game.gamePlayers.forEach { tagPlayer ->
             val player = tagPlayer.player
             val isHunter = player.uniqueId == hunterUuid
 
@@ -88,14 +86,14 @@ class TagPreparing(game: Game<TagPlayer>) : GameState<TagPlayer>(game) {
             player.canMove(false)
         }
 
-        tagGame.map.teleportPlayers(tagGame)
-        tagGame.map.onGameStart(tagGame)
+        game.map.teleportPlayers(game)
+        game.map.onGameStart(game)
 
-        startCountdown(tagGame)
+        startCountdown(game)
     }
 
-    override fun onPlayerJoin(player: TagPlayer) {
-        player.player.setupAsSpectator(game as TagGame)
+    override fun onPlayerJoin(gamePlayer: TagPlayer) {
+        gamePlayer.player.setupAsSpectator(game)
     }
 
     // ---------- выбор охотника ----------

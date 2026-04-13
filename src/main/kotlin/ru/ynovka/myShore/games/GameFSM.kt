@@ -1,12 +1,12 @@
 package ru.ynovka.myShore.games
 
-class GameFSM<P : GamePlayer>(initial: GameState<P>) {
-    var current: GameState<P> = initial
+class GameFSM<P : GamePlayer>(initial: GameState<P, *>) {
+    var current: GameState<P, *> = initial
         private set
 
     fun start() = current.onEnter()
 
-    fun transitionTo(next: GameState<P>) {
+    fun transitionTo(next: GameState<P, *>) {
         current.onExit()
         current = next
         current.onEnter()

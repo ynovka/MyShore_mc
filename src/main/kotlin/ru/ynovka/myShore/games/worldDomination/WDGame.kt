@@ -1,6 +1,7 @@
 package ru.ynovka.myShore.games.worldDomination
 
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.games.worldDomination.states.WDWaitingForPlayers
 import ru.ynovka.myShore.games.Game
@@ -27,6 +28,8 @@ class WDGame : Game<WDPlayer>() {
     companion object {
         const val MIN_PLAYERS = 2 // todo заменить на 12
         val world by lazy { Bukkit.getWorld("world_domination")!! }
+        val hubLoc by lazy { Location(world, 0.0, 100.0, 0.0) }
+        val unLoc by lazy { Location(world, 1000.0, 100.0, 0.0) }
 
         fun Player.currentWDGame(): WDGame? = GameManager.run { currentGame() } as? WDGame
     }

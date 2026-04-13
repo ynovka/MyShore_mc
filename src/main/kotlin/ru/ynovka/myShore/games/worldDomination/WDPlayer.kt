@@ -14,7 +14,7 @@ class WDPlayer(
     var country: Country? = null
 
     companion object {
-        fun Player.asWDPlayer(): WDPlayer?  = currentWDGame()?.getOrCreatePlayer(this)
+        fun Player.asWDPlayer(): WDPlayer? = currentWDGame()?.getOrCreatePlayer(this)
     }
 }
 

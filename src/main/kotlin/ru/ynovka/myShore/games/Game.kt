@@ -9,8 +9,7 @@ import java.util.UUID
 abstract class Game<P : GamePlayer>(
     val party: Party? = null  /** null  → публичная игра */
 ) {
-
-    abstract val initialState: GameState<P>
+    abstract val initialState: GameState<P, *>
     val fsm: GameFSM<P> by lazy {
         GameFSM(initialState).also { it.start() }
     }

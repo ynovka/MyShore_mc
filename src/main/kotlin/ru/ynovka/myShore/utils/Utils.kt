@@ -26,6 +26,19 @@ object Utils {
         }
     }
 
+    fun <T> Iterable<T>.distribute(groupsCount: Int): List<MutableList<T>> {
+        require(groupsCount > 0)
+
+        val groups = List(groupsCount) { mutableListOf<T>() }
+
+        forEachIndexed { index, element ->
+            val groupIndex = index % groupsCount
+            groups[groupIndex].add(element)
+        }
+
+        return groups
+    }
+
     val Boolean.intValue
         get() = if (this) 1 else 0
 }

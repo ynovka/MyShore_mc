@@ -10,7 +10,6 @@ import ru.ynovka.myShore.games.tag.hasVictims
 import ru.ynovka.myShore.games.tag.hasHunter
 import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.games.tag.TagPlayer
-import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameState
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
@@ -19,21 +18,19 @@ import java.time.Duration
 
 
 // 5 сек после игры - определение победителей
-class TagFinishing(game: Game<TagPlayer>) : GameState<TagPlayer>(game) {
+class TagFinishing(game: TagGame) : GameState<TagPlayer, TagGame>(game) {
 
     override fun onEnter() {
-        val tagGame = game as TagGame
-
         // Жертвы живы или охотник отсутствует → победа жертв
-        val winnerRole = if (tagGame.hasVictims() || !tagGame.hasHunter()) {
+        val winnerRole = if (game.hasVictims() || !game.hasHunter()) {
             TagPlayerRoles.VICTIM
         } else {
             TagPlayerRoles.HUNTER
         }
 
-        saveStats(tagGame, winnerRole)
+        saveStats(game, winnerRole)
 
-        tagGame.gamePlayers.forEach { tagPlayer ->
+        game.gamePlayers.forEach { tagPlayer ->
             val player = tagPlayer.player
             player.clearActivePotionEffects()
             player.applyFinishingInventory()
@@ -43,22 +40,21 @@ class TagFinishing(game: Game<TagPlayer>) : GameState<TagPlayer>(game) {
             tagPlayer.role = TagPlayerRoles.UNDEFINED
         }
 
-        tagGame.scheduler.runTaskLater(inst, Runnable {
-            val nextState = if (tagGame.gamePlayers.size >= 2) {
+        game.scheduler.runTaskLater(inst, Runnable {
+            val nextState = if (game.gamePlayers.size >= 2) {
                 TagVoting(game)
             } else {
                 TagWaitingForPlayers(game)
             }
-            tagGame.fsm.transitionTo(nextState)
+            game.fsm.transitionTo(nextState)
         }, 5 * 20L)
 
-        tagGame.map.onGameEnd(tagGame)
+        game.map.onGameEnd(game)
     }
 
-    override fun onPlayerJoin(player: TagPlayer) {
-        val tagGame = game as TagGame
-        player.role = TagPlayerRoles.SPECTATOR
-        player.player.setupAsSpectator(tagGame)
+    override fun onPlayerJoin(gamePlayer: TagPlayer) {
+        gamePlayer.role = TagPlayerRoles.SPECTATOR
+        gamePlayer.player.setupAsSpectator(game)
     }
 
     private fun buildWinnerTitle(winnerRole: TagPlayerRoles): Title {

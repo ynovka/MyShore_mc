@@ -7,7 +7,6 @@ import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.games.tag.TagPlayer
 import ru.ynovka.myShore.games.tag.teleport
-import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameState
 import net.kyori.adventure.text.Component
 import org.bukkit.GameMode
@@ -16,26 +15,25 @@ import kotlin.math.ceil
 
 
 // 10 сек на голосование за карту, режим игры, сменить лобби, посмотреть статистику
-class TagVoting(game: Game<TagPlayer>) : GameState<TagPlayer>(game) {
+class TagVoting(game: TagGame) : GameState<TagPlayer, TagGame>(game) {
 
     override fun onEnter() {
-        val tagGame = game as TagGame
-        tagGame.gamePlayers.forEach { tagPlayer ->
-            tagPlayer.player.setupForVoting(tagGame)
+        game.gamePlayers.forEach { tagPlayer ->
+            tagPlayer.player.setupForVoting(game)
             tagPlayer.player.playSound(tagPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
         }
 
-        tagGame.scheduler.runTaskLater(inst, Runnable {
-            if (tagGame.fsm.current !is TagVoting) return@Runnable
+        game.scheduler.runTaskLater(inst, Runnable {
+            if (game.fsm.current !is TagVoting) return@Runnable
 
-            resolveMapVoting(tagGame)?.let { setupMap(tagGame, it) }
-            tagGame.mapVotes.clear()
-            tagGame.fsm.transitionTo(TagPreparing(game))
+            resolveMapVoting(game)?.let { setupMap(game, it) }
+            game.mapVotes.clear()
+            game.fsm.transitionTo(TagPreparing(this@TagVoting.game))
         }, 10 * 20L)
     }
 
-    override fun onPlayerJoin(player: TagPlayer) {
-        player.player.setupForVoting(game as TagGame)
+    override fun onPlayerJoin(gamePlayer: TagPlayer) {
+        gamePlayer.player.setupForVoting(game)
     }
 
     /**

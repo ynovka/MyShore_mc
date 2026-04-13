@@ -26,7 +26,8 @@ object Glyphs {
             .toMiniMessageString() + TextOffset.getOffsetMinimessage(-1)
 
         for (country in CountryType.entries) {
-            COUNTRY_FLAGS[country.name] = newGlyph("${country.name.lowercase()}_flag", 8, 10).toMiniMessageString()
+            COUNTRY_FLAGS[country.name] = newGlyph("${country.name.lowercase()}_flag", 8, 6)
+                .toMiniMessageString()
         }
     }
 

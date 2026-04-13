@@ -1,11 +1,11 @@
 package ru.ynovka.myShore.games
 
-abstract class GameState<P : GamePlayer>(protected val game: Game<P>) {
+abstract class GameState<P : GamePlayer, G : Game<P>>(protected val game: G) {
     open fun onEnter() {}
     open fun onExit() {}
-    open fun onPlayerJoin(player: P) {}
-    open fun onPlayerReconnect(player: P) = onPlayerJoin(player)
-    open fun onPlayerLeave(player: P) {}
-    open fun canPlayerJoin(player: P): Boolean = true
-    open fun onSpectatorJoin(spectator: P) {}
+    open fun onPlayerJoin(gamePlayer: P) {}
+    open fun onPlayerReconnect(gamePlayer: P) = onPlayerJoin(gamePlayer)
+    open fun onPlayerLeave(gamePlayer: P) {}
+    open fun canPlayerJoin(gamePlayer: P): Boolean = true
+    open fun onSpectatorJoin(gameSpectator: P) {}
 }

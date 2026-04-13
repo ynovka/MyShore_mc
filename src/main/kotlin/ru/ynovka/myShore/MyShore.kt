@@ -2,7 +2,7 @@ package ru.ynovka.myShore
 
 import com.github.darksoulq.abyssallib.server.registry.DeferredRegistry
 import com.github.darksoulq.abyssallib.server.registry.Registries
-import com.github.darksoulq.abyssallib.world.data.statistic.Statistic
+import com.github.darksoulq.abyssallib.world.data.statistic.StatisticType
 import com.github.darksoulq.abyssallib.world.item.Item
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIPaperConfig
@@ -21,7 +21,7 @@ class MyShore : JavaPlugin() {
         const val PLUGIN_ID = "myshore"
         val mm = MiniMessage.miniMessage()
         val ITEMS: DeferredRegistry<Item> = DeferredRegistry.create(Registries.ITEMS, PLUGIN_ID)
-        val STATS: DeferredRegistry<Statistic> = DeferredRegistry.create(Registries.STATISTICS, PLUGIN_ID)
+        val STATISTIC_TYPES: DeferredRegistry<StatisticType> = DeferredRegistry.create(Registries.STATISTIC_TYPES, PLUGIN_ID)
         val plasmo = PlasmoAddon()
     }
 
@@ -43,7 +43,7 @@ class MyShore : JavaPlugin() {
         Stats.register()
 
         ITEMS.apply()
-        STATS.apply()
+        STATISTIC_TYPES.apply()
         TexturePack.register()
     }
 

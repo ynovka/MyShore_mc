@@ -1,7 +1,6 @@
 plugins {
     kotlin("jvm") version "2.3.20-RC"
     id("com.gradleup.shadow") version "9.3.1"
-    id("xyz.jpenilla.run-paper") version "3.0.2"
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
 }
 
@@ -19,7 +18,7 @@ repositories {
 dependencies {
     paperweight.devBundle("cn.dreeam.leaf", "1.21.11-R0.1-SNAPSHOT")
 
-    compileOnly("com.github.darksoulq:AbyssalLib:v2.0.0-mc1.21.11-dev.14")
+    compileOnly("com.github.darksoulq:AbyssalLib:v2.0.0-mc1.21.11-dev.17")
     //compileOnly("com.github.darksoulq:AbyssalLib")
     compileOnly("su.plo.voice.server:paper:2.1.8")
 
@@ -33,23 +32,16 @@ kotlin {
     jvmToolchain(21)
 }
 
-tasks {
-    runServer {
-        serverJar(File("run/server.jar"))
-        minecraftVersion("1.21.11")
-    }
-}
-
-tasks.withType(xyz.jpenilla.runtask.task.AbstractRun::class) {
-    javaLauncher = javaToolchains.launcherFor {
-        vendor = JvmVendorSpec.JETBRAINS
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-    jvmArgs("-XX:+AllowEnhancedClassRedefinition")
-}
-
 tasks.build {
     dependsOn("shadowJar")
+}
+
+tasks.shadowJar {
+    archiveFileName.set("${project.name}-${project.version}.jar")
+
+    destinationDirectory.set(
+        file("/var/lib/featherpanel/volumes/f77dd561-9f8b-4f19-9563-e9360906a3a1/plugins/")
+    )
 }
 
 tasks.processResources {
