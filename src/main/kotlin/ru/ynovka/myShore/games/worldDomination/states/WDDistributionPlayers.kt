@@ -1,12 +1,16 @@
 package ru.ynovka.myShore.games.worldDomination.states
 
+import com.github.darksoulq.abyssallib.world.advancement.AdvancementFrame
+import com.github.darksoulq.abyssallib.world.advancement.Toast
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.worldDomination.entity.CountryType
 import ru.ynovka.myShore.games.worldDomination.entity.Country
@@ -38,25 +42,46 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
      * У президентов есть 3 минуты что бы выбрать своего вице-президента
      * По истечению 3-ёх минут странам без вице-президентов они будут назначенны случайным образом
      */
-    override fun onEnter() {
+    override fun onEnterState() {
         // Случайное распределение стран и президентов
         val players = game.gamePlayers.shuffled()
         val countriesCount = (players.size / 2).coerceIn(2..10)
         val countriesList = CountryType.entries.shuffled().take(countriesCount)
 
-        players.map(GamePlayer::player).forEach { it.inventory.setItem(8, WDItems.wdNotebook.getStack(it)) }
+        // todo перевод
+        val toast = Toast.builder()
+            .line1(Component.text("Началась новая стадия").color(NamedTextColor.GRAY))
+            .line2(Component.text("<#87CEEB>>   Распределение игроков"))
+            .icon(ItemStack.of(Material.CLOCK))
+            .frame(AdvancementFrame.GOAL)
+            .build()
+
+        players.map(GamePlayer::player).forEach {
+            it.inventory.setItem(8, WDItems.wdNotebook.getStack(it))
+            toast.send(it)
+        }
 
         players.take(countriesCount).zip(countriesList)
             .forEach { (president, type) ->
                 val pp = president.player
                 // Создаём страну, телепортируем в неё презиента
-                val country = Country.create(president, type).also { country ->
+                val country = Country.create(game, president, type).also { country ->
                     country.teleport(pp)
                 }
                 game.countries += country
 
                 // Выдаём президенту телефон для звонков
                 pp.inventory.setItem(7, WDItems.wdPhoneMenu.getStack(pp))
+
+                // todo перевод
+                val toast = Toast.builder()
+                    .line1(Component.text("Ваша роль - президент").color(NamedTextColor.GRAY))
+                    .line2(Component.text("Страна - ${country.getFormattedName(pp)}"))
+                    .icon(ItemStack.of(Material.CLOCK))
+                    .frame(AdvancementFrame.GOAL)
+                    .build()
+
+                toast.send(pp)
             }
 
         // Отсчёт 3 минуты, до перехода к следующему этапу
@@ -65,14 +90,11 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         }, 3 * 60 * 20L)
     }
 
-    override fun onExit() {
-        game.gamePlayers
-            .filter { it.role == WDPlayerRole.PRESIDENT }
-            .map(GamePlayer::player)
-            .forEach { it.inventory.clear(0) }
-
+    override fun onExitState() {
+        // Очищаем приглашения в вице-президенты
         invites.clear()
 
+        // Распределяем оставшихся игроков по странам
         val unassignedPlayers = game.gamePlayers.filter { it.country == null }.shuffled().toMutableSet()
         game.countries.forEach { country ->
             if (country.vicePresident == null) {
@@ -88,8 +110,14 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
             }
         }
 
+        // Завершаем все телефонные звонки
         PhoneCall.endAllCalls(game.gamePlayers.map(GamePlayer::playerId))
 
+        // Забираем телефоны
+        game.gamePlayers
+            .filter { it.role == WDPlayerRole.PRESIDENT }
+            .map(GamePlayer::player)
+            .forEach { it.inventory.clear(7) }
     }
 
     override fun onPlayerJoin(gamePlayer: WDPlayer) {

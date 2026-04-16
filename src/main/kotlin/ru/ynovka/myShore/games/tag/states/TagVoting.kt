@@ -17,7 +17,7 @@ import kotlin.math.ceil
 // 10 сек на голосование за карту, режим игры, сменить лобби, посмотреть статистику
 class TagVoting(game: TagGame) : GameState<TagPlayer, TagGame>(game) {
 
-    override fun onEnter() {
+    override fun onEnterState() {
         game.gamePlayers.forEach { tagPlayer ->
             tagPlayer.player.setupForVoting(game)
             tagPlayer.player.playSound(tagPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)

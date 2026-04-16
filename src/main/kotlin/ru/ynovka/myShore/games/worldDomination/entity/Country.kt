@@ -1,14 +1,17 @@
 package ru.ynovka.myShore.games.worldDomination.entity
 
+import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import net.kyori.adventure.text.minimessage.MiniMessage
-import org.bukkit.entity.Player
-import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
+import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.texturepack.Glyphs
+import org.bukkit.entity.Player
 
 
 class Country private constructor(
+    /** Ссылка на игру */
+    val game: WDGame,
     /** Президент */
     val president: WDPlayer,
     /** Пресет страны */
@@ -23,6 +26,10 @@ class Country private constructor(
 
     /** Список игроков страны */
     val citizens: MutableList<WDPlayer> = mutableListOf()
+
+    /** Жива ли страна? */
+    val isAlive
+        get() = cities.any { it.value.isAlive }
 
     /** Баланс государства */
     var balance: Int = 950
@@ -59,8 +66,41 @@ class Country private constructor(
         player.teleportAsync(skin.loc)
     }
 
+    /** Вызывается в начале этапа переговоров */
+    fun onStartNewRound() {
+        collectRoundProfit()
+        bombsAvailable = bombsMaking
+        bombsMaking = 0
+    }
+
+    /** Сбор прибыли за раунд */
     fun collectRoundProfit() {
         balance += cities.values.sumOf { it.capitalization }
+    }
+
+    /** @return true если ядерная технология успешно изучена */
+    fun learnNuclear(): Boolean {
+        if (isNuclearLearned) return false
+        if (balance >= LEARN_NUCLEAR_COST) return false
+        balance -= LEARN_NUCLEAR_COST
+        isNuclearLearned = true
+        return true
+    }
+
+    /** @return true если ядерная бомба успешно создана */
+    fun craftNuclearBomb(): Boolean {
+        if (balance >= CRAFT_NUCLEAR_BOMB_COST) return false
+        balance -= CRAFT_NUCLEAR_BOMB_COST
+        bombsMaking += 1
+        return true
+    }
+
+    /** @return true если вклад в экологию успешно сделан */
+    fun investmentsEcology(): Boolean {
+        if (balance >= ECOLOGY_COST) return false
+        balance -= ECOLOGY_COST
+        game.ecology += 1
+        return true
     }
 
     fun setVicePresident(player: WDPlayer) {
@@ -79,25 +119,21 @@ class Country private constructor(
     }
 
     companion object {
+        const val LEARN_NUCLEAR_COST: Int = 150
+        const val CRAFT_NUCLEAR_BOMB_COST: Int = 250
+        const val ECOLOGY_COST: Int = 50
+
         /** Единственная точка создания Country */
-        fun create(president: WDPlayer, type: CountryType): Country =
-            Country(president, type)
-
-        val pendingInvitesToVicePresident: MutableMap<Country, WDPlayer> = mutableMapOf()
-
-        fun inviteVicePresident(country: Country, target: WDPlayer) {
-            // Отправляем сообщение в чате у цели:
-            // "Президент X страны Y предлагает вам должность вице-президента"
-            // "|-> ПРИНЯТЬ | ОТКЛОНИТЬ"
-            inst.server.scheduler.runTaskLater(inst, Runnable {
-                // Пишем в чат президенту: "target не принял ваше приглашение"
-                // Пишем в чат target: "Вы не успели принять приглашение"
-            }, 15 * 20L)
-        }
+        fun create(game: WDGame, president: WDPlayer, type: CountryType): Country =
+            Country(game, president, type)
 
         fun Country?.getFlag(): String {
             return Glyphs.COUNTRY_FLAGS[this?.type?.name] ?: ""
         }
+
+        fun Country.getFormattedName(player: Player) = MiniMessage.miniMessage().deserialize(
+            "${getFlag()} ${ServerTranslator.translate(type.nameTranslatable, player)}"
+        )
 
         fun WDPlayer.getFormattedName() = MiniMessage.miniMessage().deserialize("${country.getFlag()} ${player.name}")
 

@@ -22,7 +22,7 @@ class TagInProgressState(game: TagGame) : GameState<TagPlayer, TagGame>(game) {
 
     private var bossBar: BossBar? = null
 
-    override fun onEnter() {
+    override fun onEnterState() {
         game.gamePlayers.forEach { it.player.canMove(true) }
         startHunterDistanceRenderer(game)
         startCountdown(game)

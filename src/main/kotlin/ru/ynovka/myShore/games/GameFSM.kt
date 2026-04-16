@@ -4,12 +4,12 @@ class GameFSM<P : GamePlayer>(initial: GameState<P, *>) {
     var current: GameState<P, *> = initial
         private set
 
-    fun start() = current.onEnter()
+    fun start() = current.onEnterState()
 
     fun transitionTo(next: GameState<P, *>) {
-        current.onExit()
+        current.onExitState()
         current = next
-        current.onEnter()
+        current.onEnterState()
     }
 
     fun playerJoin(p: P) = current.onPlayerJoin(p)

@@ -13,7 +13,7 @@ import ru.ynovka.myShore.text.actionBar.ActionBar
 class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
     private var startTask: BukkitTask? = null
 
-    override fun onEnter() {
+    override fun onEnterState() {
         game.gamePlayers.map(WDPlayer::player).forEach {
             it.teleportAsync(Hub.spawn)
             it.inventory.clear()
@@ -21,7 +21,7 @@ class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         // if (task == null) action bar "Ожидание игроков..." с анимацией
     }
 
-    override fun onExit() {
+    override fun onExitState() {
         startTask?.cancel()
         startTask = null
         game.gamePlayers.map(WDPlayer::player).forEach {

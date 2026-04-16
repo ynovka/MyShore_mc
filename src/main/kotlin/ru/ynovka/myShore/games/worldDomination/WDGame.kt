@@ -18,8 +18,7 @@ class WDGame : Game<WDPlayer>() {
     val countries: MutableSet<Country> = mutableSetOf()
     /** Текущий раунд игры */
     var round = 0
-    val ecology: Int
-        get() = 100
+    var ecology: Int = 100
 
 
     override fun getOrCreatePlayer(player: Player): WDPlayer =

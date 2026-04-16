@@ -10,9 +10,9 @@ import ru.ynovka.myShore.games.GameState
  * Длится 1 минуту, по истечению которой игроков кикает в хаб
  */
 class WDFinishingState(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
-    override fun onEnter() { }
+    override fun onEnterState() { }
 
-    override fun onExit() { }
+    override fun onExitState() { }
 
     override fun onPlayerJoin(gamePlayer: WDPlayer) { }
 

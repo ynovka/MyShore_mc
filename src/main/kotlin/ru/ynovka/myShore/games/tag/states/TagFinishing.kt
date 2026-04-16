@@ -20,7 +20,7 @@ import java.time.Duration
 // 5 сек после игры - определение победителей
 class TagFinishing(game: TagGame) : GameState<TagPlayer, TagGame>(game) {
 
-    override fun onEnter() {
+    override fun onEnterState() {
         // Жертвы живы или охотник отсутствует → победа жертв
         val winnerRole = if (game.hasVictims() || !game.hasHunter()) {
             TagPlayerRoles.VICTIM

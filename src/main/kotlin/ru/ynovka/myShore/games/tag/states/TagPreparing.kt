@@ -52,7 +52,7 @@ class TagPreparing(game: TagGame) : GameState<TagPlayer, TagGame>(game) {
 
     private val glowingEffect = PotionEffect(PotionEffectType.GLOWING, -1, 0, false, false)
 
-    override fun onEnter() {
+    override fun onEnterState() {
         val hunterUuid = chooseHunter(game.gamePlayers.map { it.player.uniqueId })
         registerHunter(hunterUuid)
 

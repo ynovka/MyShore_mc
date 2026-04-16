@@ -40,22 +40,23 @@ class City(
     /** @return true если щит успешно установлен */
     fun buyShield(): Boolean {
         if (hasShield) return false
-        if (country.balance < 150) return false
-        country.balance -= 150
+        if (country.balance >= SHIELD_COST) return false
+        country.balance -= SHIELD_COST
         hasShield = true
         return true
     }
 
     /** @return true если город успешно улучшен */
     fun buyUpgrade(): Boolean {
-        if (country.balance < 250) return false
-        country.balance -= 250
+        if (country.balance >= UPGRADE_COST) return false
+        country.balance -= UPGRADE_COST
         lvl += 1
         return true
     }
 
     companion object {
-        const val UPGRADE_COST: Int = 250
+        const val UPGRADE_COST: Int = 150
+        const val SHIELD_COST: Int = 300
 
         fun getCityById(country: Country, cityId: Int): City =
             country.cities[cityId] ?: throw IllegalArgumentException("City $cityId not found")

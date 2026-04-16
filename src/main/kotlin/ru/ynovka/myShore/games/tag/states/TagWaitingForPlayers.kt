@@ -10,7 +10,7 @@ import org.bukkit.Sound
 // Ожидание игроков (нужно хотя бы 2)
 class TagWaitingForPlayers(game: TagGame) : GameState<TagPlayer, TagGame>(game) {
 
-    override fun onEnter() {
+    override fun onEnterState() {
         game.gamePlayers.forEach { tagPlayer ->
             tagPlayer.player.setupForWaiting(game)
             tagPlayer.player.playSound(tagPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
