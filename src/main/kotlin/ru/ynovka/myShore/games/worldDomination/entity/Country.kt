@@ -8,6 +8,8 @@ import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
 import ru.ynovka.myShore.texturepack.Glyphs
 import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
+import java.util.concurrent.ThreadLocalRandom
+import kotlin.math.ceil
 
 
 class Country private constructor(
@@ -35,6 +37,9 @@ class Country private constructor(
     /** Баланс государства */
     var balance: Int = 950
 
+    val levelOfLife: Int
+        get() = ceil(cities.values.sumOf { it.capitalization } * game.ecology / 4.0).toInt()
+
     /** Изучена ли ядерная технология */
     var isNuclearLearned: Boolean = false
         private set
@@ -57,9 +62,9 @@ class Country private constructor(
         addCitizen(president)
         president.role = WDPlayerRole.PRESIDENT
 
-        // Собираем города из пресетов — this уже существует
-        type.cityPresets.forEachIndexed { index, preset ->
-            cities[index] = City(preset.name, this, preset.capitalizationRange)
+        val capitalizations = distributeCapitalization()
+        type.citiesName.forEachIndexed { index, name ->
+            cities[index] = City(name, this, capitalizations[index])
         }
     }
 
@@ -78,7 +83,7 @@ class Country private constructor(
     /** Сбор прибыли за раунд */
     fun collectRoundProfit() {
         if (game.round == 0) return
-        balance += cities.values.sumOf { it.capitalization }
+        balance += levelOfLife * 13
     }
 
     /** @return true если ядерная технология успешно изучена */
@@ -87,6 +92,7 @@ class Country private constructor(
         if (balance < LEARN_NUCLEAR_COST) return false
         balance -= LEARN_NUCLEAR_COST
         isNuclearLearned = true
+        game.ecology -= ECOLOGY_LEARN_PENALTY
         return true
     }
 
@@ -95,6 +101,7 @@ class Country private constructor(
         if (balance < CRAFT_NUCLEAR_BOMB_COST) return false
         balance -= CRAFT_NUCLEAR_BOMB_COST
         bombsMaking += 1
+        game.ecology -= ECOLOGY_CRAFT_PENALTY
         return true
     }
 
@@ -102,7 +109,7 @@ class Country private constructor(
     fun investmentsEcology(): Boolean {
         if (balance < ECOLOGY_COST) return false
         balance -= ECOLOGY_COST
-        game.ecology += 1
+        game.ecology += ECOLOGY_INVEST_GAIN
         return true
     }
 
@@ -128,6 +135,10 @@ class Country private constructor(
         const val CRAFT_NUCLEAR_BOMB_COST: Int = 250
         const val ECOLOGY_COST: Int = 50
 
+        const val ECOLOGY_INVEST_GAIN: Double = 1.0 / 60
+        const val ECOLOGY_CRAFT_PENALTY: Double = 1.0 / 180
+        const val ECOLOGY_LEARN_PENALTY: Double = 0.05
+
         /** Единственная точка создания Country */
         fun create(game: WDGame, president: WDPlayer, type: CountryType): Country =
             Country(game, president, type)
@@ -142,5 +153,30 @@ class Country private constructor(
 
         fun WDPlayer.getFormattedName() = mm.deserialize("${country.getFlag()} ${player.name}")
 
+        /**
+         * Распределяет [total] очков между [count] городами так, что
+         * каждое значение находится в диапазоне [base ± deviation] и сумма == total.
+         */
+        private fun distributeCapitalization(
+            total: Int = 300,
+            count: Int = 4,
+            deviation: Int = 20
+        ): IntArray {
+            val base = total / count
+            val rng = ThreadLocalRandom.current()
+            val deltas = IntArray(count)
+            var accumulated = 0
+
+            for (i in 0 until count - 1) {
+                val remaining = count - 1 - i
+                val lo = maxOf(-deviation, -accumulated - deviation * remaining)
+                val hi = minOf(deviation, -accumulated + deviation * remaining)
+                deltas[i] = rng.nextInt(lo, hi + 1)
+                accumulated += deltas[i]
+            }
+            deltas[count - 1] = -accumulated
+
+            return IntArray(count) { base + deltas[it] }
+        }
     }
 }

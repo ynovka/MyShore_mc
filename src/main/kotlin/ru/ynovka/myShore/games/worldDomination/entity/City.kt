@@ -2,14 +2,13 @@ package ru.ynovka.myShore.games.worldDomination.entity
 
 import net.kyori.adventure.text.TranslatableComponent
 import ru.ynovka.myShore.utils.Utils.intValue
-import java.util.concurrent.ThreadLocalRandom
 
 class City(
     /** Название города - ключ перевода */
     val name: TranslatableComponent,
     /** Ссылка на страну-родитель */
     val country: Country,
-    capitalizationRange: IntRange = 250..275
+    private val startCapitalization: Int
 ) {
     /** Уровень города */
     var lvl = 0
@@ -22,9 +21,6 @@ class City(
     var hasShield = false
         private set
 
-    private val startCapitalization = ThreadLocalRandom.current()
-        .nextInt(capitalizationRange.first, capitalizationRange.last)
-
     val capitalization
         get() = (startCapitalization + lvl * 100) * isAlive.intValue
 
@@ -35,6 +31,7 @@ class City(
             return
         }
         isAlive = false
+        country.game.ecology -= ECOLOGY_DESTROY_PENALTY
     }
 
     /** @return true если щит успешно установлен */
@@ -57,5 +54,6 @@ class City(
     companion object {
         const val UPGRADE_COST: Int = 150
         const val SHIELD_COST: Int = 300
+        const val ECOLOGY_DESTROY_PENALTY: Double = 0.05
     }
 }

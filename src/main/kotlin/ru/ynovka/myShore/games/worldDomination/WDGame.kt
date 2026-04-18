@@ -14,11 +14,13 @@ class WDGame : Game<WDPlayer>() {
     override val maxPlayers = 50
     override val gamePlayers: MutableSet<WDPlayer> = mutableSetOf()
 
-    /** Список стран */
-    val countries: MutableSet<Country> = mutableSetOf()
     /** Текущий раунд игры */
     var round = 0
-    var ecology: Double = 0.80
+    /** Список стран */
+    val countries: MutableSet<Country> = mutableSetOf()
+    /** Мировой уровень экологии */
+    var ecology: Double = ECOLOGY_START
+        set(value) { field = value.coerceIn(0.0, 1.0) }
 
 
     override fun getOrCreatePlayer(player: Player): WDPlayer =
@@ -26,6 +28,8 @@ class WDGame : Game<WDPlayer>() {
 
     companion object {
         const val MIN_PLAYERS = 1 // todo заменить на 12
+        const val ECOLOGY_START = 0.80
+
         val world by lazy { Bukkit.getWorld("world_domination")!! }
         val hubLoc by lazy { Location(world, 0.0, 100.0, 0.0) }
         val unLoc by lazy { Location(world, 1000.0, 100.0, 0.0) }
