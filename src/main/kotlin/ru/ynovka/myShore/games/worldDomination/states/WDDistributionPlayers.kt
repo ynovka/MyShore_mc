@@ -50,8 +50,8 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
 
         // todo перевод
         val toast = Toast.builder()
-            .line1(Component.text("Началась новая стадия").color(NamedTextColor.GRAY))
-            .line2(Component.text("<#87CEEB>>   Распределение игроков"))
+            .line1(Component.text("Началась новая стадия", NamedTextColor.GRAY))
+            .line2(Component.text("Распределение"))
             .icon(ItemStack.of(Material.CLOCK))
             .frame(AdvancementFrame.GOAL)
             .build()
@@ -75,9 +75,9 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
 
                 // todo перевод
                 val toast = Toast.builder()
-                    .line1(Component.text("Ваша роль - президент").color(NamedTextColor.GRAY))
-                    .line2(Component.text("Страна - ${country.getFormattedName(pp)}"))
-                    .icon(ItemStack.of(Material.CLOCK))
+                    .line1(Component.text("Вы президент страны", NamedTextColor.GRAY))
+                    .line2(country.getFormattedName(pp))
+                    .icon(ItemStack.of(Material.DIAMOND_BLOCK))
                     .frame(AdvancementFrame.GOAL)
                     .build()
 
@@ -87,8 +87,9 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         // Отсчёт 3 минуты, до перехода к следующему этапу
         inst.server.scheduler.runTaskLater(inst, Runnable {
             game.fsm.transitionTo(WDIntroductionPlayers(game))
-        }, 3 * 60 * 20L)
+        }, 3 * 60 * 20L / 20) // todo убрать `/ 20`
     }
+
 
     override fun onExitState() {
         // Очищаем приглашения в вице-президенты
@@ -97,16 +98,18 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         // Распределяем оставшихся игроков по странам
         val unassignedPlayers = game.gamePlayers.filter { it.country == null }.shuffled().toMutableSet()
         game.countries.forEach { country ->
-            if (country.vicePresident == null) {
+            if (country.vicePresident == null && unassignedPlayers.isNotEmpty()) {
                 val newVice = unassignedPlayers.random()
                 unassignedPlayers.remove(newVice)
                 country.setVicePresident(newVice)
             }
         }
-        val chunkedPlayers = unassignedPlayers.distribute(game.countries.size)
-        chunkedPlayers.zip(game.countries).forEach { (players, country) ->
-            players.forEach { player ->
-                country.addCitizen(player)
+        if (unassignedPlayers.isNotEmpty()) {
+            val chunkedPlayers = unassignedPlayers.distribute(game.countries.size)
+            chunkedPlayers.zip(game.countries).forEach { (players, country) ->
+                players.forEach { player ->
+                    country.addCitizen(player)
+                }
             }
         }
 

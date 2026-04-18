@@ -26,7 +26,7 @@ class City(
         .nextInt(capitalizationRange.first, capitalizationRange.last)
 
     val capitalization
-        get() = startCapitalization + lvl * 100 * isAlive.intValue
+        get() = (startCapitalization + lvl * 100) * isAlive.intValue
 
     /** Бомбить город */
     fun bombardCity() {
@@ -40,7 +40,7 @@ class City(
     /** @return true если щит успешно установлен */
     fun buyShield(): Boolean {
         if (hasShield) return false
-        if (country.balance >= SHIELD_COST) return false
+        if (country.balance < SHIELD_COST) return false
         country.balance -= SHIELD_COST
         hasShield = true
         return true
@@ -48,7 +48,7 @@ class City(
 
     /** @return true если город успешно улучшен */
     fun buyUpgrade(): Boolean {
-        if (country.balance >= UPGRADE_COST) return false
+        if (country.balance < UPGRADE_COST) return false
         country.balance -= UPGRADE_COST
         lvl += 1
         return true
@@ -57,8 +57,5 @@ class City(
     companion object {
         const val UPGRADE_COST: Int = 150
         const val SHIELD_COST: Int = 300
-
-        fun getCityById(country: Country, cityId: Int): City =
-            country.cities[cityId] ?: throw IllegalArgumentException("City $cityId not found")
     }
 }

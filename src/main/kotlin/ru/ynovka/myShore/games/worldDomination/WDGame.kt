@@ -18,14 +18,14 @@ class WDGame : Game<WDPlayer>() {
     val countries: MutableSet<Country> = mutableSetOf()
     /** Текущий раунд игры */
     var round = 0
-    var ecology: Int = 100
+    var ecology: Double = 0.80
 
 
     override fun getOrCreatePlayer(player: Player): WDPlayer =
         gamePlayers.firstOrNull { it.playerId == player.uniqueId} ?: WDPlayer(player.uniqueId)
 
     companion object {
-        const val MIN_PLAYERS = 2 // todo заменить на 12
+        const val MIN_PLAYERS = 1 // todo заменить на 12
         val world by lazy { Bukkit.getWorld("world_domination")!! }
         val hubLoc by lazy { Location(world, 0.0, 100.0, 0.0) }
         val unLoc by lazy { Location(world, 1000.0, 100.0, 0.0) }

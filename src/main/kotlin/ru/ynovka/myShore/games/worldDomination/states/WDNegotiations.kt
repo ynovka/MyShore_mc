@@ -32,8 +32,8 @@ class WDNegotiations(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         // Уведомление о начала новой стадии
         // todo перевод
         val toast = Toast.builder()
-            .line1(Component.text("Началась новая стадия").color(NamedTextColor.GRAY))
-            .line2(Component.text("<#87CEEB>> Переговоры"))
+            .line1(Component.text("Началась новая стадия", NamedTextColor.GRAY))
+            .line2(Component.text("Переговоры"))
             .icon(ItemStack.of(Material.CLOCK))
             .frame(AdvancementFrame.GOAL)
             .build()
@@ -48,11 +48,12 @@ class WDNegotiations(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
             }
         }
 
-        // Выдаём телефоны президентам
+        // Выдаём телефоны, ноутбуки президентам
         game.gamePlayers
             .filter { it.role == WDPlayerRole.PRESIDENT }
             .map(GamePlayer::player)
             .forEach {
+                it.inventory.setItem(0, WDItems.wdLaptopMenu.getStack(null))
                 it.inventory.setItem(7, WDItems.wdPhoneMenu.getStack(null))
             }
 
@@ -69,7 +70,10 @@ class WDNegotiations(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         game.gamePlayers
             .filter { it.role == WDPlayerRole.PRESIDENT }
             .map(GamePlayer::player)
-            .forEach { it.inventory.clear(7) }
+            .forEach {
+                it.inventory.clear(0)
+                it.inventory.clear(7)
+            }
     }
 
     override fun onPlayerReconnect(gamePlayer: WDPlayer) { }

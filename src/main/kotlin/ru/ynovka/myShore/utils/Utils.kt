@@ -1,11 +1,14 @@
 package ru.ynovka.myShore.utils
 
-import ru.ynovka.myShore.MyShore.Companion.mm
+import com.github.darksoulq.abyssallib.world.gui.GuiBuilder
+import com.github.darksoulq.abyssallib.world.gui.GuiElement
+import com.github.darksoulq.abyssallib.world.gui.SlotPosition
 import net.kyori.adventure.text.Component
-import org.bukkit.scoreboard.Team
-import org.bukkit.entity.Player
 import org.bukkit.Bukkit
-import java.util.UUID
+import org.bukkit.entity.Player
+import org.bukkit.scoreboard.Team
+import ru.ynovka.myShore.MyShore.Companion.mm
+import java.util.*
 
 
 object Utils {
@@ -37,6 +40,25 @@ object Utils {
         }
 
         return groups
+    }
+
+    fun GuiBuilder.fill(
+        from: SlotPosition,
+        to: SlotPosition,
+        element: GuiElement
+    ) {
+        require(from.segment() == to.segment()) { "Both positions must be in the same segment" }
+        val width = 9
+        val fromRow = from.index() / width
+        val fromCol = from.index() % width
+        val toRow = to.index() / width
+        val toCol = to.index() % width
+
+        for (row in minOf(fromRow, toRow)..maxOf(fromRow, toRow)) {
+            for (col in minOf(fromCol, toCol)..maxOf(fromCol, toCol)) {
+                set(SlotPosition(from.segment(), row * width + col), element)
+            }
+        }
     }
 
     val Boolean.intValue

@@ -1,12 +1,13 @@
 package ru.ynovka.myShore.games.worldDomination.entity
 
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
-import net.kyori.adventure.text.minimessage.MiniMessage
-import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
-import ru.ynovka.myShore.games.worldDomination.WDPlayer
-import ru.ynovka.myShore.games.worldDomination.WDGame
-import ru.ynovka.myShore.texturepack.Glyphs
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.MyShore.Companion.mm
+import ru.ynovka.myShore.games.worldDomination.WDGame
+import ru.ynovka.myShore.games.worldDomination.WDPlayer
+import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
+import ru.ynovka.myShore.texturepack.Glyphs
+import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
 
 
 class Country private constructor(
@@ -54,6 +55,7 @@ class Country private constructor(
     init {
         // Добавляем президента
         addCitizen(president)
+        president.role = WDPlayerRole.PRESIDENT
 
         // Собираем города из пресетов — this уже существует
         type.cityPresets.forEachIndexed { index, preset ->
@@ -75,13 +77,14 @@ class Country private constructor(
 
     /** Сбор прибыли за раунд */
     fun collectRoundProfit() {
+        if (game.round == 0) return
         balance += cities.values.sumOf { it.capitalization }
     }
 
     /** @return true если ядерная технология успешно изучена */
     fun learnNuclear(): Boolean {
         if (isNuclearLearned) return false
-        if (balance >= LEARN_NUCLEAR_COST) return false
+        if (balance < LEARN_NUCLEAR_COST) return false
         balance -= LEARN_NUCLEAR_COST
         isNuclearLearned = true
         return true
@@ -89,7 +92,7 @@ class Country private constructor(
 
     /** @return true если ядерная бомба успешно создана */
     fun craftNuclearBomb(): Boolean {
-        if (balance >= CRAFT_NUCLEAR_BOMB_COST) return false
+        if (balance < CRAFT_NUCLEAR_BOMB_COST) return false
         balance -= CRAFT_NUCLEAR_BOMB_COST
         bombsMaking += 1
         return true
@@ -97,7 +100,7 @@ class Country private constructor(
 
     /** @return true если вклад в экологию успешно сделан */
     fun investmentsEcology(): Boolean {
-        if (balance >= ECOLOGY_COST) return false
+        if (balance < ECOLOGY_COST) return false
         balance -= ECOLOGY_COST
         game.ecology += 1
         return true
@@ -105,18 +108,20 @@ class Country private constructor(
 
     fun setVicePresident(player: WDPlayer) {
         addCitizen(player)
+        president.role = WDPlayerRole.VICE_PRESIDENT
         vicePresident = player
     }
 
     fun addCitizen(player: WDPlayer) {
         citizens.add(player)
+        president.role = WDPlayerRole.CITIZEN
         player.country = this
     }
 
-    fun removeCitizen(player: WDPlayer) {
+    /* todo Нужно подумать над ливом игроков во время катки fun removeCitizen(player: WDPlayer) {
         citizens.remove(player)
         player.country = null
-    }
+    }*/
 
     companion object {
         const val LEARN_NUCLEAR_COST: Int = 150
@@ -131,11 +136,11 @@ class Country private constructor(
             return Glyphs.COUNTRY_FLAGS[this?.type?.name] ?: ""
         }
 
-        fun Country.getFormattedName(player: Player) = MiniMessage.miniMessage().deserialize(
-            "${getFlag()} ${ServerTranslator.translate(type.nameTranslatable, player)}"
-        )
+        fun Country.getFormattedName(player: Player) =
+            mm.deserialize("<white>${getFlag()} ")
+                .append(ServerTranslator.translate(type.nameTranslatable, player))
 
-        fun WDPlayer.getFormattedName() = MiniMessage.miniMessage().deserialize("${country.getFlag()} ${player.name}")
+        fun WDPlayer.getFormattedName() = mm.deserialize("${country.getFlag()} ${player.name}")
 
     }
 }

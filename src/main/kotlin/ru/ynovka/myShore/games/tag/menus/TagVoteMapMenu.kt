@@ -1,36 +1,35 @@
 package ru.ynovka.myShore.games.tag.menus
 
-import ru.ynovka.myShore.games.tag.TagItems.tagVoteMountainTrackMapMenuItem
-import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
-import ru.ynovka.myShore.games.tag.TagItems.tagVoteJungleMapMenuItem
-import ru.ynovka.myShore.games.tag.TagItems.tagVoteRandomMapMenuItem
-import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
-import com.github.darksoulq.abyssallib.world.gui.SlotPosition
-import net.kyori.adventure.text.format.NamedTextColor
+import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import com.github.darksoulq.abyssallib.world.gui.Gui
+import com.github.darksoulq.abyssallib.world.gui.SlotPosition
+import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
 import com.github.darksoulq.abyssallib.world.gui.gui
-import ru.ynovka.myShore.games.tag.maps.TagMaps
-import ru.ynovka.myShore.games.tag.maps.TagMap
-import ru.ynovka.myShore.utils.Utils.toComponent
-import ru.ynovka.myShore.texturepack.GuiTextures
-import ru.ynovka.myShore.games.tag.states.TagWaitingForPlayers
-import ru.ynovka.myShore.games.tag.currentTagGame
 import net.kyori.adventure.text.Component
-import org.bukkit.inventory.MenuType
-import org.bukkit.entity.Player
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Sound
+import org.bukkit.entity.Player
+import org.bukkit.inventory.MenuType
+import ru.ynovka.myShore.games.tag.TagItems.tagVoteJungleMapMenuItem
+import ru.ynovka.myShore.games.tag.TagItems.tagVoteMountainTrackMapMenuItem
+import ru.ynovka.myShore.games.tag.TagItems.tagVoteRandomMapMenuItem
+import ru.ynovka.myShore.games.tag.currentTagGame
+import ru.ynovka.myShore.games.tag.maps.TagMap
+import ru.ynovka.myShore.games.tag.maps.TagMaps
 import ru.ynovka.myShore.games.tag.states.TagVoting.Companion.setupMap
+import ru.ynovka.myShore.games.tag.states.TagWaitingForPlayers
+import ru.ynovka.myShore.texturepack.GuiTextures
 
 
 @Suppress("UnstableApiUsage")
 object TagVoteMapMenu {
     fun get(): Gui = gui(
         MenuType.GENERIC_9X1,
-        Component.text()
-            .append(TextOffset.getOffsetMinimessage(-8).toComponent().color(NamedTextColor.WHITE))
-            .append(GuiTextures.MENU_1x9_028!!.toComponent().color(NamedTextColor.WHITE))
-            .append(TextOffset.getOffsetMinimessage(-170).toComponent().color(NamedTextColor.WHITE))
+        Component.text().color(NamedTextColor.WHITE)
+            .append(TextOffset.getOffset(-8))
+            .append(GuiTextures.MENU_1x9_028)
+            .append(TextOffset.getOffset(-170))
             .append(Component.translatable("menu.myshore.minigames"))
             .build(),
     ) {

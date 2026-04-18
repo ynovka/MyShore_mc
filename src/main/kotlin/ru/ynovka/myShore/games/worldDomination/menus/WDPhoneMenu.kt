@@ -2,57 +2,57 @@ package ru.ynovka.myShore.games.worldDomination.menus
 
 import com.github.darksoulq.abyssallib.extension.closeGui
 import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
+import com.github.darksoulq.abyssallib.world.gui.*
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
-import com.github.darksoulq.abyssallib.world.gui.SlotPosition
-import net.kyori.adventure.text.format.NamedTextColor
-import com.github.darksoulq.abyssallib.world.gui.Gui
-import com.github.darksoulq.abyssallib.world.gui.GuiLayer
-import com.github.darksoulq.abyssallib.world.gui.GuiView
-import com.github.darksoulq.abyssallib.world.gui.gui
 import com.github.darksoulq.abyssallib.world.item.Item
-import ru.ynovka.myShore.utils.Utils.toComponent
-import ru.ynovka.myShore.texturepack.GuiTextures
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.MenuType
 import org.bukkit.inventory.meta.SkullMeta
 import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.worldDomination.WDItems
-import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
+import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
 import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFormattedName
+import ru.ynovka.myShore.games.worldDomination.states.WDDistributionPlayers
+import ru.ynovka.myShore.games.worldDomination.states.WDNegotiations
 import ru.ynovka.myShore.plasmo.PhoneCall
+import ru.ynovka.myShore.texturepack.GuiTextures
+import java.util.*
 
 
 @Suppress("UnstableApiUsage")
 object WDPhoneMenu {
     fun get(
         game: Game<WDPlayer>,
+        playerId: UUID,
         targetRole: WDPlayerRole
     ): Gui = gui(
         MenuType.GENERIC_9X6,
-        Component.text()
-            .append(TextOffset.getOffsetMinimessage(-8).toComponent().color(NamedTextColor.WHITE))
-            .append(GuiTextures.MENU_6x9!!.toComponent().color(NamedTextColor.WHITE))
-            .append(TextOffset.getOffsetMinimessage(-170).toComponent().color(NamedTextColor.WHITE))
+        Component.text().color(NamedTextColor.WHITE)
+            .append(TextOffset.getOffset(-8))
+            .append(GuiTextures.MENU_6x9)
+            .append(TextOffset.getOffset(-170))
             .append(Component.translatable("menu.myshore.wd.phone"))
             .build(),
-    ) { layer(WDPhoneLayer(game, targetRole)) }
+    ) { layer(WDPhoneLayer(game, playerId, targetRole)) }
 
     class WDPhoneLayer(
         private val game: Game<WDPlayer>,
+        private val playerId: UUID,
         private val targetRole: WDPlayerRole
     ) : GuiLayer {
         override fun renderTo(view: GuiView) {
             val players = game.gamePlayers
-                .filter { it.role == targetRole }
+                .filter { it.role == targetRole && playerId != it.playerId}
                 .sortedBy { it.country?.president?.playerId }
 
             players.forEachIndexed { index, target ->
@@ -85,45 +85,26 @@ object WDPhoneMenu {
                             player.inventory.setItem(7, WDItems.wdPhoneMenu.getStack(null))
                         },
                         onSuccessEnd = {
-                            player.sendMessage(
-                                Component.text()
-                                    .append(
-                                        Component.translatable(
-                                            "msg.myshore.wd.would_invite_vice_president.1",
-                                            targetFormattedName
-                                        )
-                                    )
-                                    .appendNewline()
-                                    .append(Component.translatable("msg.myshore.wd.would_invite_vice_president.2"))
-                                    .appendNewline()
-                                    .append(
-                                        Component.translatable("msg.myshore.wd.would_invite_vice_president.3")
-                                            .color(NamedTextColor.GREEN)
-                                            .decorate(TextDecoration.BOLD)
-                                            .clickEvent(ClickEvent.runCommand("/wd invite_vice ${targetPlayer.name}"))
-                                            .hoverEvent(
-                                                HoverEvent.showText(
-                                                    Component.text("Нажмите, чтобы отправить приглашение").color(NamedTextColor.BLUE)
-                                                )
-                                            )
-                                    )
-                                    .build()
-                            )
+                            when (game.fsm.current) {
+                                is WDDistributionPlayers -> sendDuggestInviteVice(player, targetPlayer, targetFormattedName)
+                                is WDNegotiations -> player.inventory.setItem(7, ItemStack(Material.AIR))
+                            }
                         }
                     )
 
+
                     val phone = WDItems.wdPhoneMenu.getStack(null)
 
-                    // Перемещаем телефон в offhand
+                    // Перемещаем телефон звонящего в offhand
                     player.closeGui()
                     player.inventory.clear(7)
                     player.inventory.setItemInOffHand(phone)
                     fillHotbarInvisibleItems(player)
 
+                    // Перемещаем телефон цели в offhand
                     targetPlayer.inventory.clear(7)
                     targetPlayer.inventory.setItemInOffHand(phone)
                     fillHotbarInvisibleItems(targetPlayer)
-
                 }
             }
         }
@@ -135,6 +116,37 @@ object WDPhoneMenu {
                 view.top.setItem(i, null)
             }
         }
+    }
+
+    private fun sendDuggestInviteVice(
+        player: Player,
+        targetPlayer: Player,
+        targetFormattedName: Component
+    ) {
+        player.sendMessage(
+            Component.text()
+                .append(
+                    Component.translatable(
+                        "msg.myshore.wd.would_invite_vice_president.1",
+                        targetFormattedName
+                    )
+                )
+                .appendNewline()
+                .append(Component.translatable("msg.myshore.wd.would_invite_vice_president.2"))
+                .appendNewline()
+                .append(
+                    Component.translatable("msg.myshore.wd.would_invite_vice_president.3")
+                        .color(NamedTextColor.GREEN)
+                        .decorate(TextDecoration.BOLD)
+                        .clickEvent(ClickEvent.runCommand("/wd invite_vice ${targetPlayer.name}"))
+                        .hoverEvent(
+                            HoverEvent.showText(
+                                Component.text("Нажмите, чтобы отправить приглашение").color(NamedTextColor.BLUE)
+                            )
+                        )
+                )
+                .build()
+        )
     }
 
     private fun clearInvisibleItems(player: Player) {

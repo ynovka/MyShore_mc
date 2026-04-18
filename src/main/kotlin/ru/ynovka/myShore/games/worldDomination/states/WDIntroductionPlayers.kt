@@ -23,8 +23,8 @@ class WDIntroductionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
     override fun onEnterState() {
         // todo перевод
         val toast = Toast.builder()
-            .line1(Component.text("Началась новая стадия").color(NamedTextColor.GRAY))
-            .line2(Component.text("<#87CEEB>>  Знакомство игроков"))
+            .line1(Component.text("Началась новая стадия", NamedTextColor.GRAY))
+            .line2(Component.text("Знакомство игроков"))
             .icon(ItemStack.of(Material.CLOCK))
             .frame(AdvancementFrame.GOAL)
             .build()
@@ -44,7 +44,7 @@ class WDIntroductionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         // Отсчёт 1 минута, до перехода к следующему этапу
         inst.server.scheduler.runTaskLater(inst, Runnable {
             game.fsm.transitionTo(WDNegotiations(game))
-        }, 60 * 20L)
+        }, 60 * 20L / 20) // todo убрать `/ 20`
     }
 
     override fun onPlayerReconnect(gamePlayer: WDPlayer) {

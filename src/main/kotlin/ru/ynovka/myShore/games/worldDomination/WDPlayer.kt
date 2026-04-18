@@ -9,7 +9,7 @@ import java.util.UUID
 
 class WDPlayer(
     playerId: UUID,
-    val role: WDPlayerRole = WDPlayerRole.UNDEFINED
+    var role: WDPlayerRole = WDPlayerRole.UNDEFINED
 ) : GamePlayer(playerId) {
     var country: Country? = null
 

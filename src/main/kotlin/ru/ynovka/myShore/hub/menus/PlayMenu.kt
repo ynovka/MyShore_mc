@@ -21,10 +21,10 @@ import ru.ynovka.myShore.hub.HubItems.playWDItem
 object PlayMenu {
     fun get(): Gui = gui(
         MenuType.GENERIC_9X2,
-        Component.text()
-            .append(TextOffset.getOffsetMinimessage(-8).toComponent().color(NamedTextColor.WHITE))
-            .append(GuiTextures.MENU_2x9_048_26!!.toComponent().color(NamedTextColor.WHITE))
-            .append(TextOffset.getOffsetMinimessage(-170).toComponent().color(NamedTextColor.WHITE))
+        Component.text().color(NamedTextColor.WHITE)
+            .append(TextOffset.getOffset(-8))
+            .append(GuiTextures.MENU_2x9_048_26)
+            .append(TextOffset.getOffset(-170))
             .append(Component.translatable("menu.myshore.minigames"))
             .build(),
     ) {
