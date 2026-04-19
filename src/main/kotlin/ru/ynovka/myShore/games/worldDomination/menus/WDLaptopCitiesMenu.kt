@@ -6,9 +6,7 @@ import com.github.darksoulq.abyssallib.world.gui.SlotPosition
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
 import com.github.darksoulq.abyssallib.world.gui.gui
 import net.kyori.adventure.text.Component
-import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import ru.ynovka.myShore.games.worldDomination.WDItems.wdInvisibleItem
 import ru.ynovka.myShore.games.worldDomination.WDPlayer

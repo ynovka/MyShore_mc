@@ -64,7 +64,7 @@ object PhoneCall {
                 Component.translatable("sub.title.myshore.wd.incoming_call", fromName),
                 Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(9), Duration.ofMillis(500))
             )
-        );
+        )
         to.sendTimedActionBar(
             Component.translatable("bar.myshore.wd.call_control"),
             10

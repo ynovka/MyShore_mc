@@ -1,4 +1,3 @@
 package ru.ynovka.myShore.text.chat
 
-object Chat {
-}
+object Chat

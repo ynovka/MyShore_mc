@@ -1,17 +1,13 @@
 package ru.ynovka.myShore.games.worldDomination.menus
 
-import com.github.darksoulq.abyssallib.extension.openGui
 import com.github.darksoulq.abyssallib.world.gui.Gui
 import com.github.darksoulq.abyssallib.world.gui.SlotPosition
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
 import com.github.darksoulq.abyssallib.world.gui.gui
 import net.kyori.adventure.text.Component
-import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import ru.ynovka.myShore.games.worldDomination.WDItems.wdInvisibleItem
-import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
 import ru.ynovka.myShore.games.worldDomination.entity.City
 import ru.ynovka.myShore.utils.Utils.fill
 
@@ -36,7 +32,7 @@ object WDLaptopCityMenu {
             SlotPosition.top(9),
             SlotPosition.top(19),
             GuiButton.of(cityItem) { ctx ->
-                val player = ctx.view.inventoryView.player as Player
+                ctx.view.inventoryView.player as Player
             }
         )
 
@@ -51,7 +47,7 @@ object WDLaptopCityMenu {
             SlotPosition.top(12),
             SlotPosition.top(22),
             GuiButton.of(upgradeCityItem) { ctx ->
-                val player = ctx.view.inventoryView.player as Player
+                ctx.view.inventoryView.player as Player
                 println("улучшить город: ${city.buyUpgrade()}")
                 // city.buyUpgrade()
             }
@@ -68,7 +64,7 @@ object WDLaptopCityMenu {
             SlotPosition.top(15),
             SlotPosition.top(25),
             GuiButton.of(buyShieldCityItem) { ctx ->
-                val player = ctx.view.inventoryView.player as Player
+                ctx.view.inventoryView.player as Player
                 println("построить щит: ${city.buyShield()}")
                 // city.buyShield()
             }
