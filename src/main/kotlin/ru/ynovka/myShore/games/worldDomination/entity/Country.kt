@@ -97,7 +97,7 @@ class Country private constructor(
     }
 
     /** @return true если ядерная бомба успешно создана */
-    fun craftNuclearBomb(): Boolean {
+    fun createNuclearBomb(): Boolean {
         if (balance < CRAFT_NUCLEAR_BOMB_COST) return false
         balance -= CRAFT_NUCLEAR_BOMB_COST
         bombsMaking += 1
