@@ -40,6 +40,7 @@ class City(
         if (country.balance < SHIELD_COST) return false
         country.balance -= SHIELD_COST
         hasShield = true
+        country.game.history.record(WDHistoryEntry(WDAction.SHIELD_BUILT, country.game.round, actor = country, targetCity = this))
         return true
     }
 
@@ -48,6 +49,7 @@ class City(
         if (country.balance < UPGRADE_COST) return false
         country.balance -= UPGRADE_COST
         lvl += 1
+        country.game.history.record(WDHistoryEntry(WDAction.CITY_UPGRADED, country.game.round, actor = country, targetCity = this))
         return true
     }
 

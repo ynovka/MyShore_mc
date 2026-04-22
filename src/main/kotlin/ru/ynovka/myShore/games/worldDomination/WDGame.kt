@@ -3,6 +3,7 @@ package ru.ynovka.myShore.games.worldDomination
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.games.worldDomination.entity.WDGameHistory
 import ru.ynovka.myShore.games.worldDomination.states.WDWaitingForPlayers
 import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.games.GameManager
@@ -21,6 +22,8 @@ class WDGame : Game<WDPlayer>() {
     /** Мировой уровень экологии */
     var ecology: Double = ECOLOGY_START
         set(value) { field = value.coerceIn(0.0, 1.0) }
+    /** История действий всех стран за игру */
+    val history = WDGameHistory()
 
 
     override fun getOrCreatePlayer(player: Player): WDPlayer =

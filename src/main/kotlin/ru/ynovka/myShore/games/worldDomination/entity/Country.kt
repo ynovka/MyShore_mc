@@ -57,8 +57,13 @@ class Country private constructor(
 
     val countryVisibilityGroup = VisibilityGroup()
 
+    /** Бомбардировки, отложенные до конца этапа переговоров */
+    val pendingBombardments: MutableList<City> = mutableListOf()
+
+    /** Активные санкции против этой страны */
+    val incomingSanctions: MutableSet<Country> = mutableSetOf()
+
     init {
-        // Добавляем президента
         addCitizen(president)
         president.role = WDPlayerRole.PRESIDENT
 
@@ -78,12 +83,14 @@ class Country private constructor(
         collectRoundProfit()
         bombsAvailable = bombsMaking
         bombsMaking = 0
+        incomingSanctions.clear()
     }
 
-    /** Сбор прибыли за раунд */
+    /** Сбор прибыли за раунд с учётом штрафа от санкций (-5% за каждого санкционера, макс 45%) */
     fun collectRoundProfit() {
         if (game.round == 0) return
-        balance += levelOfLife * 13
+        val penalty = (SANCTION_INCOME_PENALTY * incomingSanctions.size).coerceAtMost(MAX_SANCTION_PENALTY)
+        balance += (levelOfLife * 13 * (1.0 - penalty)).toInt()
     }
 
     /** @return true если ядерная технология успешно изучена */
@@ -93,6 +100,7 @@ class Country private constructor(
         balance -= LEARN_NUCLEAR_COST
         isNuclearLearned = true
         game.ecology -= ECOLOGY_LEARN_PENALTY
+        game.history.record(WDHistoryEntry(WDAction.NUCLEAR_LEARNED, game.round, actor = this))
         return true
     }
 
@@ -102,6 +110,7 @@ class Country private constructor(
         balance -= CRAFT_NUCLEAR_BOMB_COST
         bombsMaking += 1
         game.ecology -= ECOLOGY_CRAFT_PENALTY
+        game.history.record(WDHistoryEntry(WDAction.NUCLEAR_BOMB_CREATED, game.round, actor = this))
         return true
     }
 
@@ -110,7 +119,44 @@ class Country private constructor(
         if (balance < ECOLOGY_COST) return false
         balance -= ECOLOGY_COST
         game.ecology += ECOLOGY_INVEST_GAIN
+        game.history.record(WDHistoryEntry(WDAction.ECOLOGY_INVESTED, game.round, actor = this))
         return true
+    }
+
+    /**
+     * Ставит бомбардировку города в очередь.
+     * @return true если бомбардировка успешно поставлена в очередь
+     */
+    fun scheduleBombardment(city: City): Boolean {
+        if (city in this.cities.values) return false
+        if (bombsAvailable <= 0) return false
+        bombsAvailable -= 1
+        pendingBombardments += city
+        game.history.record(WDHistoryEntry(WDAction.BOMBARDMENT, game.round, actor = this, targetCountry = city.country, targetCity = city))
+        return true
+    }
+
+    /** Применяет все отложенные бомбардировки */
+    fun resolvePendingBombardments() {
+        pendingBombardments.forEach { it.bombardCity() }
+        pendingBombardments.clear()
+    }
+
+    /** Накладывает санкции на 1 раунд */
+    fun sanctionCountry(target: Country): Boolean {
+        if (this == target) return false
+        target.incomingSanctions.add(this)
+        game.history.record(WDHistoryEntry(WDAction.SANCTION, game.round, actor = this, targetCountry = target))
+        return true
+    }
+
+    /** @return действия страны */
+    fun spy(target: Country): Map<WDAction, Int>? {
+        if (this == target) return null
+        if (balance < SPY_COST) return null
+        balance -= SPY_COST
+        game.history.record(WDHistoryEntry(WDAction.SPY, game.round, actor = this, targetCountry = target))
+        return game.history.getActionsOf(target, game.round)
     }
 
     fun setVicePresident(player: WDPlayer) {
@@ -134,10 +180,13 @@ class Country private constructor(
         const val LEARN_NUCLEAR_COST: Int = 150
         const val CRAFT_NUCLEAR_BOMB_COST: Int = 250
         const val ECOLOGY_COST: Int = 50
+        const val SPY_COST: Int = 75
 
         const val ECOLOGY_INVEST_GAIN: Double = 1.0 / 60
         const val ECOLOGY_CRAFT_PENALTY: Double = 1.0 / 180
         const val ECOLOGY_LEARN_PENALTY: Double = 0.05
+        const val SANCTION_INCOME_PENALTY: Double = 0.05
+        const val MAX_SANCTION_PENALTY: Double = 0.45
 
         /** Единственная точка создания Country */
         fun create(game: WDGame, president: WDPlayer, type: CountryType): Country =

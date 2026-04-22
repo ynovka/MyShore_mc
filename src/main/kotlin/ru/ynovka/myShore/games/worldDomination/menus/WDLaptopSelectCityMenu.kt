@@ -24,7 +24,7 @@ object WDLaptopSelectCityMenu {
             val base = idx * 2 + (if (idx >= 2) 1 else 0) + 9
             fill(
                 SlotPosition.top(base),
-                SlotPosition.top(base + 10),
+                SlotPosition.top(base + 19),
                 GuiButton.of(
                     invisibleItem(city.name, listOf(Component.empty()))
                 ) { ctx ->
