@@ -95,7 +95,6 @@ object HubEvents : Listener {
     fun onPlayerInteract(e: PlayerInteractEvent) {
         if (!e.player.isInHubWorld() || e.player.gameMode == GameMode.CREATIVE) return
         e.isCancelled = true
-        e.isCancelled = true
     }
 
     @EventHandler

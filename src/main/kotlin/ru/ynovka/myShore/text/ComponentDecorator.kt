@@ -1,32 +1,16 @@
-package ru.ynovka.myShore.text.actionBar
+package ru.ynovka.myShore.text
 
-import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
+import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import net.kyori.adventure.text.TranslatableComponent
-import org.bukkit.entity.Player
-import ru.ynovka.myShore.MyShore
+import ru.ynovka.myShore.text.actionBar.CharWidth
+import net.kyori.adventure.text.TextComponent
 import ru.ynovka.myShore.texturepack.Glyphs
+import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.MyShore
+import org.bukkit.entity.Player
 
-/**
- * Оборачивает Adventure-компонент фоновыми глифами переменной ширины.
- *
- * ── Почему НЕ через сериализацию в строку ──────────────────────────────────
- * MiniMessage.serialize() → deserialize() разрушает ClickEvent / HoverEvent,
- * потому что эти события не имеют MiniMessage-представления без потерь.
- * Здесь мы рекурсивно обходим дерево компонентов и МОДИФИЦИРУЕМ его напрямую.
- *
- * ── Математика сдвигов ─────────────────────────────────────────────────────
- * BACKGROUND_CENTER[W] = <glyph background_center_W> + TextOffset(-2)
- *   • Продвижение курсора глифом  = W + 1  (ширина изображения W + 1px межбуквенный)
- *   • Встроенный сдвиг в BACKGROUND_CENTER = -2
- *   • Итого после BACKGROUND_CENTER[W]: курсор сдвинулся на (W + 1 - 2) = W - 1
- * Нужно вернуть курсор в исходную позицию: returnShift = -(W - 1)
- * После этого символ рисуется и продвигает курсор на W px — всё верно.
- *
- * Если рендер "плывёт" — измени формулу returnShift в [buildBgEntry].
- */
+
 object ComponentDecorator {
 
     // ── Публичное API ────────────────────────────────────────────────────────

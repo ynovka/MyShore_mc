@@ -2,14 +2,14 @@ package ru.ynovka.myShore.games.worldDomination.states
 
 import com.github.darksoulq.abyssallib.world.advancement.AdvancementFrame
 import com.github.darksoulq.abyssallib.world.advancement.Toast
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.Material
-import org.bukkit.inventory.ItemStack
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.games.worldDomination.WDGame
-import ru.ynovka.myShore.MyShore.Companion.inst
+import net.kyori.adventure.text.format.NamedTextColor
+import ru.ynovka.myShore.utils.BossBarTimer
+import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.games.GameState
+import org.bukkit.inventory.ItemStack
+import org.bukkit.Material
 
 
 /**
@@ -29,6 +29,16 @@ class WDIntroductionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
             .frame(AdvancementFrame.GOAL)
             .build()
 
+        // Таймер минута, до перехода к следующему этапу
+        val timer = BossBarTimer()
+        timer.start(
+            totalSeconds = 60 / 12, // todo убрать / 12
+            isActive = { game.fsm.current is WDIntroductionPlayers },
+            onFinish = {
+                game.fsm.transitionTo(WDNegotiations(game))
+            }
+        )
+
         game.gamePlayers.forEach { wdPlayer ->
             val player = wdPlayer.player
 
@@ -38,13 +48,8 @@ class WDIntroductionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
             // Уведомление-достижение о начале стадии переговоров
             toast.send(player)
 
-            // todo Таймер 1 минута в bossbar
+            timer.addPlayer(player)
         }
-
-        // Отсчёт 1 минута, до перехода к следующему этапу
-        inst.server.scheduler.runTaskLater(inst, Runnable {
-            game.fsm.transitionTo(WDNegotiations(game))
-        }, 60 * 20L / 20) // todo убрать `/ 20`
     }
 
     override fun onPlayerReconnect(gamePlayer: WDPlayer) {

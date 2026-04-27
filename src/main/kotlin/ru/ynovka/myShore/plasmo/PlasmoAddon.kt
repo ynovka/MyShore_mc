@@ -29,12 +29,10 @@ class PlasmoAddon : AddonInitializer {
     override fun onAddonInitialize() {
         PhoneCallVoice.init(this)
         voiceServer.eventBus.register(this, PhoneCallVoice)
-        println("Addon initialized")
     }
 
     override fun onAddonShutdown() {
         voiceServer.eventBus.unregister(this, PhoneCallVoice)
-        println("Addon shut down")
     }
 
     @EventSubscribe

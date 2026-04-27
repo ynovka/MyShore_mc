@@ -23,6 +23,7 @@ import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
 import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
 import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFormattedName
 import ru.ynovka.myShore.plasmo.PhoneCall
+import ru.ynovka.myShore.utils.BossBarTimer
 import ru.ynovka.myShore.utils.Utils.distribute
 import java.util.UUID
 
@@ -44,8 +45,8 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
      */
     override fun onEnterState() {
         // Случайное распределение стран и президентов
-        val players = game.gamePlayers.shuffled()
-        val countriesCount = (players.size / 2).coerceIn(2..10)
+        val wdPlayers = game.gamePlayers.shuffled()
+        val countriesCount = (wdPlayers.size / 2).coerceIn(2..10)
         val countriesList = CountryType.entries.shuffled().take(countriesCount)
 
         // todo перевод
@@ -56,12 +57,23 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
             .frame(AdvancementFrame.GOAL)
             .build()
 
-        players.map(GamePlayer::player).forEach {
-            it.inventory.setItem(8, WDItems.wdNotebook.getStack(it))
-            toast.send(it)
+        // Таймер 3 минуты, до перехода к следующему этапу
+        val timer = BossBarTimer()
+        timer.start(
+            totalSeconds = 3 * 60 / 12, // todo убрать / 12
+            isActive = { game.fsm.current is WDDistributionPlayers },
+            onFinish = {
+                game.fsm.transitionTo(WDIntroductionPlayers(game))
+            }
+        )
+
+        wdPlayers.map(GamePlayer::player).forEach { player ->
+            player.inventory.setItem(8, WDItems.wdNotebook.getStack(player))
+            toast.send(player)
+            timer.addPlayer(player)
         }
 
-        players.take(countriesCount).zip(countriesList)
+        wdPlayers.take(countriesCount).zip(countriesList)
             .forEach { (president, type) ->
                 val pp = president.player
                 // Создаём страну, телепортируем в неё презиента
@@ -83,11 +95,6 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
 
                 toast.send(pp)
             }
-
-        // Отсчёт 3 минуты, до перехода к следующему этапу
-        inst.server.scheduler.runTaskLater(inst, Runnable {
-            game.fsm.transitionTo(WDIntroductionPlayers(game))
-        }, 3 * 60 * 20L / 20) // todo убрать `/ 20`
     }
 
 

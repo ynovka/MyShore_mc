@@ -10,7 +10,7 @@ import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.hub.HubItems
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
-import ru.ynovka.myShore.text.actionBar.ComponentDecorator
+import ru.ynovka.myShore.text.ComponentDecorator
 import ru.ynovka.myShore.text.actionBar.clearActionBar
 
 

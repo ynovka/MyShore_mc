@@ -8,7 +8,7 @@ import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.games.worldDomination.WDItems
 import net.kyori.adventure.text.format.NamedTextColor
 import ru.ynovka.myShore.games.worldDomination.WDGame
-import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.utils.BossBarTimer
 import ru.ynovka.myShore.plasmo.PhoneCall
 import ru.ynovka.myShore.games.GamePlayer
 import net.kyori.adventure.text.Component
@@ -37,8 +37,20 @@ class WDNegotiations(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
             .icon(ItemStack.of(Material.CLOCK))
             .frame(AdvancementFrame.GOAL)
             .build()
+
+        // Таймер 10 минут, до перехода к следующему этапу
+        val timer = BossBarTimer()
+        timer.start(
+            totalSeconds = 10 * 60 / 15, // todo убрать / 15
+            isActive = { game.fsm.current is WDNegotiations },
+            onFinish = {
+                game.fsm.transitionTo(WDUNMeeting(game))
+            }
+        )
+
         game.gamePlayers.asPlayers().forEach { player ->
             toast.send(player)
+            timer.addPlayer(player)
         }
 
         // Телепорт игроков по странам
@@ -56,10 +68,6 @@ class WDNegotiations(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
                 it.inventory.setItem(0, WDItems.wdLaptopMenu.getStack(null))
                 it.inventory.setItem(7, WDItems.wdPhoneMenu.getStack(null))
             }
-
-        inst.server.scheduler.runTaskLater(inst, Runnable {
-            game.fsm.transitionTo(WDUNMeeting(game))
-        }, 10 * 60 * 20L)
     }
 
     override fun onExitState() {

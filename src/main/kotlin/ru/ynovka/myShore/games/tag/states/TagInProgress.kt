@@ -14,7 +14,7 @@ import org.bukkit.boss.BarStyle
 import org.bukkit.boss.BossBar
 import kotlin.math.roundToInt
 import org.bukkit.Bukkit
-import ru.ynovka.myShore.text.actionBar.ComponentDecorator
+import ru.ynovka.myShore.text.ComponentDecorator
 
 
 // 40-100 сек (сам геймплей салочек)

@@ -21,7 +21,7 @@ import org.bukkit.GameMode
 import java.time.Duration
 import org.bukkit.Bukkit
 import org.bukkit.Sound
-import ru.ynovka.myShore.text.actionBar.ComponentDecorator
+import ru.ynovka.myShore.text.ComponentDecorator
 import ru.ynovka.myShore.utils.Utils.clearTeams
 import java.util.UUID
 

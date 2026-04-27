@@ -1,32 +1,38 @@
 package ru.ynovka.myShore.games.worldDomination.menus
 
 import com.github.darksoulq.abyssallib.extension.openGui
-import com.github.darksoulq.abyssallib.server.event.context.gui.GuiClickContext
+import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import com.github.darksoulq.abyssallib.world.gui.Gui
 import com.github.darksoulq.abyssallib.world.gui.GuiBuilder
 import com.github.darksoulq.abyssallib.world.gui.SlotPosition
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
 import com.github.darksoulq.abyssallib.world.gui.gui
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import ru.ynovka.myShore.games.worldDomination.WDItems.wdInvisibleItem
 import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
+import ru.ynovka.myShore.texturepack.GuiTextures
 import ru.ynovka.myShore.utils.Utils.fill
 
 
 @Suppress("UnstableApiUsage")
 object WDLaptopMainMenu {
-    fun get(): Gui = gui(MenuType.GENERIC_9X4, laptopTitle) {
+    fun get(): Gui = gui(
+        MenuType.GENERIC_9X4,
+        Component.text().color(NamedTextColor.WHITE)
+            .append(TextOffset.getOffset(-8))
+            .append(GuiTextures.MENU_WD_MAIN)
+            .append(TextOffset.getOffset(-170))
+            .append(laptopTitle)
+            .build()) {
         laptopNavBar(29)
     }
 }
 
-internal val laptopTitle: Component
-    get() = Component.text()
-        .append(Component.translatable("menu.myshore.wd.laptop"))
-        .build()
+internal val laptopTitle = Component.translatable("menu.myshore.wd.laptop")
 
 internal fun invisibleItem(
     name: Component,
