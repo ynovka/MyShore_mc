@@ -1,12 +1,11 @@
 package ru.ynovka.myShore.games.worldDomination.states
 
 import com.github.darksoulq.abyssallib.extension.closeGui
-import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
-import ru.ynovka.myShore.hub.Hub
 import ru.ynovka.myShore.text.actionBar.ActionBar
 import ru.ynovka.myShore.utils.BossBarTimer
+import ru.ynovka.myShore.games.GameState
 
 
 // Ожидание игроков (нужно хотя бы 12)
@@ -19,7 +18,7 @@ class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         game.gamePlayers.forEach { gamePlayer ->
             val player = gamePlayer.player
 
-            player.teleportAsync(Hub.spawn)
+            player.teleportAsync(WDGame.hubLoc)
             player.inventory.clear()
             timer.addPlayer(player)
         }
@@ -40,7 +39,7 @@ class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
     override fun onPlayerJoin(gamePlayer: WDPlayer) {
         val player = gamePlayer.player
 
-        player.teleportAsync(Hub.spawn)
+        player.teleportAsync(WDGame.hubLoc)
         player.inventory.clear()
         timer.addPlayer(player)
 

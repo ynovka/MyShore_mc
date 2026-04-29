@@ -13,47 +13,45 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.worldDomination.entity.CountryType
-import ru.ynovka.myShore.games.worldDomination.entity.Country
-import ru.ynovka.myShore.games.worldDomination.WDPlayer
-import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.GamePlayer
 import ru.ynovka.myShore.games.GamePlayer.Companion.asPlayers
+import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.worldDomination.WDItems
+import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
 import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
+import ru.ynovka.myShore.games.worldDomination.entity.Country
 import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFormattedName
+import ru.ynovka.myShore.games.worldDomination.entity.CountryType
 import ru.ynovka.myShore.plasmo.PhoneCall
 import ru.ynovka.myShore.utils.BossBarTimer
-import ru.ynovka.myShore.utils.Utils.distribute
 import java.util.UUID
+import kotlin.math.ceil
 
 
-/**
- * Этап распределния игроков по странам, длится 3 минуты
- * Снача определяется кол-во стран (кол-во игроков / 2, max 10)
- * Для тестов - минимум 2 игрока (2с по 1и)
- * Минимум 12 игроков (6с по 2и)
- * Максимум 50 игроков (10с по 5и)
- */
-
+/** Этап распределения игроков по странам, длится 3 минуты */
 class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
     private val timer = BossBarTimer()
 
+    companion object {
+        private const val MIN_COUNTRIES = 6
+        private const val MAX_COUNTRIES = 10
+        private const val MAX_PLAYERS_IN_COUNTRY = 5
+        private const val FULL_DISTRIBUTION_MIN_PLAYERS = MIN_COUNTRIES * 2
+    }
+
     /**
-     * Случайным образом определяем президентов случайных стран и телепортируем их в штаб-квартиры
-     * Остальные игроки остаются в лобби
-     * У президентов есть 3 минуты что бы выбрать своего вице-президента
-     * По истечению 3-ёх минут странам без вице-президентов они будут назначенны случайным образом
+     * Случайным образом определяем президентов случайных стран и телепортируем их в штаб-квартиры.
+     * Остальные игроки остаются в лобби.
+     * У президентов есть 3 минуты, чтобы выбрать своего вице-президента.
+     * По истечении 3 минут странам без вице-президентов они будут назначены случайным образом.
      */
     override fun onEnterState() {
-        // Случайное распределение стран и президентов
         val wdPlayers = game.gamePlayers.shuffled()
-        val countriesCount = (wdPlayers.size / 2).coerceIn(2..10)
+        val countriesCount = getTargetCountriesCount(wdPlayers.size)
         val countriesList = CountryType.entries.shuffled().take(countriesCount)
 
-        // todo перевод
         val toast = Toast.builder()
             .line1(Component.text("Началась новая стадия", NamedTextColor.GRAY))
             .line2(Component.text("Распределение", NamedTextColor.WHITE))
@@ -61,9 +59,8 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
             .frame(AdvancementFrame.GOAL)
             .build()
 
-        // Таймер 3 минуты, до перехода к следующему этапу
         timer.start(
-            totalSeconds = 3 * 60 / 12, // todo убрать / 12
+            totalSeconds = 3 * 60 / 20, // todo убрать / 20
             isActive = { game.fsm.current is WDDistributionPlayers },
             onFinish = {
                 game.fsm.transitionTo(WDIntroductionPlayers(game))
@@ -78,56 +75,38 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
 
         wdPlayers.take(countriesCount).zip(countriesList)
             .forEach { (president, type) ->
-                val pp = president.player
-                // Создаём страну, телепортируем в неё презиента
-                val country = Country.create(game, president, type).also { country ->
-                    country.teleport(pp)
-                }
-                game.countries += country
-
-                // Выдаём президенту телефон для звонков
-                pp.inventory.setItem(7, WDItems.wdPhoneMenu.getStack(pp))
-
-                // todo перевод
-                val toast = Toast.builder()
-                    .line1(Component.text("Вы президент страны", NamedTextColor.GRAY))
-                    .line2(country.getFormattedName(pp))
-                    .icon(ItemStack.of(Material.DIAMOND_BLOCK))
-                    .frame(AdvancementFrame.GOAL)
-                    .build()
-
-                toast.send(pp)
+                createCountryWithPresident(
+                    president = president,
+                    type = type,
+                    givePhone = true
+                )
             }
     }
 
-
     override fun onExitState() {
         timer.stop()
-        // Очищаем приглашения в вице-президенты
         invites.clear()
 
-        // Распределяем оставшихся игроков по странам
-        val unassignedPlayers = game.gamePlayers.filter { it.country == null }.shuffled().toMutableSet()
-        game.countries.forEach { country ->
-            if (country.vicePresident == null && unassignedPlayers.isNotEmpty()) {
-                val newVice = unassignedPlayers.random()
-                unassignedPlayers.remove(newVice)
-                country.setVicePresident(newVice)
-            }
-        }
-        if (unassignedPlayers.isNotEmpty()) {
-            val chunkedPlayers = unassignedPlayers.distribute(game.countries.size)
-            chunkedPlayers.zip(game.countries).forEach { (players, country) ->
-                players.forEach { player ->
-                    country.addCitizen(player)
-                }
-            }
-        }
+        val playersCount = game.gamePlayers.size
 
-        // Завершаем все телефонные звонки
+        ensureCountriesWithPresidents(
+            targetCount = getBaseCountriesCount(playersCount),
+            givePhone = false
+        )
+
+        assignMissingVicePresidents()
+
+        ensureCountriesWithPresidents(
+            targetCount = getTargetCountriesCount(playersCount),
+            givePhone = false
+        )
+
+        assignMissingVicePresidents()
+
+        distributeRemainingCitizens()
+
         PhoneCall.endAllCalls(game.gamePlayers.map(GamePlayer::playerId))
 
-        // Забираем телефоны
         game.gamePlayers
             .filter { it.role == WDPlayerRole.PRESIDENT }
             .map(GamePlayer::player)
@@ -139,13 +118,14 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
     }
 
     override fun onPlayerJoin(gamePlayer: WDPlayer) {
-        gamePlayer.player.teleportAsync(WDGame.hubLoc)
         val player = gamePlayer.player
 
-        // Показываем текущий таймер
+        player.teleportAsync(WDGame.hubLoc)
+
+        player.inventory.setItem(8, WDItems.wdNotebook.getStack(player))
+
         timer.addPlayer(player)
 
-        // Показываем текущую стадию
         val toast = Toast.builder()
             .line1(Component.text("Текущая стадия", NamedTextColor.GRAY))
             .line2(Component.text("Распределение", NamedTextColor.WHITE))
@@ -154,20 +134,159 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
             .build()
 
         toast.send(player)
+
+        ensureCountriesWithPresidents(
+            targetCount = getTargetCountriesCount(game.gamePlayers.size),
+            givePhone = true
+        )
     }
 
     override fun onPlayerReconnect(gamePlayer: WDPlayer) {
         val player = gamePlayer.player
+
+        timer.addPlayer(player)
+        player.inventory.setItem(8, WDItems.wdNotebook.getStack(player))
+
+        if (gamePlayer.role == WDPlayerRole.PRESIDENT) {
+            player.inventory.setItem(7, WDItems.wdPhoneMenu.getStack(player))
+        }
+
         val country = gamePlayer.country
         if (country != null) {
             country.teleport(player)
             return
         }
+
         player.teleportAsync(WDGame.hubLoc)
     }
 
+    private fun getBaseCountriesCount(playersCount: Int): Int {
+        if (playersCount <= 0) return 0
+
+        return if (playersCount < FULL_DISTRIBUTION_MIN_PLAYERS) {
+            playersCount.coerceAtMost(MIN_COUNTRIES)
+        } else {
+            MIN_COUNTRIES
+        }
+    }
+
+    /**
+     * - 1 игрок  -> 1 страна
+     * - 2 игрока -> 2 страны
+     * - 12 игроков -> 6 стран
+     * - 30 игроков -> 6 стран
+     * - 31 игрок -> 7 стран
+     * - 50 игроков -> 10 стран
+     */
+    private fun getTargetCountriesCount(playersCount: Int): Int {
+        if (playersCount <= 0) return 0
+
+        val byPlayersLimit = ceil(playersCount.toDouble() / MAX_PLAYERS_IN_COUNTRY).toInt()
+
+        return maxOf(
+            getBaseCountriesCount(playersCount),
+            byPlayersLimit
+        ).coerceAtMost(MAX_COUNTRIES)
+    }
+
+    private fun ensureCountriesWithPresidents(
+        targetCount: Int,
+        givePhone: Boolean
+    ) {
+        while (game.countries.size < targetCount) {
+            val president = game.gamePlayers
+                .filter { it.country == null }
+                .shuffled()
+                .firstOrNull()
+                ?: return
+
+            val type = getRandomUnusedCountryType() ?: return
+
+            createCountryWithPresident(
+                president = president,
+                type = type,
+                givePhone = givePhone
+            )
+        }
+    }
+
+    private fun createCountryWithPresident(
+        president: WDPlayer,
+        type: CountryType,
+        givePhone: Boolean
+    ): Country {
+        val player = president.player
+
+        val country = Country.create(game, president, type).also { country ->
+            game.countries += country
+            country.teleport(player)
+        }
+
+        if (givePhone) {
+            player.inventory.setItem(7, WDItems.wdPhoneMenu.getStack(player))
+        }
+
+        val toast = Toast.builder()
+            .line1(Component.text("Вы президент страны", NamedTextColor.GRAY))
+            .line2(country.getFormattedName(player))
+            .icon(ItemStack.of(Material.DIAMOND_BLOCK))
+            .frame(AdvancementFrame.GOAL)
+            .build()
+
+        toast.send(player)
+
+
+
+        return country
+    }
+
+    private fun assignMissingVicePresidents() {
+        val unassignedPlayers = game.gamePlayers
+            .filter { it.country == null }
+            .shuffled()
+            .toMutableList()
+
+        game.countries.shuffled().forEach { country ->
+            if (country.vicePresident == null && unassignedPlayers.isNotEmpty()) {
+                val newVice = unassignedPlayers.removeAt(0)
+
+                country.setVicePresident(newVice)
+                country.teleport(newVice.player)
+            }
+        }
+    }
+
+    private fun distributeRemainingCitizens() {
+        val unassignedPlayers = game.gamePlayers
+            .filter { it.country == null }
+            .shuffled()
+
+        unassignedPlayers.forEach { wdPlayer ->
+            val country = game.countries
+                .filter { country -> getPlayersCount(country) < MAX_PLAYERS_IN_COUNTRY }
+                .shuffled()
+                .minByOrNull { country -> getPlayersCount(country) }
+                ?: return@forEach
+
+            country.addCitizen(wdPlayer)
+        }
+    }
+
+    private fun getPlayersCount(country: Country): Int {
+        return game.gamePlayers.count { it.country == country }
+    }
+
+    private fun getRandomUnusedCountryType(): CountryType? {
+        val usedTypes = game.countries.map { it.type }.toSet()
+
+        return CountryType.entries
+            .filter { it !in usedTypes }
+            .shuffled()
+            .firstOrNull()
+    }
 
     private val invites: MutableSet<ViceInvite> = mutableSetOf()
+
     data class ViceInvite(
         val vice: UUID,
         val president: UUID,
@@ -178,12 +297,12 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         vice: Player,
         president: Player
     ) {
-        // пишем игроку TO сообщение с приглашением
         val i = ViceInvite(
             vice.uniqueId,
             president.uniqueId,
             System.currentTimeMillis().plus(15_000)
         )
+
         invites.add(i)
 
         Bukkit.getScheduler().runTaskLater(inst, Runnable {
@@ -193,11 +312,15 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         }, 15 * 20L)
 
         val presidentFormatedName = president.asWDPlayer()?.getFormattedName() ?: Component.text(president.name)
+
         vice.sendMessage(
             Component.text()
-                .append(Component.translatable(
-                    "msg.myshore.wd.invite_vice_president", presidentFormatedName
-                ))
+                .append(
+                    Component.translatable(
+                        "msg.myshore.wd.invite_vice_president",
+                        presidentFormatedName
+                    )
+                )
                 .appendNewline()
                 .append(
                     Component.translatable("btn.myshore.agree")
@@ -206,7 +329,8 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
                         .clickEvent(ClickEvent.runCommand("/wd accept_invite_vice ${president.name}"))
                         .hoverEvent(
                             HoverEvent.showText(
-                                Component.text("Нажмите, чтобы принять приглашение").color(NamedTextColor.BLUE)
+                                Component.text("Нажмите, чтобы принять приглашение")
+                                    .color(NamedTextColor.BLUE)
                             )
                         )
                 )
@@ -220,7 +344,8 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
                         .clickEvent(ClickEvent.runCommand("/wd deny_invite_vice ${president.name}"))
                         .hoverEvent(
                             HoverEvent.showText(
-                                Component.text("Нажмите, чтобы отклонить приглашение").color(NamedTextColor.BLUE)
+                                Component.text("Нажмите, чтобы отклонить приглашение")
+                                    .color(NamedTextColor.BLUE)
                             )
                         )
                 )
@@ -232,26 +357,42 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         president: Player,
         game: WDGame
     ) {
-        // игрок TO принял приглашение
-        val i = invites.firstOrNull { it.vice == vice.uniqueId && it.president == president.uniqueId } ?: return
+        val i = invites.firstOrNull {
+            it.vice == vice.uniqueId && it.president == president.uniqueId
+        } ?: return
+
         invites.remove(i)
 
-        val country = game.countries.firstOrNull { it.president.playerId == president } ?: return
+        val country = game.countries.firstOrNull {
+            it.president.playerId == president.uniqueId
+        } ?: return
+
+        if (country.vicePresident != null) return
+
         val wdPlayer = game.getOrCreatePlayer(vice)
+
+        if (wdPlayer.country != null) return
+
         country.setVicePresident(wdPlayer)
         country.teleport(wdPlayer.player)
 
-        // Пишем в чат президенту, сообщение "{игрок} принял приглашение"
+        invites.removeIf {
+            it.vice == vice.uniqueId || it.president == president.uniqueId
+        }
+
+        // TODO: Пишем в чат президенту сообщение "{игрок} принял приглашение"
     }
 
     fun denyInviteVice(
         vice: Player,
         president: Player
     ) {
-        // игрок TO отклонил приглашение
-        val i = invites.firstOrNull { it.vice == vice.uniqueId && it.president == president.uniqueId } ?: return
+        val i = invites.firstOrNull {
+            it.vice == vice.uniqueId && it.president == president.uniqueId
+        } ?: return
+
         invites.remove(i)
 
-        // Пишем в чат президенту, сообщение "{игрок} отклонил приглашение"
+        // TODO: Пишем в чат президенту сообщение "{игрок} отклонил приглашение"
     }
 }

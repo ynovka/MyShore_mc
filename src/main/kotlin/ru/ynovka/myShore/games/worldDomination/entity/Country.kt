@@ -74,7 +74,7 @@ class Country private constructor(
     }
 
     fun teleport(player: Player) {
-        // countryVisibilityGroup.addViewer(player.uniqueId) todo раскоментить
+        countryVisibilityGroup.addViewer(player.uniqueId)
         player.teleportAsync(skin.loc)
     }
 
