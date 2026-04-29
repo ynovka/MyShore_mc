@@ -24,7 +24,7 @@ class WDIntroductionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         // todo перевод
         val toast = Toast.builder()
             .line1(Component.text("Началась новая стадия", NamedTextColor.GRAY))
-            .line2(Component.text("Знакомство игроков"))
+            .line2(Component.text("Знакомство игроков", NamedTextColor.WHITE))
             .icon(ItemStack.of(Material.CLOCK))
             .frame(AdvancementFrame.GOAL)
             .build()

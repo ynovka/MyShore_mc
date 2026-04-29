@@ -1,45 +1,78 @@
 package ru.ynovka.myShore.games.worldDomination.states
 
-import org.bukkit.scheduler.BukkitTask
-import ru.ynovka.myShore.MyShore.Companion.inst
+import com.github.darksoulq.abyssallib.extension.closeGui
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.hub.Hub
 import ru.ynovka.myShore.text.actionBar.ActionBar
+import ru.ynovka.myShore.utils.BossBarTimer
 
 
 // Ожидание игроков (нужно хотя бы 12)
 class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
-    private var startTask: BukkitTask? = null
+    private val timer = BossBarTimer()
+
+    private var started = false
 
     override fun onEnterState() {
-        game.gamePlayers.map(WDPlayer::player).forEach {
-            it.teleportAsync(Hub.spawn)
-            it.inventory.clear()
+        game.gamePlayers.forEach { gamePlayer ->
+            val player = gamePlayer.player
+
+            player.teleportAsync(Hub.spawn)
+            player.inventory.clear()
+            timer.addPlayer(player)
         }
-        // if (task == null) action bar "Ожидание игроков..." с анимацией
+
+        tryStartTimer()
     }
 
     override fun onExitState() {
-        startTask?.cancel()
-        startTask = null
-        game.gamePlayers.map(WDPlayer::player).forEach {
-            ActionBar.clear(it)
+        timer.stop()
+        started = false
+
+        game.gamePlayers.forEach { wdPlayer ->
+            ActionBar.clear(wdPlayer.player)
+            wdPlayer.player.closeGui()
         }
     }
 
     override fun onPlayerJoin(gamePlayer: WDPlayer) {
         val player = gamePlayer.player
-        player.teleportAsync(WDGame.hubLoc)
-        player.inventory.clear()
 
-        if (startTask != null) return
-        if (game.gamePlayers.size >= WDGame.MIN_PLAYERS) {
-            startTask = inst.server.scheduler.runTaskLater(inst, Runnable {
-                // todo пишем всем игрокам отсчёт до начала в actionbar + тем кто только зашёл в лобби
-                if (game.gamePlayers.size >= WDGame.MIN_PLAYERS) game.fsm.transitionTo(WDDistributionPlayers(game))
-            }, 10 * 20L) // todo заменить на 60 * 20L - 1 минута до начала
-        }
+        player.teleportAsync(Hub.spawn)
+        player.inventory.clear()
+        timer.addPlayer(player)
+
+        tryStartTimer()
+    }
+
+    override fun onPlayerLeave(gamePlayer: WDPlayer) {
+        val player = gamePlayer.player
+        timer.removePlayer(player)
+    }
+
+    private fun tryStartTimer() {
+        if (started) return
+        if (game.gamePlayers.size < WDGame.MIN_PLAYERS) return
+
+        started = true
+
+        timer.start(
+            totalSeconds = 10, // todo 60
+            isActive = {
+                game.gamePlayers.size >= WDGame.MIN_PLAYERS
+            },
+            onCancel = {
+                started = false
+            },
+            onFinish = {
+                started = false
+
+                if (game.gamePlayers.size >= WDGame.MIN_PLAYERS) {
+                    game.fsm.transitionTo(WDDistributionPlayers(game))
+                }
+            }
+        )
     }
 }

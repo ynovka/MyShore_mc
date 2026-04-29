@@ -17,7 +17,6 @@ import ru.ynovka.myShore.games.worldDomination.menus.WDLaptopMainMenu
 import ru.ynovka.myShore.games.worldDomination.menus.WDPhoneMenu
 import ru.ynovka.myShore.games.worldDomination.states.WDDistributionPlayers
 import ru.ynovka.myShore.games.worldDomination.states.WDNegotiations
-import ru.ynovka.myShore.plasmo.PhoneCall
 import ru.ynovka.myShore.texturepack.TexturePack
 import ru.ynovka.myShore.utils.cancelItem
 
@@ -70,10 +69,6 @@ object WDItems {
         }
         onUse { source, _, _ -> openPhoneMenu(source as Player) }
         onUseOn { ctx -> openPhoneMenu(ctx.source as Player) }
-        onSwapHand { player, _ ->
-            PhoneCall.acceptCall(player)
-            ActionResult.CANCEL
-        }
     }
     private fun openPhoneMenu(
         player: Player

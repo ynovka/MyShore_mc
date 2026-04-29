@@ -1,5 +1,6 @@
 package ru.ynovka.myShore.games.worldDomination.states
 
+import com.github.darksoulq.abyssallib.extension.closeGui
 import com.github.darksoulq.abyssallib.world.advancement.AdvancementFrame
 import com.github.darksoulq.abyssallib.world.advancement.Toast
 import ru.ynovka.myShore.games.GamePlayer.Companion.asPlayers
@@ -33,7 +34,7 @@ class WDNegotiations(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         // todo перевод
         val toast = Toast.builder()
             .line1(Component.text("Началась новая стадия", NamedTextColor.GRAY))
-            .line2(Component.text("Переговоры"))
+            .line2(Component.text("Переговоры", NamedTextColor.WHITE))
             .icon(ItemStack.of(Material.CLOCK))
             .frame(AdvancementFrame.GOAL)
             .build()
@@ -82,6 +83,10 @@ class WDNegotiations(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
                 it.inventory.clear(0)
                 it.inventory.clear(7)
             }
+
+        game.gamePlayers.asPlayers().forEach { player ->
+            player.closeGui()
+        }
     }
 
     override fun onPlayerReconnect(gamePlayer: WDPlayer) { }

@@ -1,5 +1,6 @@
 package ru.ynovka.myShore.games.worldDomination.states
 
+import com.github.darksoulq.abyssallib.extension.closeGui
 import com.github.darksoulq.abyssallib.world.advancement.AdvancementFrame
 import com.github.darksoulq.abyssallib.world.advancement.Toast
 import net.kyori.adventure.text.Component
@@ -17,6 +18,7 @@ import ru.ynovka.myShore.games.worldDomination.entity.Country
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.GamePlayer
+import ru.ynovka.myShore.games.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.worldDomination.WDItems
 import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
@@ -37,6 +39,8 @@ import java.util.UUID
  */
 
 class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
+    private val timer = BossBarTimer()
+
     /**
      * Случайным образом определяем президентов случайных стран и телепортируем их в штаб-квартиры
      * Остальные игроки остаются в лобби
@@ -52,13 +56,12 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         // todo перевод
         val toast = Toast.builder()
             .line1(Component.text("Началась новая стадия", NamedTextColor.GRAY))
-            .line2(Component.text("Распределение"))
+            .line2(Component.text("Распределение", NamedTextColor.WHITE))
             .icon(ItemStack.of(Material.CLOCK))
             .frame(AdvancementFrame.GOAL)
             .build()
 
         // Таймер 3 минуты, до перехода к следующему этапу
-        val timer = BossBarTimer()
         timer.start(
             totalSeconds = 3 * 60 / 12, // todo убрать / 12
             isActive = { game.fsm.current is WDDistributionPlayers },
@@ -99,6 +102,7 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
 
 
     override fun onExitState() {
+        timer.stop()
         // Очищаем приглашения в вице-президенты
         invites.clear()
 
@@ -128,10 +132,28 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
             .filter { it.role == WDPlayerRole.PRESIDENT }
             .map(GamePlayer::player)
             .forEach { it.inventory.clear(7) }
+
+        game.gamePlayers.asPlayers().forEach { player ->
+            player.closeGui()
+        }
     }
 
     override fun onPlayerJoin(gamePlayer: WDPlayer) {
         gamePlayer.player.teleportAsync(WDGame.hubLoc)
+        val player = gamePlayer.player
+
+        // Показываем текущий таймер
+        timer.addPlayer(player)
+
+        // Показываем текущую стадию
+        val toast = Toast.builder()
+            .line1(Component.text("Текущая стадия", NamedTextColor.GRAY))
+            .line2(Component.text("Распределение", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.CLOCK))
+            .frame(AdvancementFrame.GOAL)
+            .build()
+
+        toast.send(player)
     }
 
     override fun onPlayerReconnect(gamePlayer: WDPlayer) {

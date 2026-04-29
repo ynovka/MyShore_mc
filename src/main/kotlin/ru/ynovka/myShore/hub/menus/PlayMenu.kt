@@ -6,7 +6,6 @@ import com.github.darksoulq.abyssallib.world.gui.SlotPosition
 import net.kyori.adventure.text.format.NamedTextColor
 import com.github.darksoulq.abyssallib.world.gui.Gui
 import com.github.darksoulq.abyssallib.world.gui.gui
-import ru.ynovka.myShore.utils.Utils.toComponent
 import ru.ynovka.myShore.texturepack.GuiTextures
 import net.kyori.adventure.text.Component
 import org.bukkit.inventory.MenuType
@@ -23,7 +22,7 @@ object PlayMenu {
         MenuType.GENERIC_9X2,
         Component.text().color(NamedTextColor.WHITE)
             .append(TextOffset.getOffset(-8))
-            .append(GuiTextures.MENU_2x9_048_26)
+            .append(GuiTextures.MENU_HUB_PLAY)
             .append(TextOffset.getOffset(-170))
             .append(Component.translatable("menu.myshore.minigames"))
             .build(),

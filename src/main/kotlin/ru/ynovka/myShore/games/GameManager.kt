@@ -20,6 +20,9 @@ object GameManager {
         if (player.inGame())
             return Result.failure(IllegalStateException("Player ${player.name} is already in a game"))
 
+        player.inventory.clear()
+        player.activePotionEffects.clear()
+
         val party = PartyManager.getParty(player)
         return if (party != null)
             joinPrivate(party, factory, partyFactory)

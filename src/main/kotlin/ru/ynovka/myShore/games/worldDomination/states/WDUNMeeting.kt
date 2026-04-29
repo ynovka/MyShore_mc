@@ -99,8 +99,8 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
                         ActionBar.send(
                             player,
                             Component.text(
-                                "сейчас выступает ${country.getFormattedName(player)}"
-                            ).color(NamedTextColor.BLUE),
+                                "сейчас выступает "
+                            ).append(country.getFormattedName(player)).color(NamedTextColor.BLUE),
                             durationMs = 90 * 1000
                         )
                     }
@@ -117,7 +117,7 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
             ) {
                 game.fsm.transitionTo(WDFinishingState(game))
             } else {
-                game.fsm.transitionTo(WDUNMeeting(game))
+                game.fsm.transitionTo(WDNegotiations(game))
             }
         }, game.countries.size * 90 * 20L / 10 + 20L) // todo убрать / 10
     }
