@@ -3,6 +3,7 @@ package ru.ynovka.myShore.games.worldDomination.entity
 import net.kyori.adventure.text.TranslatableComponent
 import ru.ynovka.myShore.utils.Utils.intValue
 
+
 class City(
     /** Название города - ключ перевода */
     val name: TranslatableComponent,
