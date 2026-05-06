@@ -10,6 +10,7 @@ import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import org.bukkit.entity.Player
 import java.util.concurrent.CompletableFuture
+import ru.ynovka.myShore.games.tag.teleport
 
 
 enum class TagMaps(
@@ -66,34 +67,35 @@ interface TagMap {
     }
 }
 
-fun TagMap.teleportPlayers(game: TagGame) {
-    val victims    = game.gamePlayers.filter { it.role == TagPlayerRoles.VICTIM || it.role == TagPlayerRoles.UNDEFINED }
-    val hunters    = game.gamePlayers.filter { it.role == TagPlayerRoles.HUNTER }
-    val spectators = game.gamePlayers.filter { it.role == TagPlayerRoles.SPECTATOR || it.role == TagPlayerRoles.SPECTATOR_VICTIM }
+fun TagMap.teleportPlayers(game: TagGame): CompletableFuture<Void> {
+    val victims = game.gamePlayers.filter {
+        it.role == TagPlayerRoles.VICTIM || it.role == TagPlayerRoles.UNDEFINED
+    }
+    val hunters = game.gamePlayers.filter { it.role == TagPlayerRoles.HUNTER }
+    val spectators = game.gamePlayers.filter {
+        it.role == TagPlayerRoles.SPECTATOR || it.role == TagPlayerRoles.SPECTATOR_VICTIM
+    }
 
     val shuffledVictimSpawns = victimSpawns.shuffled().toMutableList()
     val teleports = mutableListOf<CompletableFuture<Boolean>>()
 
-    // Victims
     victims.forEachIndexed { index, tagPlayer ->
         val spawn = shuffledVictimSpawns.getOrNull(index)?.toLocation()
             ?: victimSpawns.random().toLocation()
-        teleports += tagPlayer.player.teleportAsync(spawn)
+        teleports += teleport(tagPlayer.player, game, spawn)
     }
 
-    // Hunters
     hunters.forEach { tagPlayer ->
-        teleports += tagPlayer.player.teleportAsync(hunterSpawn.toLocation())
+        teleports += teleport(tagPlayer.player, game, hunterSpawn.toLocation())
     }
 
-    // Spectators follow the hunter
     val hunterLocation = hunters.firstOrNull()?.player?.location
     spectators.forEach { tagPlayer ->
-        val loc = hunterLocation ?: victimSpawns.random().toLocation()
-        teleports += tagPlayer.player.teleportAsync(loc)
+        val spawn = hunterLocation ?: victimSpawns.random().toLocation()
+        teleports += teleport(tagPlayer.player, game, spawn)
     }
 
-    CompletableFuture.allOf(*teleports.toTypedArray())
+    return CompletableFuture.allOf(*teleports.toTypedArray())
 }
 
 data class MapSpawn(

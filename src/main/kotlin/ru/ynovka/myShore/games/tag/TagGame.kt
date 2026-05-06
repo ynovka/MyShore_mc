@@ -13,7 +13,9 @@ import ru.ynovka.myShore.games.Game
 import ru.ynovka.myShore.utils.canMove
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import java.util.UUID
+import java.util.concurrent.CompletableFuture
 
 
 class TagGame : Game<TagPlayer>() {
@@ -97,9 +99,20 @@ fun TagGame.hasHunter(): Boolean  = gamePlayers.any { it.role == TagPlayerRoles.
 
 /**
  * Асинхронный телепорт игрока на позицию, соответствующую его роли на этой карте.
+ * Перед телепортом игрок принудительно возвращается в visibility-группу игры,
+ * чтобы прямые телепорты на карту не обходили логику видимости.
+ * Если [destinationOverride] передан, используется он, чтобы внешний код мог
+ * сохранить детерминированное распределение по спавнам.
  * [onComplete] вызывается в main thread после успешного телепорта.
  */
-fun TagMap.teleport(player: Player, game: TagGame, onComplete: () -> Unit = {}) {
+fun TagMap.teleport(
+    player: Player,
+    game: TagGame,
+    destinationOverride: Location? = null,
+    onComplete: () -> Unit = {}
+): CompletableFuture<Boolean> {
+    game.gameVisibilityGroup.addViewer(player.uniqueId)
+
     val role = game.findPlayer(player)?.role
         ?: if (game.fsm.current is TagInProgressState || game.fsm.current is TagPreparing) {
             TagPlayerRoles.SPECTATOR
@@ -107,7 +120,7 @@ fun TagMap.teleport(player: Player, game: TagGame, onComplete: () -> Unit = {}) 
             TagPlayerRoles.UNDEFINED
         }
 
-    val destination = when (role) {
+    val destination = destinationOverride ?: when (role) {
         TagPlayerRoles.UNDEFINED,
         TagPlayerRoles.VICTIM -> victimSpawns
             .shuffled()
@@ -126,7 +139,10 @@ fun TagMap.teleport(player: Player, game: TagGame, onComplete: () -> Unit = {}) 
         }
     }
 
-    player.teleportAsync(destination).thenAccept {
-        Bukkit.getScheduler().runTask(inst, Runnable { onComplete() })
+    return player.teleportAsync(destination).thenApply { success ->
+        if (success) {
+            Bukkit.getScheduler().runTask(inst, Runnable { onComplete() })
+        }
+        success
     }
 }
