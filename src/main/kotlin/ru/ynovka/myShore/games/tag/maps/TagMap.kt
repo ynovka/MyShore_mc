@@ -7,6 +7,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import java.util.concurrent.ThreadLocalRandom
 import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import org.bukkit.entity.Player
 import java.util.concurrent.CompletableFuture
 import ru.ynovka.myShore.games.tag.teleport
@@ -67,8 +68,31 @@ interface TagMap {
 }
 
 fun TagMap.teleportPlayers(game: TagGame): CompletableFuture<Void> {
-    val teleports = game.gamePlayers.map { tagPlayer ->
-        teleport(tagPlayer.player, game)
+    val victims = game.gamePlayers.filter {
+        it.role == TagPlayerRoles.VICTIM || it.role == TagPlayerRoles.UNDEFINED
+    }
+    val hunters = game.gamePlayers.filter { it.role == TagPlayerRoles.HUNTER }
+    val spectators = game.gamePlayers.filter {
+        it.role == TagPlayerRoles.SPECTATOR || it.role == TagPlayerRoles.SPECTATOR_VICTIM
+    }
+
+    val shuffledVictimSpawns = victimSpawns.shuffled().toMutableList()
+    val teleports = mutableListOf<CompletableFuture<Boolean>>()
+
+    victims.forEachIndexed { index, tagPlayer ->
+        val spawn = shuffledVictimSpawns.getOrNull(index)?.toLocation()
+            ?: victimSpawns.random().toLocation()
+        teleports += teleport(tagPlayer.player, game, spawn)
+    }
+
+    hunters.forEach { tagPlayer ->
+        teleports += teleport(tagPlayer.player, game, hunterSpawn.toLocation())
+    }
+
+    val hunterLocation = hunters.firstOrNull()?.player?.location
+    spectators.forEach { tagPlayer ->
+        val spawn = hunterLocation ?: victimSpawns.random().toLocation()
+        teleports += teleport(tagPlayer.player, game, spawn)
     }
 
     return CompletableFuture.allOf(*teleports.toTypedArray())
