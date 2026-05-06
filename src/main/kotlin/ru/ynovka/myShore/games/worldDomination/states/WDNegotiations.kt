@@ -87,6 +87,10 @@ class WDNegotiations(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         game.gamePlayers.asPlayers().forEach { player ->
             player.closeGui()
         }
+
+        game.countries.forEach { country ->
+            country.resolvePendingBombardments()
+        }
     }
 
     override fun onPlayerReconnect(gamePlayer: WDPlayer) { }

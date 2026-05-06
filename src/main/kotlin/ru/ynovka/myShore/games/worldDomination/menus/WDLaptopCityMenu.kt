@@ -4,8 +4,11 @@ import com.github.darksoulq.abyssallib.world.gui.SlotPosition
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
 import com.github.darksoulq.abyssallib.world.gui.gui
 import net.kyori.adventure.text.Component
+import org.bukkit.entity.Player
 import org.bukkit.inventory.MenuType
 import ru.ynovka.myShore.games.worldDomination.entity.City
+import ru.ynovka.myShore.games.worldDomination.entity.City.Companion.SHIELD_COST
+import ru.ynovka.myShore.games.worldDomination.entity.City.Companion.UPGRADE_COST
 import ru.ynovka.myShore.utils.Utils.fill
 
 
@@ -26,10 +29,14 @@ object WDLaptopCityMenu {
             GuiButton.of(
                 invisibleItem(
                     Component.text("Улучшить город"), // todo перевод
-                    listOf(Component.empty()) // todo стоимость и "1 уровень -> 2 уровень"
+                    listOf(
+                        Component.text("Стоимость улучшения: $UPGRADE_COST"),
+                        Component.text("${city.lvl} уровень -> ${city.lvl+1} уровень")
+                    ) // todo перевод
                 )
-            ) {
-                println("улучшить город: ${city.buyUpgrade()}")
+            ) { ctx ->
+                val player = (ctx.source as Player)
+                city.buyUpgrade().send(player)
             }
         )
 
@@ -38,11 +45,15 @@ object WDLaptopCityMenu {
             SlotPosition.top(34),
             GuiButton.of(
                 invisibleItem(
-                    Component.text("Построить щит"), // todo перевод
-                    listOf(Component.empty()) // todo стоимость
+                    Component.text("Установить щит"), // todo перевод
+                    listOf(
+                        Component.text("Стоимость установки: $SHIELD_COST"),
+                        Component.text("Наличие щита: ${if (city.hasShield) "ЕСТЬ" else "НЕТУ"}")
+                    ) // todo стоимость
                 )
-            ) {
-                println("построить щит: ${city.buyShield()}")
+            ) { ctx ->
+                val player = (ctx.source as Player)
+                city.buyShield().send(player)
             }
         )
     }

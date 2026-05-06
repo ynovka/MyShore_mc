@@ -1,5 +1,6 @@
 package ru.ynovka.myShore.games.worldDomination.menus
 
+import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import com.github.darksoulq.abyssallib.world.gui.SlotPosition
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
 import com.github.darksoulq.abyssallib.world.gui.gui
@@ -9,6 +10,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.MenuType
 import ru.ynovka.myShore.games.worldDomination.entity.Country
 import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFormattedName
+import ru.ynovka.myShore.texturepack.GuiTextures
 import ru.ynovka.myShore.utils.Utils.fill
 
 
@@ -18,7 +20,14 @@ object WDLaptopSelectCountryMenu {
         player: Player,
         cc: Country,
         clickction: ((Player, Country) -> Unit)
-    ) = gui(MenuType.GENERIC_9X4, laptopTitle) {
+    ) = gui(
+        MenuType.GENERIC_9X4,
+        Component.text().color(NamedTextColor.WHITE)
+            .append(TextOffset.getOffset(-8))
+            .append(GuiTextures.MENU_WD_SELECT_COUNTRY)
+            .append(TextOffset.getOffset(-170))
+            .append(laptopTitle)
+            .build()) {
         laptopNavBar()
 
         val slotMap = listOf(9, 11, 13, 15, 18, 20, 22, 24, 27, 29)

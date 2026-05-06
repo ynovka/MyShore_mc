@@ -9,6 +9,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 import org.bukkit.inventory.MenuType
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
+import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.SPY_COST
 import ru.ynovka.myShore.games.worldDomination.entity.WDAction
 import ru.ynovka.myShore.utils.Utils.fill
 
@@ -27,7 +28,7 @@ object WDLaptopPolicyMenu {
             GuiButton.of(
                 invisibleItem(
                     Component.text("Разведка"), // todo перевод
-                    listOf(Component.empty()) // todo стоимость
+                    listOf(Component.text("Стоимость: $SPY_COST")) // todo стоимость
                 )
             ) { ctx ->
                 (ctx.source as Player).openGui(
@@ -82,12 +83,13 @@ object WDLaptopPolicyMenu {
                     ) // todo стоимость
                 )
             ) { ctx ->
-                (ctx.source as Player).openGui(
+                val player = ctx.source as Player
+                player.openGui(
                     WDLaptopSelectCountryMenu.get(
                         player,
                         wdPlayer.country!!
                     ) { _, country ->
-                        wdPlayer.country?.sanctionCountry(country)
+                        wdPlayer.country?.sanctionCountry(country)?.send(player)
                     }
                 )
             }
@@ -100,18 +102,19 @@ object WDLaptopPolicyMenu {
                 invisibleItem(
                     Component.text("Бомбардировка"), // todo перевод
                     listOf(
-                        Component.text("Отправьте 1 ядерную бомбу своему врагу").color(NamedTextColor.GRAY) // todo перевод
+                        Component.text("Отправьте 1 ядерную бомбу своему врагу", NamedTextColor.GRAY) // todo перевод
                     )
                 )
             ) { ctx ->
-                (ctx.source as Player).openGui(
+                val player = ctx.source as Player
+                player.openGui(
                     WDLaptopSelectCountryMenu.get(
                         player,
                         wdPlayer.country!!,
                     ) { targetPlayer, country ->
                         targetPlayer.openGui(
                             WDLaptopSelectCityMenu.get(country) { _, city ->
-                                wdPlayer.country?.scheduleBombardment(city)
+                                wdPlayer.country?.scheduleBombardment(city)?.send(player)
                             }
                         )
                     }

@@ -1,7 +1,13 @@
 package ru.ynovka.myShore.games.worldDomination.entity
 
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
+import com.github.darksoulq.abyssallib.world.advancement.AdvancementFrame
+import com.github.darksoulq.abyssallib.world.advancement.Toast
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import ru.ynovka.myShore.MyShore.Companion.mm
 import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
@@ -94,46 +100,46 @@ class Country private constructor(
     }
 
     /** @return true если ядерная технология успешно изучена */
-    fun learnNuclear(): Boolean {
-        if (isNuclearLearned) return false
-        if (balance < LEARN_NUCLEAR_COST) return false
+    fun learnNuclear(): Toast {
+        if (isNuclearLearned) return nuclearAlreadyLearned
+        if (balance < LEARN_NUCLEAR_COST) return notEnoughMoneyToast
         balance -= LEARN_NUCLEAR_COST
         isNuclearLearned = true
         game.ecology -= ECOLOGY_LEARN_PENALTY
         game.history.record(WDHistoryEntry(WDAction.NUCLEAR_LEARNED, game.round, actor = this))
-        return true
+        return nuclearLearned
     }
 
     /** @return true если ядерная бомба успешно создана */
-    fun createNuclearBomb(): Boolean {
-        if (balance < CRAFT_NUCLEAR_BOMB_COST) return false
+    fun createNuclearBomb(): Toast {
+        if (balance < CRAFT_NUCLEAR_BOMB_COST) return notEnoughMoneyToast
         balance -= CRAFT_NUCLEAR_BOMB_COST
         bombsMaking += 1
         game.ecology -= ECOLOGY_CRAFT_PENALTY
         game.history.record(WDHistoryEntry(WDAction.NUCLEAR_BOMB_CREATED, game.round, actor = this))
-        return true
+        return nuclearBombCrafted
     }
 
     /** @return true если вклад в экологию успешно сделан */
-    fun investmentsEcology(): Boolean {
-        if (balance < ECOLOGY_COST) return false
+    fun investmentsEcology(): Toast {
+        if (balance < ECOLOGY_COST) return notEnoughMoneyToast
         balance -= ECOLOGY_COST
         game.ecology += ECOLOGY_INVEST_GAIN
         game.history.record(WDHistoryEntry(WDAction.ECOLOGY_INVESTED, game.round, actor = this))
-        return true
+        return investedEcology
     }
 
     /**
      * Ставит бомбардировку города в очередь.
      * @return true если бомбардировка успешно поставлена в очередь
      */
-    fun scheduleBombardment(city: City): Boolean {
-        if (city in this.cities.values) return false
-        if (bombsAvailable <= 0) return false
+    fun scheduleBombardment(city: City): Toast {
+        if (city in this.cities.values) return selfBombardment
+        if (bombsAvailable <= 0) return notEnoughNuclearBombs
         bombsAvailable -= 1
         pendingBombardments += city
         game.history.record(WDHistoryEntry(WDAction.BOMBARDMENT, game.round, actor = this, targetCountry = city.country, targetCity = city))
-        return true
+        return nuclearBombSent
     }
 
     /** Применяет все отложенные бомбардировки */
@@ -143,13 +149,14 @@ class Country private constructor(
     }
 
     /** Накладывает санкции на 1 раунд */
-    fun sanctionCountry(target: Country): Boolean {
-        if (this == target) return false
+    fun sanctionCountry(target: Country): Toast {
+        if (this == target) return selfSanction
         target.incomingSanctions.add(this)
         game.history.record(WDHistoryEntry(WDAction.SANCTION, game.round, actor = this, targetCountry = target))
-        return true
+        return sanctionSent
     }
 
+    // todo переделать, сводка должна отправляться в конце раунда в виде книги и пера?
     /** @return действия страны */
     fun spy(target: Country): Map<WDAction, Int>? {
         if (this == target) return null
@@ -227,5 +234,75 @@ class Country private constructor(
 
             return IntArray(count) { base + deltas[it] }
         }
+
+        val notEnoughMoneyToast: Toast = Toast.builder()
+            .line1(Component.text("Недостаточно", NamedTextColor.WHITE))
+            .line2(Component.text("средств!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.RED_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.GOAL)
+            .build()
+
+        val nuclearAlreadyLearned: Toast = Toast.builder()
+            .line1(Component.text("Ядерная технология", NamedTextColor.WHITE))
+            .line2(Component.text("уже изучена!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.RED_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.GOAL)
+            .build()
+
+        val nuclearLearned: Toast = Toast.builder()
+            .line1(Component.text("Ядерная технология", NamedTextColor.WHITE))
+            .line2(Component.text("успешно изучена!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.LIME_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.CHALLENGE)
+            .build()
+
+        val nuclearBombCrafted: Toast = Toast.builder()
+            .line1(Component.text("Ядерная бомба", NamedTextColor.WHITE))
+            .line2(Component.text("успешно создана!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.LIME_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.CHALLENGE)
+            .build()
+
+        val investedEcology: Toast = Toast.builder()
+            .line1(Component.text("Вклад в экологию", NamedTextColor.WHITE))
+            .line2(Component.text("выполнен!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.LIME_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.CHALLENGE)
+            .build()
+
+        val selfBombardment: Toast = Toast.builder()
+            .line1(Component.text("Нельзя бомбить", NamedTextColor.WHITE))
+            .line2(Component.text("свои города!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.RED_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.GOAL)
+            .build()
+
+        val notEnoughNuclearBombs: Toast = Toast.builder()
+            .line1(Component.text("Недостаточно бомб", NamedTextColor.WHITE))
+            .line2(Component.text("для бомбёжки!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.RED_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.GOAL)
+            .build()
+
+        val nuclearBombSent: Toast = Toast.builder()
+            .line1(Component.text("Ядерная бомба", NamedTextColor.WHITE))
+            .line2(Component.text("успешно отпрвалена!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.LIME_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.CHALLENGE)
+            .build()
+
+        val selfSanction: Toast = Toast.builder()
+            .line1(Component.text("Нельзя накладывыать", NamedTextColor.WHITE))
+            .line2(Component.text("санкции на себя!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.RED_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.GOAL)
+            .build()
+
+        val sanctionSent: Toast = Toast.builder()
+            .line1(Component.text("Санкции успешно", NamedTextColor.WHITE))
+            .line2(Component.text("отправлены!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.LIME_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.CHALLENGE)
+            .build()
     }
 }

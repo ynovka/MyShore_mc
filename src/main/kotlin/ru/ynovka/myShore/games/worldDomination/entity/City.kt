@@ -1,6 +1,12 @@
 package ru.ynovka.myShore.games.worldDomination.entity
 
+import com.github.darksoulq.abyssallib.world.advancement.AdvancementFrame
+import com.github.darksoulq.abyssallib.world.advancement.Toast
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TranslatableComponent
+import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.Material
+import org.bukkit.inventory.ItemStack
 import ru.ynovka.myShore.utils.Utils.intValue
 
 
@@ -36,27 +42,55 @@ class City(
     }
 
     /** @return true если щит успешно установлен */
-    fun buyShield(): Boolean {
-        if (hasShield) return false
-        if (country.balance < SHIELD_COST) return false
+    fun buyShield(): Toast {
+        if (hasShield) return shieldAlredyExist
+        if (country.balance < SHIELD_COST) return notEnoughMoneyToast
         country.balance -= SHIELD_COST
         hasShield = true
         country.game.history.record(WDHistoryEntry(WDAction.SHIELD_BUILT, country.game.round, actor = country, targetCity = this))
-        return true
+        return shieldBought
     }
 
     /** @return true если город успешно улучшен */
-    fun buyUpgrade(): Boolean {
-        if (country.balance < UPGRADE_COST) return false
+    fun buyUpgrade(): Toast {
+        if (country.balance < UPGRADE_COST) return notEnoughMoneyToast
         country.balance -= UPGRADE_COST
         lvl += 1
         country.game.history.record(WDHistoryEntry(WDAction.CITY_UPGRADED, country.game.round, actor = country, targetCity = this))
-        return true
+        return upgradeBought
     }
 
     companion object {
         const val UPGRADE_COST: Int = 150
         const val SHIELD_COST: Int = 300
         const val ECOLOGY_DESTROY_PENALTY: Double = 0.05
+
+        val notEnoughMoneyToast: Toast = Toast.builder()
+            .line1(Component.text("Недостаточно", NamedTextColor.WHITE))
+            .line2(Component.text("средств!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.RED_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.GOAL)
+            .build()
+
+        val shieldAlredyExist: Toast = Toast.builder()
+            .line1(Component.text("На этом городе уже", NamedTextColor.WHITE))
+            .line2(Component.text("есть щит!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.RED_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.GOAL)
+            .build()
+
+        val shieldBought: Toast = Toast.builder()
+            .line1(Component.text("Щит установлен", NamedTextColor.WHITE))
+            .line2(Component.text("на город!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.LIME_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.CHALLENGE)
+            .build()
+
+        val upgradeBought: Toast = Toast.builder()
+            .line1(Component.text("Улучшение города", NamedTextColor.WHITE))
+            .line2(Component.text("успешно куплено!", NamedTextColor.WHITE))
+            .icon(ItemStack.of(Material.LIME_STAINED_GLASS_PANE))
+            .frame(AdvancementFrame.CHALLENGE)
+            .build()
     }
 }

@@ -4,8 +4,12 @@ import com.github.darksoulq.abyssallib.world.gui.SlotPosition
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
 import com.github.darksoulq.abyssallib.world.gui.gui
 import net.kyori.adventure.text.Component
+import org.bukkit.entity.Player
 import org.bukkit.inventory.MenuType
 import ru.ynovka.myShore.games.worldDomination.entity.Country
+import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.CRAFT_NUCLEAR_BOMB_COST
+import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.ECOLOGY_COST
+import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.LEARN_NUCLEAR_COST
 import ru.ynovka.myShore.utils.Utils.fill
 
 
@@ -18,19 +22,21 @@ object WDLaptopScienceMenu {
             GuiButton.of(
                 invisibleItem(
                     Component.text("Создать бомбу"), // todo перевод
-                    listOf(Component.empty()) // todo цена, сколько бомб доступно
+                    listOf(Component.text("Стоимость: $CRAFT_NUCLEAR_BOMB_COST")) // todo цена, сколько бомб доступно
                 )
-            ) {
-                println("создать бомбу: ${country.createNuclearBomb()}")
+            ) { ctx ->
+                val player = (ctx.source as Player)
+                country.createNuclearBomb().send(player)
             }
         } else {
             GuiButton.of(
                 invisibleItem(
                     Component.text("Изучить ядерную технологию"), // todo перевод
-                    listOf(Component.empty()) // todo цена
+                    listOf(Component.text("Стоимость: $LEARN_NUCLEAR_COST")) // todo цена
                 )
-            ) {
-                println("изучить ядерную технологию: ${country.learnNuclear()}")
+            ) { ctx ->
+                val player = (ctx.source as Player)
+                country.learnNuclear().send(player)
             }
         }
 
@@ -46,10 +52,11 @@ object WDLaptopScienceMenu {
             GuiButton.of(
                 invisibleItem(
                     Component.text("Вклад в экологию"), // todo перевод
-                    listOf(Component.empty()) // todo стоимость
+                    listOf(Component.text("Стоимость: $ECOLOGY_COST")) // todo стоимость
                 )
-            ) {
-                println("вклад в экологию: ${country.investmentsEcology()}")
+            ) { ctx ->
+                val player = (ctx.source as Player)
+                country.investmentsEcology().send(player)
             }
         )
     }
