@@ -7,10 +7,9 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import java.util.concurrent.ThreadLocalRandom
 import ru.ynovka.myShore.games.tag.TagGame
-import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import org.bukkit.entity.Player
 import java.util.concurrent.CompletableFuture
-import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.games.tag.teleport
 
 
 enum class TagMaps(
@@ -87,50 +86,5 @@ data class MapSpawn(
         val world = Bukkit.getWorld(worldName)
             ?: error("World '$worldName' is not loaded")
         return Location(world, x, y, z, yaw, pitch)
-    }
-}
-
-/**
- * Асинхронный телепорт игрока на позицию, соответствующую его роли на этой карте.
- * Перед телепортом игрок принудительно возвращается в visibility-группу игры,
- * чтобы прямые телепорты на карту не обходили логику видимости.
- * [onComplete] вызывается в main thread после успешного телепорта.
- */
-fun TagMap.teleport(player: Player, game: TagGame, onComplete: () -> Unit = {}): CompletableFuture<Boolean> {
-    game.gameVisibilityGroup.addViewer(player.uniqueId)
-
-    val role = game.findPlayer(player)?.role
-        ?: if (game.fsm.current is ru.ynovka.myShore.games.tag.states.TagInProgressState ||
-            game.fsm.current is ru.ynovka.myShore.games.tag.states.TagPreparing
-        ) {
-            TagPlayerRoles.SPECTATOR
-        } else {
-            TagPlayerRoles.UNDEFINED
-        }
-
-    val destination = when (role) {
-        TagPlayerRoles.UNDEFINED,
-        TagPlayerRoles.VICTIM -> victimSpawns
-            .shuffled()
-            .firstOrNull { it.toLocation().getNearbyPlayers(1.0).isEmpty() }
-            ?.toLocation()
-            ?: victimSpawns.random().toLocation()
-
-        TagPlayerRoles.HUNTER -> hunterSpawn.toLocation()
-
-        TagPlayerRoles.SPECTATOR,
-        TagPlayerRoles.SPECTATOR_VICTIM -> {
-            val hunter = game.gamePlayers
-                .firstOrNull { it.role == TagPlayerRoles.HUNTER }
-                ?.player
-            hunter?.location ?: victimSpawns.random().toLocation()
-        }
-    }
-
-    return player.teleportAsync(destination).thenApply { success ->
-        if (success) {
-            Bukkit.getScheduler().runTask(inst, Runnable { onComplete() })
-        }
-        success
     }
 }
