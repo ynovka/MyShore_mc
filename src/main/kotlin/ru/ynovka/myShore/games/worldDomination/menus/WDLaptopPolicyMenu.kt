@@ -19,7 +19,7 @@ object WDLaptopPolicyMenu {
     fun get(
         player: Player,
         wdPlayer: WDPlayer
-    ) = gui(MenuType.GENERIC_9X4, laptopTitle) {
+    ) = gui(MenuType.GENERIC_9X4, getLaptopTitle(player)) {
         laptopNavBar()
 
         fill(
@@ -33,8 +33,8 @@ object WDLaptopPolicyMenu {
             ) { ctx ->
                 (ctx.source as Player).openGui(
                     WDLaptopSelectCountryMenu.get(
-                        player,
-                        wdPlayer.country!!
+                        wdPlayer.country!!,
+                        player
                     ) { targetPlayer, country ->
                         val myCountry = wdPlayer.country ?: return@get
                         val stats = myCountry.spy(country)
@@ -86,8 +86,8 @@ object WDLaptopPolicyMenu {
                 val player = ctx.source as Player
                 player.openGui(
                     WDLaptopSelectCountryMenu.get(
-                        player,
-                        wdPlayer.country!!
+                        wdPlayer.country!!,
+                        player
                     ) { _, country ->
                         wdPlayer.country?.sanctionCountry(country)?.send(player)
                     }
@@ -109,11 +109,11 @@ object WDLaptopPolicyMenu {
                 val player = ctx.source as Player
                 player.openGui(
                     WDLaptopSelectCountryMenu.get(
-                        player,
                         wdPlayer.country!!,
+                        player
                     ) { targetPlayer, country ->
                         targetPlayer.openGui(
-                            WDLaptopSelectCityMenu.get(country) { _, city ->
+                            WDLaptopSelectCityMenu.get(country, player) { _, city ->
                                 wdPlayer.country?.scheduleBombardment(city)?.send(player)
                             }
                         )

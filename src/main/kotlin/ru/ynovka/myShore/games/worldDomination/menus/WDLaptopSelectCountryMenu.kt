@@ -17,8 +17,8 @@ import ru.ynovka.myShore.utils.Utils.fill
 @Suppress("UnstableApiUsage")
 object WDLaptopSelectCountryMenu {
     fun get(
-        player: Player,
         cc: Country,
+        player: Player,
         clickction: ((Player, Country) -> Unit)
     ) = gui(
         MenuType.GENERIC_9X4,
@@ -26,7 +26,7 @@ object WDLaptopSelectCountryMenu {
             .append(TextOffset.getOffset(-8))
             .append(GuiTextures.MENU_WD_SELECT_COUNTRY)
             .append(TextOffset.getOffset(-170))
-            .append(laptopTitle)
+            .append(getLaptopTitle(player))
             .build()) {
         laptopNavBar()
 

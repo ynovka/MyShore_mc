@@ -58,7 +58,7 @@ object WDItems {
         val game = player.currentWDGame() ?: return ActionResult.PASS
         if (game.fsm.current !is WDNegotiations) return ActionResult.PASS
 
-        player.openGui(WDLaptopMainMenu.get())
+        player.openGui(WDLaptopMainMenu.get(player))
 
         return ActionResult.CANCEL
     }

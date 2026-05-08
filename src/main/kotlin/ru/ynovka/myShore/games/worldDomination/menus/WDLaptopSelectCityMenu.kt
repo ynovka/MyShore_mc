@@ -19,6 +19,7 @@ import ru.ynovka.myShore.utils.Utils.fill
 object WDLaptopSelectCityMenu {
     fun get(
         country: Country,
+        player: Player,
         clickction: ((Player, City) -> Unit)
     ): Gui = gui(
         MenuType.GENERIC_9X4,
@@ -26,7 +27,7 @@ object WDLaptopSelectCityMenu {
             .append(TextOffset.getOffset(-8))
             .append(GuiTextures.MENU_WD_SELECT_CITY)
             .append(TextOffset.getOffset(-170))
-            .append(laptopTitle)
+            .append(getLaptopTitle(player))
             .build()) {
         laptopNavBar()
 

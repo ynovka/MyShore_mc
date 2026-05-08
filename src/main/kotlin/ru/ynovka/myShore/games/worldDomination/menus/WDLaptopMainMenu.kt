@@ -20,19 +20,26 @@ import ru.ynovka.myShore.utils.Utils.fill
 
 @Suppress("UnstableApiUsage")
 object WDLaptopMainMenu {
-    fun get(): Gui = gui(
+    fun get(player: Player): Gui = gui(
         MenuType.GENERIC_9X4,
         Component.text().color(NamedTextColor.WHITE)
             .append(TextOffset.getOffset(-8))
             .append(GuiTextures.MENU_WD_MAIN)
             .append(TextOffset.getOffset(-170))
-            .append(laptopTitle)
-            .build()) {
+            .append(getLaptopTitle(player))
+            .build()
+    ) {
         laptopNavBar(29)
     }
 }
 
-internal val laptopTitle = Component.translatable("menu.myshore.wd.laptop")
+fun getLaptopTitle(player: Player): Component {
+    val balance = player.asWDPlayer()?.country?.balance ?: 0
+    return Component.translatable(
+        "menu.myshore.wd.laptop",
+        Component.text(balance)
+    )
+}
 
 internal fun invisibleItem(
     name: Component,
@@ -60,8 +67,8 @@ internal fun GuiBuilder.laptopNavBar(
 
             wdPlayer.country?.let { country ->
                 player.openGui(
-                    WDLaptopSelectCityMenu.get(country) { player, city ->
-                        player.openGui(WDLaptopCityMenu.get(city))
+                    WDLaptopSelectCityMenu.get(country, player) { player, city ->
+                        player.openGui(WDLaptopCityMenu.get(city, player))
                     }
                 )
             }
@@ -76,7 +83,7 @@ internal fun GuiBuilder.laptopNavBar(
             val wdPlayer = player.asWDPlayer() ?: return@of
             val country = wdPlayer.country ?: return@of
 
-            player.openGui(WDLaptopScienceMenu.get(country))
+            player.openGui(WDLaptopScienceMenu.get(country, player))
         }
     )
 

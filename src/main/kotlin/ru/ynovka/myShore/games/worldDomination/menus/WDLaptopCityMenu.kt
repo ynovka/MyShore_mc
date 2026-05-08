@@ -14,7 +14,7 @@ import ru.ynovka.myShore.utils.Utils.fill
 
 @Suppress("UnstableApiUsage")
 object WDLaptopCityMenu {
-    fun get(city: City) = gui(MenuType.GENERIC_9X4, laptopTitle) {
+    fun get(city: City, player: Player) = gui(MenuType.GENERIC_9X4, getLaptopTitle(player)) {
         laptopNavBar()
 
         fill(

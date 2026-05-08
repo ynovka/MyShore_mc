@@ -15,7 +15,7 @@ import ru.ynovka.myShore.utils.Utils.fill
 
 @Suppress("UnstableApiUsage")
 object WDLaptopScienceMenu {
-    fun get(country: Country) = gui(MenuType.GENERIC_9X4, laptopTitle) {
+    fun get(country: Country, player: Player) = gui(MenuType.GENERIC_9X4, getLaptopTitle(player)) {
         laptopNavBar()
 
         val nuclearButton = if (country.isNuclearLearned) {
