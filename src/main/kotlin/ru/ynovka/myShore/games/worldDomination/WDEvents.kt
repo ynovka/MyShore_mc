@@ -1,19 +1,22 @@
 package ru.ynovka.myShore.games.worldDomination
 
+import ru.ynovka.myShore.games.worldDomination.WDGame.Companion.currentWDGame
+import ru.ynovka.myShore.games.worldDomination.states.WDUNMeeting
+import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import com.github.darksoulq.abyssallib.world.item.Item
-import org.bukkit.GameMode
-import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
-import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDismountEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerEditBookEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerSwapHandItemsEvent
-import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.worldDomination.WDGame.Companion.currentWDGame
-import ru.ynovka.myShore.games.worldDomination.states.WDUNMeeting
-import ru.ynovka.myShore.plasmo.PhoneCall
+import org.bukkit.event.player.PlayerTeleportEvent
 import ru.ynovka.myShore.text.actionBar.ActionBar
+import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.plasmo.PhoneCall
+import org.bukkit.event.EventPriority
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.entity.Player
+import org.bukkit.GameMode
 
 
 object WDEvents : Listener{
@@ -70,5 +73,33 @@ object WDEvents : Listener{
 
             e.isCancelled = true
         }
+    }
+
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onDismount(e: EntityDismountEvent) {
+        val player = e.entity as? Player ?: return
+        val wdGame = player.currentWDGame() ?: return
+        val meeting = wdGame.fsm.current as? WDUNMeeting ?: return
+
+        if (!meeting.isSitting(player.uniqueId)) return
+
+        e.isCancelled = true
+
+        inst.server.scheduler.runTask(inst, Runnable {
+            meeting.ensureStillSitting(player)
+        })
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    fun onTeleport(e: PlayerTeleportEvent) {
+        val wdGame = e.player.currentWDGame() ?: return
+        val meeting = wdGame.fsm.current as? WDUNMeeting ?: return
+
+        if (!meeting.isSitting(e.player.uniqueId)) return
+
+        inst.server.scheduler.runTask(inst, Runnable {
+            meeting.forceUnsitAfterTeleport(e.player)
+        })
     }
 }

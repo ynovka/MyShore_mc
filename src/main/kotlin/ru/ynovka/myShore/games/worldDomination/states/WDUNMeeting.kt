@@ -1,163 +1,407 @@
 package ru.ynovka.myShore.games.worldDomination.states
 
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.title.Title
+import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFormattedName
 import ru.ynovka.myShore.games.worldDomination.entity.Country
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
+import net.kyori.adventure.text.format.NamedTextColor
 import ru.ynovka.myShore.games.worldDomination.WDGame
-import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.GameState
-import org.bukkit.Location
-import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFormattedName
 import ru.ynovka.myShore.text.actionBar.ActionBar
+import org.bukkit.persistence.PersistentDataType
+import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.utils.BossBarTimer
+import ru.ynovka.myShore.plasmo.StageVoice
+import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.games.GamePlayer
+import ru.ynovka.myShore.games.GameState
+import net.kyori.adventure.title.Title
+import ru.ynovka.myShore.plasmo.Stage
+import org.bukkit.entity.ArmorStand
+import org.bukkit.entity.Player
+import org.bukkit.NamespacedKey
+import org.bukkit.Location
 import java.time.Duration
-import java.util.UUID
 import kotlin.math.atan2
-
+import java.util.UUID
 
 /**
- * Этап совещания ООН
- * Длится от 9 до 15 минут (кол-во стран * 90 секунд)
- * (возможно нужно дать 10 секунд на подтверждения выступления, если не подтвердить выступление -
- * страну переместит в конец выступления, работает 1 раз за совещание, иначе речь пропускается)
- * В этот период каждой стране даётся 1 минута на любую речь
+ * Этап совещания ООН.
+ *
+ * Длится от 9 до 15 минут: количество стран * 90 секунд.
+ *
+ * В этот период каждой стране даётся 90 секунд на выступление.
+ *
  * Порядок стран для выступления:
- * - прилетело больше бомб
- * - уровень развития
- * - название по алфавиту
+ * - прилетело больше бомб;
+ * - уровень развития;
+ * - название по алфавиту.
  */
 class WDUNMeeting(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
+
     var speakingCountry: Int? = null
+        private set
+
     var nowSpeaking: MutableSet<UUID> = mutableSetOf()
+        private set
 
-    override fun onEnterState() {
-        game.gamePlayers.forEach { wdPlayer ->
-            game.gameVisibilityGroup.addViewer(wdPlayer.playerId)
-            // todo Забираем право говорить в plasmo
-        }
+    private lateinit var stage: Stage
 
-        // РАССАДКА
-        game.countries.forEach { country ->
-            country.citizens.forEach { player ->
+    private val occupiedSeats: MutableMap<UUID, SeatRef> = mutableMapOf()
+    private val sittingPlayers: MutableMap<UUID, UUID> = mutableMapOf()
 
-                val location = assignSeat(country, player)
-
-                if (location != null) {
-                    player.player.teleportAsync(location)
-                    // todo mount
-                }
-            }
-        }
-
-        // ЦИКЛ ВЫСТУПЛЕНИЙ
-        game.countries.forEachIndexed { idx, country ->
-            inst.server.scheduler.runTaskLater(inst, Runnable {
-                speakingCountry = country.type.ordinal
-                nowSpeaking.clear()
-
-                // Таймер 90 секунд на выступление страны
-                val timer = BossBarTimer()
-                timer.start(
-                    totalSeconds = 90 / 10, // todo убрать / 10
-                    isActive = { game.fsm.current is WDUNMeeting },
-                    onFinish = {
-                        country.citizens.forEach { wdPlayer ->
-                            val location = occupiedSeats.entries.firstOrNull { it.value == wdPlayer.playerId }?.key
-                            if (location != null) {
-                                wdPlayer.player.teleportAsync(location.facingToward(sceneCenter))
-                            }
-                        }
-                    }
-                )
-
-                game.gamePlayers.forEach { wdPlayer ->
-                    val player = wdPlayer.player
-
-                    timer.addPlayer(player)
-
-                    if (wdPlayer.country == country) {
-                        // todo перевод
-                        player.showTitle(Title.title(
-                            Component.text(""), Component.text("Ваша очередь!").color(NamedTextColor.BLUE),
-                            Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(1), Duration.ofMillis(500))
-                        ))
-
-                        // todo перевод
-                        ActionBar.send(
-                            player,
-                            Component.text(
-                                "нажмите F для выхода на сцену"
-                            ).color(NamedTextColor.GREEN),
-                            durationMs = 90 * 1000
-                        )
-
-                        // todo Даём право говорить в plasmo
-                    } else {
-                        // todo перевод
-                        ActionBar.send(
-                            player,
-                            Component.text(
-                                "сейчас выступает "
-                            ).append(country.getFormattedName(player)).color(NamedTextColor.BLUE),
-                            durationMs = 90 * 1000
-                        )
-                    }
-                }
-            }, idx * 90 * 20L / 10 + 20L) // todo убрать / 10
-        }
-
-        // ЗАВЕРШЕНИЕ СОВЕЩАНИЯ
-        inst.server.scheduler.runTaskLater(inst, Runnable {
-            if (
-                game.round >= 5 ||
-                game.ecology <= 0.0 ||
-                game.countries.count { it.isAlive } == 1
-            ) {
-                game.fsm.transitionTo(WDFinishingState(game))
-            } else {
-                game.fsm.transitionTo(WDNegotiations(game))
-            }
-        }, game.countries.size * 90 * 20L / 10 + 20L) // todo убрать / 10
+    private val seatCountryKey by lazy {
+        NamespacedKey(inst, "wd_un_seat_country")
     }
 
-    override fun onExitState() { }
+    private val seatIndexKey by lazy {
+        NamespacedKey(inst, "wd_un_seat_index")
+    }
+
+    override fun onEnterState() {
+        createVoiceStage()
+        addAllPlayersToVisibilityGroup()
+        seatAllPlayers()
+        startSpeakingCycle()
+        scheduleMeetingFinish()
+    }
+
+    override fun onExitState() {
+        speakingCountry = null
+        nowSpeaking.clear()
+    }
 
     override fun onPlayerReconnect(gamePlayer: WDPlayer) {
         game.gameVisibilityGroup.addViewer(gamePlayer.playerId)
 
         val country = gamePlayer.country ?: return
+        val seatLocation = assignSeat(country, gamePlayer) ?: return
 
-        val location = assignSeat(country, gamePlayer)
-        if (location != null) {
-            gamePlayer.player.teleportAsync(location.facingToward(sceneCenter))
-            // todo mount
+        gamePlayer.player.teleportAsync(seatLocation).thenRun {
+            inst.server.scheduler.runTask(inst, Runnable {
+                sitOnSeat(gamePlayer)
+            })
         }
     }
 
-    override fun onPlayerLeave(gamePlayer: WDPlayer) { }
+    override fun onPlayerLeave(gamePlayer: WDPlayer) {
+        val player = gamePlayer.player
+        unsit(player)
+    }
 
     override fun canPlayerJoin(gamePlayer: WDPlayer): Boolean = false
 
-    private val occupiedSeats: MutableMap<Location, UUID> = mutableMapOf()
+    fun isSitting(playerId: UUID): Boolean {
+        return sittingPlayers.containsKey(playerId)
+    }
+
+    fun ensureStillSitting(player: Player) {
+        val standId = sittingPlayers[player.uniqueId] ?: return
+
+        val stand = player.world.entities
+            .filterIsInstance<ArmorStand>()
+            .firstOrNull { it.uniqueId == standId && it.isValid }
+
+        if (stand == null) {
+            sittingPlayers.remove(player.uniqueId)
+            return
+        }
+
+        if (!stand.passengers.contains(player)) {
+            stand.addPassenger(player)
+        }
+    }
+
+    fun forceUnsitAfterTeleport(player: Player) {
+        unsit(player)
+    }
+
+    private fun createVoiceStage() {
+        stage = StageVoice.createStage(
+            game.gamePlayers.map(GamePlayer::playerId)
+        )
+    }
+
+    private fun addAllPlayersToVisibilityGroup() {
+        game.gamePlayers.forEach { wdPlayer ->
+            game.gameVisibilityGroup.addViewer(wdPlayer.playerId)
+        }
+    }
+
+    private fun seatAllPlayers() {
+        game.countries.forEach { country ->
+            country.citizens.forEach { wdPlayer ->
+                val seatLocation = assignSeat(country, wdPlayer) ?: return@forEach
+
+                wdPlayer.player.teleportAsync(seatLocation).thenRun {
+                    inst.server.scheduler.runTask(inst, Runnable {
+                        sitOnSeat(wdPlayer)
+                    })
+                }
+            }
+        }
+    }
+
+    private fun startSpeakingCycle() {
+        game.countries.forEachIndexed { index, country ->
+            inst.server.scheduler.runTaskLater(inst, Runnable {
+                startCountrySpeech(country)
+            }, getSpeechStartDelay(index))
+        }
+    }
+
+    private fun startCountrySpeech(country: Country) {
+        speakingCountry = country.type.ordinal
+        nowSpeaking.clear()
+
+        StageVoice.setSpeakers(
+            stage = stage,
+            speakerUuids = nowSpeaking
+        )
+
+        val timer = BossBarTimer()
+
+        timer.start(
+            totalSeconds = SPEECH_SECONDS / DEBUG_TIME_DIVIDER,
+            isActive = { game.fsm.current is WDUNMeeting },
+            onFinish = {
+                returnCountryCitizensToSeats(country)
+            }
+        )
+
+        game.gamePlayers.forEach { wdPlayer ->
+            val player = wdPlayer.player
+
+            timer.addPlayer(player)
+
+            if (wdPlayer.country == country) {
+                notifyCurrentCountryPlayer(player)
+            } else {
+                notifyListeningPlayer(player, country)
+            }
+        }
+    }
+
+    private fun notifyCurrentCountryPlayer(player: Player) {
+        player.showTitle(
+            Title.title(
+                Component.text(""),
+                Component.text("Ваша очередь!").color(NamedTextColor.BLUE),
+                Title.Times.times(
+                    Duration.ofMillis(500),
+                    Duration.ofSeconds(1),
+                    Duration.ofMillis(500)
+                )
+            )
+        )
+
+        ActionBar.send(
+            player = player,
+            message = Component.text("нажмите F для выхода на сцену")
+                .color(NamedTextColor.GREEN),
+            durationMs = SPEECH_SECONDS * 1000L
+        )
+    }
+
+    private fun notifyListeningPlayer(player: Player, country: Country) {
+        ActionBar.send(
+            player = player,
+            message = Component.text("сейчас выступает ")
+                .append(country.getFormattedName(player))
+                .color(NamedTextColor.BLUE),
+            durationMs = SPEECH_SECONDS * 1000L
+        )
+    }
+
+    private fun returnCountryCitizensToSeats(country: Country) {
+        country.citizens.forEach { wdPlayer ->
+            val seatLocation = getOccupiedSeatLocation(wdPlayer.playerId) ?: return@forEach
+
+            wdPlayer.player.teleportAsync(seatLocation).thenRun {
+                inst.server.scheduler.runTask(inst, Runnable {
+                    sitOnSeat(wdPlayer)
+                })
+            }
+        }
+    }
+
+    private fun scheduleMeetingFinish() {
+        inst.server.scheduler.runTaskLater(inst, Runnable {
+            val nextState = if (shouldFinishGame()) {
+                WDFinishingState(game)
+            } else {
+                WDNegotiations(game)
+            }
+
+            game.fsm.transitionTo(nextState)
+        }, getMeetingFinishDelay())
+    }
+
+    private fun shouldFinishGame(): Boolean {
+        return game.round >= 5 ||
+                game.ecology <= 0.0 ||
+                game.countries.count { it.isAlive } == 1
+    }
+
+    private fun assignSeat(country: Country, wdPlayer: WDPlayer): Location? {
+        val existingSeat = occupiedSeats[wdPlayer.playerId]
+
+        if (existingSeat != null) {
+            return getSeatLocation(existingSeat)
+        }
+
+        val countryOrdinal = country.type.ordinal
+        val countrySeats = seats[countryOrdinal] ?: return null
+
+        val usedIndexes = occupiedSeats.values
+            .asSequence()
+            .filter { it.countryOrdinal == countryOrdinal }
+            .map { it.seatIndex }
+            .toSet()
+
+        val freeSeatIndex = countrySeats.indices
+            .firstOrNull { it !in usedIndexes }
+            ?: return null
+
+        val seatRef = SeatRef(
+            countryOrdinal = countryOrdinal,
+            seatIndex = freeSeatIndex
+        )
+
+        occupiedSeats[wdPlayer.playerId] = seatRef
+
+        return getSeatLocation(seatRef)
+    }
+
+    private fun getOccupiedSeatLocation(playerId: UUID): Location? {
+        val seatRef = occupiedSeats[playerId] ?: return null
+        return getSeatLocation(seatRef)
+    }
+
+    private fun getSeatLocation(seatRef: SeatRef): Location? {
+        return seats[seatRef.countryOrdinal]
+            ?.getOrNull(seatRef.seatIndex)
+            ?.facingToward(sceneCenter)
+    }
+
+    private fun sitOnSeat(wdPlayer: WDPlayer): Boolean {
+        val seatRef = occupiedSeats[wdPlayer.playerId] ?: return false
+        val seatLocation = getSeatLocation(seatRef) ?: return false
+
+        val stand = getOrCreateSeatStand(
+            countryOrdinal = seatRef.countryOrdinal,
+            seatIndex = seatRef.seatIndex,
+            seatLocation = seatLocation
+        )
+
+        if (!stand.passengers.contains(wdPlayer.player)) {
+            stand.addPassenger(wdPlayer.player)
+        }
+
+        sittingPlayers[wdPlayer.playerId] = stand.uniqueId
+        return true
+    }
+
+    private fun unsit(player: Player) {
+        val standId = sittingPlayers.remove(player.uniqueId) ?: return
+        val stand = player.world.entities.firstOrNull { it.uniqueId == standId } ?: return
+
+        if (stand.passengers.contains(player)) {
+            stand.removePassenger(player)
+        }
+    }
+
+    private fun getOrCreateSeatStand(
+        countryOrdinal: Int,
+        seatIndex: Int,
+        seatLocation: Location
+    ): ArmorStand {
+        val world = seatLocation.world ?: error("Seat world is null")
+
+        val existingStand = world.getNearbyEntities(seatLocation, 0.35, 0.35, 0.35)
+            .asSequence()
+            .filterIsInstance<ArmorStand>()
+            .firstOrNull { stand ->
+                stand.isValid &&
+                        stand.scoreboardTags.contains(SEAT_TAG) &&
+                        stand.persistentDataContainer.get(
+                            seatCountryKey,
+                            PersistentDataType.INTEGER
+                        ) == countryOrdinal &&
+                        stand.persistentDataContainer.get(
+                            seatIndexKey,
+                            PersistentDataType.INTEGER
+                        ) == seatIndex
+            }
+
+        if (existingStand != null) {
+            return existingStand
+        }
+
+        return world.spawn(seatLocation, ArmorStand::class.java) { stand ->
+            stand.isInvisible = true
+            stand.setGravity(false)
+            stand.isInvulnerable = true
+            stand.isSmall = true
+            stand.setBasePlate(false)
+            stand.isMarker = true
+            stand.isCollidable = false
+            stand.isPersistent = true
+            stand.removeWhenFarAway = false
+
+            stand.addScoreboardTag(SEAT_TAG)
+
+            stand.persistentDataContainer.set(
+                seatCountryKey,
+                PersistentDataType.INTEGER,
+                countryOrdinal
+            )
+
+            stand.persistentDataContainer.set(
+                seatIndexKey,
+                PersistentDataType.INTEGER,
+                seatIndex
+            )
+        }
+    }
 
     private fun Location.facingToward(target: Location): Location {
         val dx = target.x - x
         val dz = target.z - z
         val yaw = Math.toDegrees(atan2(-dx, dz)).toFloat()
-        return Location(world, x, y, z, yaw, 0f)
+
+        return Location(
+            world,
+            x,
+            y,
+            z,
+            yaw,
+            0f
+        )
     }
 
-    private fun assignSeat(country: Country, player: WDPlayer): Location? {
-        val locations = seats.getValue(country.type.ordinal)
-        val location = locations.firstOrNull { it !in occupiedSeats } ?: return null
-
-        occupiedSeats[location] = player.playerId
-        return location.facingToward(sceneCenter)
+    private fun getSpeechStartDelay(index: Int): Long {
+        return index * SPEECH_SECONDS * TICKS_PER_SECOND / DEBUG_TIME_DIVIDER + TICKS_PER_SECOND
     }
+
+    private fun getMeetingFinishDelay(): Long {
+        return game.countries.size * SPEECH_SECONDS * TICKS_PER_SECOND / DEBUG_TIME_DIVIDER + TICKS_PER_SECOND
+    }
+
+    private data class SeatRef(
+        val countryOrdinal: Int,
+        val seatIndex: Int
+    )
 
     companion object {
+        private const val SEAT_TAG = "wd_un_meeting_seat"
+
+        private const val SPEECH_SECONDS = 90
+        private const val TICKS_PER_SECOND = 20L
+
+        /**
+         * TODO: поставить 1 перед релизом.
+         */
+        private const val DEBUG_TIME_DIVIDER = 10
+
         val seats: Map<Int, List<Location>> by lazy {
             mapOf(
                 0 to listOf(
@@ -233,11 +477,11 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
             )
         }
 
-        val sceneTeleport by lazy {
+        val sceneTeleport: Location by lazy {
             Location(WDGame.world, 1000.5, 100.0, 0.0, 180f, 0f)
         }
 
-        val sceneCenter by lazy {
+        val sceneCenter: Location by lazy {
             Location(WDGame.world, 1000.5, 101.0, -16.5)
         }
     }

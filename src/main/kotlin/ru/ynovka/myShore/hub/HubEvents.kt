@@ -1,25 +1,25 @@
 package ru.ynovka.myShore.hub
 
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
-import org.bukkit.Bukkit
-import org.bukkit.GameMode
-import org.bukkit.Material
-import org.bukkit.entity.Player
-import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
-import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
+import ru.ynovka.myShore.text.actionBar.ActionBar
+import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
-import ru.ynovka.myShore.MyShore
-import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.GameManager
-import ru.ynovka.myShore.hub.Hub.toHub
-import ru.ynovka.myShore.party.LeftReason
 import ru.ynovka.myShore.party.PartyManager
-import ru.ynovka.myShore.text.actionBar.ActionBar
+import ru.ynovka.myShore.games.GameManager
+import org.bukkit.potion.PotionEffectType
+import ru.ynovka.myShore.party.LeftReason
+import ru.ynovka.myShore.hub.Hub.toHub
+import org.bukkit.potion.PotionEffect
+import org.bukkit.event.EventPriority
+import org.bukkit.event.EventHandler
+import ru.ynovka.myShore.MyShore
+import org.bukkit.event.Listener
+import org.bukkit.entity.Player
+import org.bukkit.GameMode
+import org.bukkit.Material
+import org.bukkit.Bukkit
 
 
 object HubEvents : Listener {
@@ -70,8 +70,9 @@ object HubEvents : Listener {
             if (!isConnected) {
                 player.sendMessage("Похоже у вас не установлен мод PlasmoVoice")
                 player.sendMessage("Без него вы не сможете поиграть в некоторые из игр")
+                player.sendMessage("Если считаете что произошла ошибка, попробуйте /vrc")
             }
-        }, 5*20L)
+        }, 6*20L)
 
         player.toHub()
 
