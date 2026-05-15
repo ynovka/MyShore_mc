@@ -33,8 +33,11 @@ class PillarsWorld(
     }
 }
 
-data class PillarLoc(val x: Int, val z: Int) {
-
+data class PillarLoc(
+    val x: Int,
+    val z: Int,
+    val footprint: Footprint = Footprints.single
+) {
     companion object {
         const val TOP_BLOCK = 100
         const val TELEPORT_Y = 105.0

@@ -2,9 +2,12 @@ package ru.ynovka.myShore.games.pillars.generators.allocators
 
 import ru.ynovka.myShore.games.pillars.PillarsGame
 import org.bukkit.Location
+import ru.ynovka.myShore.games.pillars.Footprints
+import ru.ynovka.myShore.games.pillars.PillarLoc
 import kotlin.math.atan2
 import kotlin.math.abs
 import kotlin.math.PI
+import kotlin.math.sqrt
 
 
 object HoneyAllocatorGen : AllocatorGen {
@@ -14,9 +17,33 @@ object HoneyAllocatorGen : AllocatorGen {
             pointCount = pGame.gamePlayers.size,
             y = 100.0
         )
-        TODO("Not yet implemented")
+
+        val footprint = Footprints.hexagon(computeHexFootprintRadius(points))
+
+        points.forEach { loc ->
+            pGame.gameWorld.pillars += PillarLoc(
+                x = loc.blockX,
+                z = loc.blockZ,
+                footprint = footprint
+            )
+        }
     }
 
+    /** Вычисляет радиус footprint из минимального расстояния между точками, оставляя 1 блок зазора */
+    private fun computeHexFootprintRadius(points: List<Location>): Int {
+        if (points.size <= 1) return 0
+        var minDistSq = Double.MAX_VALUE
+        for (i in points.indices) {
+            for (j in i + 1 until points.size) {
+                val dx = points[i].blockX - points[j].blockX
+                val dz = points[i].blockZ - points[j].blockZ
+                val dSq = (dx * dx + dz * dz).toDouble()
+                if (dSq < minDistSq) minDistSq = dSq
+            }
+        }
+        val minDist = sqrt(minDistSq)
+        return (minDist / 2).toInt()
+    }
 }
 
 private const val MIN_DISTANCE = 8.5
