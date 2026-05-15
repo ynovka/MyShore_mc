@@ -3,22 +3,22 @@ package ru.ynovka.myShore.games.tag.maps
 import ru.ynovka.myShore.games.tag.maps.impl.TagMountainTrackMap
 import ru.ynovka.myShore.games.tag.maps.impl.TagJungleMap
 import net.kyori.adventure.text.TranslatableComponent
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import java.util.concurrent.ThreadLocalRandom
-import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
-import org.bukkit.entity.Player
+import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.CompletableFuture
 import ru.ynovka.myShore.games.tag.teleport
+import ru.ynovka.myShore.games.tag.TagGame
+import org.bukkit.entity.Player
+import org.bukkit.Location
+import org.bukkit.Bukkit
 
 
 enum class TagMaps(
     val mapProvider: () -> TagMap
 ) {
-    RANDOM({ TagMap.Registry.random() }),
-    JUNGLE({ TagMap.Registry.byId("tag_jungle") }),
-    MOUNTAIN_TRACK({ TagMap.Registry.byId("tag_mountain_track") });
+    RANDOM({ TagMap.random() }),
+    JUNGLE({ TagMap.byId("tag_jungle") }),
+    MOUNTAIN_TRACK({ TagMap.byId("tag_mountain_track") });
 }
 
 interface TagMap {

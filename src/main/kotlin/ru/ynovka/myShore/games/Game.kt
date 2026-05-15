@@ -6,15 +6,14 @@ import ru.ynovka.myShore.party.PartyManager.Party
 import java.util.UUID
 
 
-abstract class Game<P : GamePlayer>(
+abstract class Game<P : GamePlayer, W : GameWorld>(
     val party: Party? = null  /** null  → публичная игра */
 ) {
-    abstract val initialState: GameState<P, *>
-    val fsm: GameFSM<P> by lazy {
-        GameFSM(initialState).also { it.start() }
-    }
+    abstract val initialState: GameState<P, W, *>
+    val fsm: GameFSM<P, W> by lazy { GameFSM(initialState).also { it.start() } }
     abstract val maxPlayers: Int
     abstract val gamePlayers: MutableSet<P>
+    abstract val gameWorld: W
     val gameVisibilityGroup = VisibilityGroup()
     val exitedPlayers: MutableSet<P> = mutableSetOf()
     val spectatorPlayers: MutableSet<P> = mutableSetOf()
@@ -22,8 +21,18 @@ abstract class Game<P : GamePlayer>(
     val isPrivate: Boolean get() = party != null
     fun isEmpty(): Boolean = gamePlayers.isEmpty()
     fun isFull(): Boolean = gamePlayers.size >= maxPlayers
-    fun hasPlayer(uuid: UUID): Boolean = gamePlayers.any { it.playerId == uuid }
-    private fun isExited(p: P) = exitedPlayers.any { it.playerId == p.playerId }
+
+    fun hasActivePlayer(uuid: UUID): Boolean =
+        gamePlayers.any { it.playerId == uuid }
+
+    fun hasSpectator(uuid: UUID): Boolean =
+        spectatorPlayers.any { it.playerId == uuid }
+
+    fun hasExitedPlayer(uuid: UUID): Boolean =
+        exitedPlayers.any { it.playerId == uuid }
+
+    fun hasParticipant(uuid: UUID): Boolean =
+        hasActivePlayer(uuid) || hasSpectator(uuid)
 
     fun onPlayerJoin(player: Player) {
         player.inventory.close()
@@ -38,7 +47,7 @@ abstract class Game<P : GamePlayer>(
             return
         }
 
-        if (isExited(p)) {
+        if (hasExitedPlayer(p.playerId)) {
             exitedPlayers.removeIf { it.playerId == p.playerId }
             gamePlayers.add(p)
 
@@ -71,9 +80,32 @@ abstract class Game<P : GamePlayer>(
         }
     }
 
+    fun movePlayerToSpectator(
+        player: Player,
+        reason: SpectatorReason = SpectatorReason.UNKNOWN
+    ): Boolean {
+        if (spectatorPlayers.any { it.playerId == player.uniqueId }) return false
+
+        val p = gamePlayers.find { it.playerId == player.uniqueId } ?: return false
+
+        if (!fsm.canPlayerBecomeSpectator(p, reason)) {
+            return false
+        }
+
+        gamePlayers.removeIf { it.playerId == player.uniqueId }
+        exitedPlayers.removeIf { it.playerId == player.uniqueId }
+        spectatorPlayers.add(p)
+
+        fsm.playerBecomeSpectator(p, reason)
+        handlePlayerBecomeSpectator(p, reason)
+
+        return true
+    }
+
     protected open fun handlePlayerJoin(player: P)  {}
     protected open fun handlePlayerReconnect(player: P)  {}
     protected open fun handlePlayerLeave(player: P) {}
+    protected open fun handlePlayerBecomeSpectator(player: P, reason: SpectatorReason) {}
 
     abstract fun getOrCreatePlayer(player: Player): P
 }

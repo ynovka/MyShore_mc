@@ -2,18 +2,21 @@ package ru.ynovka.myShore.games.tag.states
 
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.applyInProgressInventory
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
-import ru.ynovka.myShore.games.tag.maps.teleportPlayers
 import ru.ynovka.myShore.text.actionBar.sendPermanentActionBar
+import ru.ynovka.myShore.games.tag.maps.teleportPlayers
+import ru.ynovka.myShore.text.actionBar.clearActionBar
 import net.kyori.adventure.text.format.NamedTextColor
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
+import ru.ynovka.myShore.text.ComponentDecorator
+import ru.ynovka.myShore.utils.Utils.clearTeams
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.games.tag.TagPlayer
-import ru.ynovka.myShore.text.actionBar.clearActionBar
-import ru.ynovka.myShore.games.GameState
-import ru.ynovka.myShore.utils.canMove
+import ru.ynovka.myShore.games.tag.TagGame
 import org.bukkit.potion.PotionEffectType
 import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.games.GameWorld
+import ru.ynovka.myShore.games.GameState
+import ru.ynovka.myShore.utils.canMove
 import net.kyori.adventure.title.Title
 import org.bukkit.potion.PotionEffect
 import org.bukkit.scoreboard.Team
@@ -21,13 +24,11 @@ import org.bukkit.GameMode
 import java.time.Duration
 import org.bukkit.Bukkit
 import org.bukkit.Sound
-import ru.ynovka.myShore.text.ComponentDecorator
-import ru.ynovka.myShore.utils.Utils.clearTeams
 import java.util.UUID
 
 
 // 5 сек перед началом (что бы у игроков загрузилась карта, они ознакомились со своими ролями)
-class TagPreparing(game: TagGame) : GameState<TagPlayer, TagGame>(game) {
+class TagPreparing(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(game) {
 
     val MAX_HISTORY = 10
 

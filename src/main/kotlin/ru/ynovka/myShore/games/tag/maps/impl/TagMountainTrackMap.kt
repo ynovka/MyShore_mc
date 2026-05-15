@@ -1,20 +1,20 @@
 package ru.ynovka.myShore.games.tag.maps.impl
 
-import ru.ynovka.myShore.games.tag.maps.TagMap
-import ru.ynovka.myShore.games.tag.TagPlayerRoles
+import ru.ynovka.myShore.games.tag.TagGame.Companion.currentTagGame
 import ru.ynovka.myShore.games.tag.states.TagFinishing
+import ru.ynovka.myShore.games.tag.TagPlayerRoles
+import ru.ynovka.myShore.games.tag.maps.MapSpawn
 import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.games.tag.hasVictims
+import ru.ynovka.myShore.games.tag.findPlayer
 import ru.ynovka.myShore.games.tag.teleport
-import ru.ynovka.myShore.games.tag.currentTagGame
 import net.kyori.adventure.text.Component
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Block
 import org.bukkit.Material
 import org.bukkit.GameMode
 import org.bukkit.Bukkit
-import ru.ynovka.myShore.games.tag.findPlayer
-import ru.ynovka.myShore.games.tag.maps.MapSpawn
 import kotlin.math.sqrt
 
 

@@ -18,7 +18,7 @@ repositories {
 dependencies {
     paperweight.devBundle("cn.dreeam.leaf", "1.21.11-R0.1-SNAPSHOT")
 
-    compileOnly("com.github.darksoulq:AbyssalLib:v2.0.0-mc1.21.11-dev.17")
+    compileOnly("com.github.darksoulq:AbyssalLib:v2.2.2-mc.26.1.2")
     //compileOnly("com.github.darksoulq:AbyssalLib")
     compileOnly("su.plo.voice.server:paper:2.1.8")
 

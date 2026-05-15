@@ -1,24 +1,25 @@
 package ru.ynovka.myShore.games.tag.states
 
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
-import ru.ynovka.myShore.games.tag.TagPlayerRoles
-import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.text.actionBar.clearActionBar
-import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.games.tag.TagPlayerRoles
+import ru.ynovka.myShore.text.ComponentDecorator
+import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.TagPlayer
+import ru.ynovka.myShore.games.tag.TagGame
+import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.games.GameWorld
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.utils.canMove
-import net.kyori.adventure.text.Component
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.boss.BossBar
 import kotlin.math.roundToInt
 import org.bukkit.Bukkit
-import ru.ynovka.myShore.text.ComponentDecorator
 
 
 // 40-100 сек (сам геймплей салочек)
-class TagInProgressState(game: TagGame) : GameState<TagPlayer, TagGame>(game) {
+class TagInProgressState(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(game) {
 
     private var bossBar: BossBar? = null
 

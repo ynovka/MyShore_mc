@@ -2,15 +2,17 @@ package ru.ynovka.myShore.games.tag.maps.impl
 
 import com.github.darksoulq.abyssallib.world.item.component.builtin.CooldownUse
 import io.papermc.paper.datacomponent.item.UseCooldown.useCooldown
+import ru.ynovka.myShore.games.tag.TagGame.Companion.currentTagGame
 import com.github.darksoulq.abyssallib.server.event.ActionResult
-import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.MyShore.Companion.ITEMS
 import ru.ynovka.myShore.texturepack.TexturePack
+import ru.ynovka.myShore.games.tag.maps.MapSpawn
 import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.games.tag.maps.TagMap
+import ru.ynovka.myShore.games.tag.findPlayer
 import java.util.concurrent.ThreadLocalRandom
 import ru.ynovka.myShore.games.tag.TagGame
-import ru.ynovka.myShore.games.tag.currentTagGame
 import ru.ynovka.myShore.utils.cancelItem
 import net.kyori.adventure.text.Component
 import org.bukkit.inventory.EquipmentSlot
@@ -25,8 +27,6 @@ import org.bukkit.Material
 import org.joml.Matrix4f
 import org.bukkit.Bukkit
 import org.bukkit.Sound
-import ru.ynovka.myShore.games.tag.findPlayer
-import ru.ynovka.myShore.games.tag.maps.MapSpawn
 import kotlin.math.abs
 
 

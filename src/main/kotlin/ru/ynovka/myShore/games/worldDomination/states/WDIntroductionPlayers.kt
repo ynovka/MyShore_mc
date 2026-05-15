@@ -7,6 +7,7 @@ import ru.ynovka.myShore.games.worldDomination.WDGame
 import net.kyori.adventure.text.format.NamedTextColor
 import ru.ynovka.myShore.utils.BossBarTimer
 import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.games.GameWorld
 import ru.ynovka.myShore.games.GameState
 import org.bukkit.inventory.ItemStack
 import org.bukkit.Material
@@ -16,15 +17,15 @@ import org.bukkit.Material
  *
  * Этап знакомства игроков, длится ровно 1 минуту
  */
-class WDIntroductionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
+class WDIntroductionPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
     /**
      * Отправляем сооющение в чат с членами страны
      */
     override fun onEnterState() {
         // todo перевод
         val toast = Toast.builder()
-            .line1(Component.text("Началась новая стадия", NamedTextColor.GRAY))
-            .line2(Component.text("Знакомство игроков", NamedTextColor.WHITE))
+            .titlle(Component.text("Началась новая стадия", NamedTextColor.GRAY))
+            .subtitle(Component.text("Знакомство игроков", NamedTextColor.WHITE))
             .icon(ItemStack.of(Material.CLOCK))
             .frame(AdvancementFrame.GOAL)
             .build()

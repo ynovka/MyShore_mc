@@ -3,13 +3,14 @@ package ru.ynovka.myShore.games.worldDomination.states
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.GameState
+import ru.ynovka.myShore.games.GameWorld
 
 
 /**
  * Этап распределния подведения итогов
  * Длится 1 минуту, по истечению которой игроков кикает в хаб
  */
-class WDFinishingState(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
+class WDFinishingState(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
     override fun onEnterState() { }
 
     override fun onExitState() { }

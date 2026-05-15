@@ -1,10 +1,10 @@
 package ru.ynovka.myShore.games.worldDomination.states
 
-import com.github.darksoulq.abyssallib.extension.closeGui
 import com.github.darksoulq.abyssallib.world.advancement.AdvancementFrame
 import com.github.darksoulq.abyssallib.world.advancement.Toast
 import ru.ynovka.myShore.games.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
+import com.github.darksoulq.abyssallib.extension.closeGui
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
 import ru.ynovka.myShore.games.worldDomination.WDItems
 import net.kyori.adventure.text.format.NamedTextColor
@@ -14,6 +14,7 @@ import ru.ynovka.myShore.plasmo.PhoneCall
 import ru.ynovka.myShore.games.GamePlayer
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.games.GameState
+import ru.ynovka.myShore.games.GameWorld
 import org.bukkit.inventory.ItemStack
 import org.bukkit.Material
 
@@ -25,7 +26,7 @@ import org.bukkit.Material
  * И может отправить запрес на переговоры 1 другой страной (5 минут) (если страна откланила - не считается)
  * Параллельно с переговорами президент и вице президент могут распределять бюджет страны.
  */
-class WDNegotiations(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
+class WDNegotiations(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
     override fun onEnterState() {
         game.round += 1
         game.countries.forEach { it.onStartNewRound() }
@@ -33,8 +34,8 @@ class WDNegotiations(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         // Уведомление о начала новой стадии
         // todo перевод
         val toast = Toast.builder()
-            .line1(Component.text("Началась новая стадия", NamedTextColor.GRAY))
-            .line2(Component.text("Переговоры", NamedTextColor.WHITE))
+            .titlle(Component.text("Началась новая стадия", NamedTextColor.GRAY))
+            .subtitle(Component.text("Переговоры", NamedTextColor.WHITE))
             .icon(ItemStack.of(Material.CLOCK))
             .frame(AdvancementFrame.GOAL)
             .build()

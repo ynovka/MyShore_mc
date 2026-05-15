@@ -1,15 +1,16 @@
 package ru.ynovka.myShore.games.worldDomination.states
 
 import com.github.darksoulq.abyssallib.extension.closeGui
-import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.games.worldDomination.WDPlayer
+import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.text.actionBar.ActionBar
 import ru.ynovka.myShore.utils.BossBarTimer
 import ru.ynovka.myShore.games.GameState
+import ru.ynovka.myShore.games.GameWorld
 
 
 // Ожидание игроков (нужно хотя бы 12)
-class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
+class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
     private val timer = BossBarTimer()
 
     private var started = false

@@ -1,37 +1,38 @@
 package ru.ynovka.myShore.games.worldDomination.states
 
-import com.github.darksoulq.abyssallib.extension.closeGui
+import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFormattedName
+import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
 import com.github.darksoulq.abyssallib.world.advancement.AdvancementFrame
+import ru.ynovka.myShore.games.worldDomination.entity.CountryType
 import com.github.darksoulq.abyssallib.world.advancement.Toast
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.event.ClickEvent
-import net.kyori.adventure.text.event.HoverEvent
+import ru.ynovka.myShore.games.GamePlayer.Companion.asPlayers
+import ru.ynovka.myShore.games.worldDomination.entity.Country
+import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
+import com.github.darksoulq.abyssallib.extension.closeGui
+import ru.ynovka.myShore.games.worldDomination.WDPlayer
+import ru.ynovka.myShore.games.worldDomination.WDItems
+import ru.ynovka.myShore.games.worldDomination.WDGame
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.Bukkit
-import org.bukkit.Material
-import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
+import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.event.HoverEvent
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.GamePlayer
-import ru.ynovka.myShore.games.GamePlayer.Companion.asPlayers
-import ru.ynovka.myShore.games.GameState
-import ru.ynovka.myShore.games.worldDomination.WDGame
-import ru.ynovka.myShore.games.worldDomination.WDItems
-import ru.ynovka.myShore.games.worldDomination.WDPlayer
-import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
-import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
-import ru.ynovka.myShore.games.worldDomination.entity.Country
-import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFormattedName
-import ru.ynovka.myShore.games.worldDomination.entity.CountryType
-import ru.ynovka.myShore.plasmo.PhoneCall
 import ru.ynovka.myShore.utils.BossBarTimer
-import java.util.UUID
+import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.games.GamePlayer
+import ru.ynovka.myShore.plasmo.PhoneCall
+import ru.ynovka.myShore.games.GameState
+import ru.ynovka.myShore.games.GameWorld
+import org.bukkit.inventory.ItemStack
+import org.bukkit.entity.Player
+import org.bukkit.Material
+import org.bukkit.Bukkit
 import kotlin.math.ceil
+import java.util.UUID
 
 
 /** Этап распределения игроков по странам, длится 3 минуты */
-class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
+class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
     private val timer = BossBarTimer()
 
     companion object {
@@ -53,8 +54,8 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         val countriesList = CountryType.entries.shuffled().take(countriesCount)
 
         val toast = Toast.builder()
-            .line1(Component.text("Началась новая стадия", NamedTextColor.GRAY))
-            .line2(Component.text("Распределение", NamedTextColor.WHITE))
+            .titlle(Component.text("Началась новая стадия", NamedTextColor.GRAY))
+            .subtitle(Component.text("Распределение", NamedTextColor.WHITE))
             .icon(ItemStack.of(Material.CLOCK))
             .frame(AdvancementFrame.GOAL)
             .build()
@@ -127,8 +128,8 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         timer.addPlayer(player)
 
         val toast = Toast.builder()
-            .line1(Component.text("Текущая стадия", NamedTextColor.GRAY))
-            .line2(Component.text("Распределение", NamedTextColor.WHITE))
+            .titlle(Component.text("Текущая стадия", NamedTextColor.GRAY))
+            .subtitle(Component.text("Распределение", NamedTextColor.WHITE))
             .icon(ItemStack.of(Material.CLOCK))
             .frame(AdvancementFrame.GOAL)
             .build()
@@ -227,8 +228,8 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
         }
 
         val toast = Toast.builder()
-            .line1(Component.text("Вы президент страны", NamedTextColor.GRAY))
-            .line2(country.getFormattedName(player))
+            .titlle(Component.text("Вы президент страны", NamedTextColor.GRAY))
+            .subtitle(country.getFormattedName(player))
             .icon(ItemStack.of(Material.DIAMOND_BLOCK))
             .frame(AdvancementFrame.GOAL)
             .build()

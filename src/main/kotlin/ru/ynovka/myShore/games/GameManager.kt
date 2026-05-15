@@ -7,12 +7,14 @@ import org.bukkit.entity.Player
 import ru.ynovka.myShore.utils.Utils.asPlayers
 
 object GameManager {
-    private val games: MutableList<Game<*>> = CopyOnWriteArrayList()
+    val games: MutableList<Game<*, *>> = CopyOnWriteArrayList()
 
-    fun Player.currentGame(): Game<*>? = games.firstOrNull { it.hasPlayer(uniqueId) }
-    fun Player.inGame(): Boolean = currentGame() != null
+    inline fun <reified G : Game<*, *>> Player.currentGame(): G? =
+        games.firstOrNull { it is G && it.hasActivePlayer(uniqueId) } as? G
 
-    fun <G : Game<*>> join(
+    fun Player.inGame(): Boolean = currentGame<Game<*, *>>() != null
+
+    fun <G : Game<*, *>> join(
         player: Player,
         factory: () -> G,
         partyFactory: (Party) -> G = { factory() },
@@ -30,7 +32,7 @@ object GameManager {
             joinPublic(player, factory)
     }
 
-    private fun <G : Game<*>> joinPublic(player: Player, factory: () -> G): Result<G> {
+    private fun <G : Game<*, *>> joinPublic(player: Player, factory: () -> G): Result<G> {
         val templateClass = factory().javaClass
         @Suppress("UNCHECKED_CAST")
         val existing = games.firstOrNull { g ->
@@ -45,7 +47,7 @@ object GameManager {
         return Result.success(game)
     }
 
-    private fun <G : Game<*>> joinPrivate(
+    private fun <G : Game<*, *>> joinPrivate(
         party: Party,
         factory: () -> G,
         partyFactory: (Party) -> G,
@@ -68,7 +70,7 @@ object GameManager {
     }
 
     fun leave(player: Player) {
-        val game = player.currentGame() ?: return
+        val game = player.currentGame<Game<*, *>>() ?: return
         game.onPlayerLeave(player)
         if (game.isEmpty()) games.remove(game)
     }

@@ -1,19 +1,22 @@
 package ru.ynovka.myShore.games.worldDomination
 
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.entity.Player
-import ru.ynovka.myShore.games.worldDomination.entity.WDGameHistory
 import ru.ynovka.myShore.games.worldDomination.states.WDWaitingForPlayers
-import ru.ynovka.myShore.games.Game
-import ru.ynovka.myShore.games.GameManager
+import ru.ynovka.myShore.games.worldDomination.entity.WDGameHistory
 import ru.ynovka.myShore.games.worldDomination.entity.Country
+import ru.ynovka.myShore.games.NoopGameWorld
+import ru.ynovka.myShore.games.GameManager
+import ru.ynovka.myShore.games.GameWorld
+import ru.ynovka.myShore.games.Game
+import org.bukkit.entity.Player
+import org.bukkit.Location
+import org.bukkit.Bukkit
 
 
-class WDGame : Game<WDPlayer>() {
+class WDGame : Game<WDPlayer, GameWorld>() {
     override val initialState = WDWaitingForPlayers(this)
     override val maxPlayers = 50
     override val gamePlayers: MutableSet<WDPlayer> = mutableSetOf()
+    override val gameWorld = NoopGameWorld
 
     /** Текущий раунд игры */
     var round = 0
@@ -37,6 +40,6 @@ class WDGame : Game<WDPlayer>() {
         val hubLoc by lazy { Location(world, 0.0, 100.0, 0.0) }
         val unLoc by lazy { Location(world, 1000.0, 100.0, 0.0) }
 
-        fun Player.currentWDGame(): WDGame? = GameManager.run { currentGame() } as? WDGame
+        fun Player.currentWDGame(): WDGame? = GameManager.run { currentGame() }
     }
 }

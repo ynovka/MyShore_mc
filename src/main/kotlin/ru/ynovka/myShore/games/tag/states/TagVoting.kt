@@ -2,20 +2,21 @@ package ru.ynovka.myShore.games.tag.states
 
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupForVoting
-import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.games.tag.TagPlayer
 import ru.ynovka.myShore.games.tag.teleport
-import ru.ynovka.myShore.games.GameState
+import ru.ynovka.myShore.games.tag.TagGame
 import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.games.GameState
+import ru.ynovka.myShore.games.GameWorld
 import org.bukkit.GameMode
 import org.bukkit.Sound
 import kotlin.math.ceil
 
 
 // 10 сек на голосование за карту, режим игры, сменить лобби, посмотреть статистику
-class TagVoting(game: TagGame) : GameState<TagPlayer, TagGame>(game) {
+class TagVoting(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(game) {
 
     override fun onEnterState() {
         game.gamePlayers.forEach { tagPlayer ->

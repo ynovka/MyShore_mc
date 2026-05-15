@@ -1,25 +1,25 @@
 package ru.ynovka.myShore.games.tag.menus
 
-import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
-import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
-import com.github.darksoulq.abyssallib.world.gui.Gui
-import com.github.darksoulq.abyssallib.world.gui.SlotPosition
-import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
-import com.github.darksoulq.abyssallib.world.gui.gui
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.Sound
-import org.bukkit.entity.Player
-import org.bukkit.inventory.MenuType
-import ru.ynovka.myShore.games.tag.TagItems.tagVoteJungleMapMenuItem
 import ru.ynovka.myShore.games.tag.TagItems.tagVoteMountainTrackMapMenuItem
-import ru.ynovka.myShore.games.tag.TagItems.tagVoteRandomMapMenuItem
-import ru.ynovka.myShore.games.tag.currentTagGame
-import ru.ynovka.myShore.games.tag.maps.TagMap
-import ru.ynovka.myShore.games.tag.maps.TagMaps
+import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import ru.ynovka.myShore.games.tag.states.TagVoting.Companion.setupMap
+import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
+import ru.ynovka.myShore.games.tag.TagItems.tagVoteJungleMapMenuItem
+import ru.ynovka.myShore.games.tag.TagItems.tagVoteRandomMapMenuItem
+import ru.ynovka.myShore.games.tag.TagGame.Companion.currentTagGame
+import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
 import ru.ynovka.myShore.games.tag.states.TagWaitingForPlayers
+import com.github.darksoulq.abyssallib.world.gui.SlotPosition
+import net.kyori.adventure.text.format.NamedTextColor
+import com.github.darksoulq.abyssallib.world.gui.Gui
+import com.github.darksoulq.abyssallib.world.gui.gui
 import ru.ynovka.myShore.texturepack.GuiTextures
+import ru.ynovka.myShore.games.tag.maps.TagMaps
+import ru.ynovka.myShore.games.tag.maps.TagMap
+import net.kyori.adventure.text.Component
+import org.bukkit.inventory.MenuType
+import org.bukkit.entity.Player
+import org.bukkit.Sound
 
 
 @Suppress("UnstableApiUsage")

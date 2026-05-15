@@ -18,7 +18,7 @@ object RiftEffect {
     private val RIFT_COLOR   = Color.fromRGB(0x8A, 0xEB, 0xFF)
     private val FLASH_COLOR  = Color.fromRGB(138, 234, 255)
 
-    fun play(game: Game<*>, player: Player) {
+    fun play(game: Game<*, *>, player: Player) {
         val loc: Location = player.location.clone().add(0.0, 1.0, 0.0)
         particles {
             origin(loc)

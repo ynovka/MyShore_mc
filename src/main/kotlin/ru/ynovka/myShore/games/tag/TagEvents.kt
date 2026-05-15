@@ -1,20 +1,21 @@
 package ru.ynovka.myShore.games.tag
 
+import ru.ynovka.myShore.games.tag.TagGame.Companion.currentTagGame
+import ru.ynovka.myShore.games.GamePlayer.Companion.asPlayers
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import ru.ynovka.myShore.Database.tagCaughtsRepository
-import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.games.tag.states.TagFinishing
-import org.bukkit.event.player.PlayerInteractEvent
 import ru.ynovka.myShore.games.tag.effects.RiftEffect
+import org.bukkit.event.player.PlayerInteractEvent
 import ru.ynovka.myShore.texturepack.SoundsPack
 import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.games.tag.maps.TagMap
 import org.bukkit.event.block.BlockBreakEvent
 import net.kyori.adventure.text.Component
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
-import ru.ynovka.myShore.games.GamePlayer.Companion.asPlayers
 
 
 object TagEvents : Listener {
@@ -85,7 +86,3 @@ object TagEvents : Listener {
 
     private fun Player.isInTagWorld() = world.name.startsWith("tag_")
 }
-
-/** Возвращает TagGame, в которой сейчас находится игрок, или null. */
-fun Player.currentTagGame(): TagGame? =
-    ru.ynovka.myShore.games.GameManager.run { currentGame() } as? TagGame

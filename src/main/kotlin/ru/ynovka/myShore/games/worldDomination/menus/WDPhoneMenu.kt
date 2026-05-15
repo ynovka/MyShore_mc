@@ -1,38 +1,37 @@
 package ru.ynovka.myShore.games.worldDomination.menus
 
-import com.github.darksoulq.abyssallib.extension.closeGui
+import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFormattedName
+import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
+import ru.ynovka.myShore.games.worldDomination.states.WDDistributionPlayers
 import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
-import com.github.darksoulq.abyssallib.world.gui.*
+import ru.ynovka.myShore.games.worldDomination.states.WDNegotiations
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
+import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
+import com.github.darksoulq.abyssallib.extension.closeGui
 import com.github.darksoulq.abyssallib.world.item.Item
-import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.games.worldDomination.WDItems
+import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.format.NamedTextColor
+import ru.ynovka.myShore.games.worldDomination.WDGame
+import com.github.darksoulq.abyssallib.world.gui.*
+import ru.ynovka.myShore.texturepack.GuiTextures
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
-import org.bukkit.Bukkit
-import org.bukkit.Material
-import org.bukkit.entity.Player
+import ru.ynovka.myShore.plasmo.PhoneCall
+import net.kyori.adventure.text.Component
+import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
-import org.bukkit.inventory.meta.SkullMeta
-import ru.ynovka.myShore.games.Game
-import ru.ynovka.myShore.games.worldDomination.WDItems
-import ru.ynovka.myShore.games.worldDomination.WDPlayer
-import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
-import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
-import ru.ynovka.myShore.games.worldDomination.entity.Country.Companion.getFormattedName
-import ru.ynovka.myShore.games.worldDomination.states.WDDistributionPlayers
-import ru.ynovka.myShore.games.worldDomination.states.WDNegotiations
-import ru.ynovka.myShore.plasmo.PhoneCall
-import ru.ynovka.myShore.texturepack.GuiTextures
+import org.bukkit.entity.Player
+import org.bukkit.Material
+import org.bukkit.Bukkit
 import java.util.*
 
 
 @Suppress("UnstableApiUsage")
 object WDPhoneMenu {
     fun get(
-        game: Game<WDPlayer>,
+        game: WDGame,
         playerId: UUID,
         targetRole: WDPlayerRole
     ): Gui = gui(
@@ -46,7 +45,7 @@ object WDPhoneMenu {
     ) { layer(WDPhoneLayer(game, playerId, targetRole)) }
 
     class WDPhoneLayer(
-        private val game: Game<WDPlayer>,
+        private val game: WDGame,
         private val playerId: UUID,
         private val targetRole: WDPlayerRole
     ) : GuiLayer {

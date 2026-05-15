@@ -4,25 +4,29 @@ import ru.ynovka.myShore.games.tag.states.TagWaitingForPlayers
 import ru.ynovka.myShore.games.tag.states.TagInProgressState
 import ru.ynovka.myShore.games.tag.states.TagFinishing
 import ru.ynovka.myShore.games.tag.states.TagPreparing
+import ru.ynovka.myShore.text.actionBar.clearActionBar
 import ru.ynovka.myShore.games.tag.states.TagVoting
+import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.maps.TagMaps
 import ru.ynovka.myShore.games.tag.maps.TagMap
-import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.text.actionBar.clearActionBar
-import ru.ynovka.myShore.games.Game
-import ru.ynovka.myShore.utils.canMove
-import org.bukkit.entity.Player
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import java.util.UUID
 import java.util.concurrent.CompletableFuture
+import ru.ynovka.myShore.games.NoopGameWorld
+import ru.ynovka.myShore.games.GameManager
+import ru.ynovka.myShore.games.GameWorld
+import ru.ynovka.myShore.utils.canMove
+import ru.ynovka.myShore.games.Game
+import org.bukkit.entity.Player
+import org.bukkit.Location
+import org.bukkit.Bukkit
+import java.util.UUID
 
 
-class TagGame : Game<TagPlayer>() {
+class TagGame : Game<TagPlayer, GameWorld>() {
 
     override val initialState = TagWaitingForPlayers(this)
     override val maxPlayers: Int = 5
     override val gamePlayers: MutableSet<TagPlayer> = mutableSetOf()
+    override val gameWorld = NoopGameWorld
 
     val scheduler = inst.server.scheduler
 
@@ -70,9 +74,11 @@ class TagGame : Game<TagPlayer>() {
             else -> Unit
         }
     }
-}
 
-// ---------- роли ----------
+    companion object {
+        fun Player.currentTagGame(): TagGame? = GameManager.run { currentGame() }
+    }
+}
 
 enum class TagPlayerRoles {
     UNDEFINED,
@@ -82,17 +88,8 @@ enum class TagPlayerRoles {
     HUNTER
 }
 
-// ---------- вспомогательные функции поиска игроков ----------
-
-/** Найти TagPlayer по UUID; null если не в игре. */
-fun TagGame.findPlayer(uuid: UUID): TagPlayer? =
-    gamePlayers.firstOrNull { it.player.uniqueId == uuid }
-
-/** Найти TagPlayer по Bukkit Player. */
 fun TagGame.findPlayer(player: Player): TagPlayer? =
     gamePlayers.firstOrNull { it.player.uniqueId == player.uniqueId }
-
-// ---------- extension-функции состояния ----------
 
 fun TagGame.hasVictims(): Boolean = gamePlayers.any { it.role == TagPlayerRoles.VICTIM }
 fun TagGame.hasHunter(): Boolean  = gamePlayers.any { it.role == TagPlayerRoles.HUNTER }

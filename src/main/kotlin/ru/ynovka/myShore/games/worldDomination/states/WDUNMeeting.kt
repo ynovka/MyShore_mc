@@ -13,6 +13,7 @@ import ru.ynovka.myShore.plasmo.StageVoice
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.games.GamePlayer
 import ru.ynovka.myShore.games.GameState
+import ru.ynovka.myShore.games.GameWorld
 import net.kyori.adventure.title.Title
 import ru.ynovka.myShore.plasmo.Stage
 import org.bukkit.entity.ArmorStand
@@ -35,7 +36,7 @@ import java.util.UUID
  * - уровень развития;
  * - название по алфавиту.
  */
-class WDUNMeeting(game: WDGame) : GameState<WDPlayer, WDGame>(game) {
+class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
 
     var speakingCountry: Int? = null
         private set

@@ -1,12 +1,13 @@
 package ru.ynovka.myShore.games.tag
 
+import ru.ynovka.myShore.games.tag.TagGame.Companion.currentTagGame
 import dev.jorel.commandapi.kotlindsl.commandAPICommand
 import ru.ynovka.myShore.Database.tagCaughtsRepository
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import ru.ynovka.myShore.games.tag.maps.TagMaps
+import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.Particle
 import org.bukkit.Color
-import ru.ynovka.myShore.MyShore.Companion.inst
 
 
 object TagCommands {
