@@ -1,7 +1,8 @@
 plugins {
+    idea
     kotlin("jvm") version "2.3.20-RC"
     id("com.gradleup.shadow") version "9.3.1"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
 }
 
 group = "ru.ynovka"
@@ -16,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.devBundle("cn.dreeam.leaf", "1.21.11-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("26.1.2.build.+")
 
     compileOnly("com.github.darksoulq:AbyssalLib:v2.2.2-mc.26.1.2")
     //compileOnly("com.github.darksoulq:AbyssalLib")
