@@ -2,12 +2,17 @@ package ru.ynovka.myShore.games.pillars
 
 import ru.ynovka.myShore.utils.InstantChunkClear
 import ru.ynovka.myShore.games.GameWorld
+import org.bukkit.Bukkit
+import org.bukkit.World
 import java.util.UUID
 
 
 class PillarsWorld(
-    worldId: UUID
-) : GameWorld(worldId) {
+    val worldId: UUID
+) : GameWorld {
+
+    override val world: World
+        get() = Bukkit.getWorld(worldId) ?: throw IllegalStateException("World with id $worldId is not loaded")
 
     val pillars: MutableSet<Pillar> = mutableSetOf()
 
