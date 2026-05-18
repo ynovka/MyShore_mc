@@ -29,13 +29,13 @@ object HubEvents : Listener {
         inst.server.pluginManager.registerEvents(this, inst)
         scheduler.schedule {
             Hub.world.players.forEach { player ->
-                if (player.gameMode == GameMode.CREATIVE) return@forEach
+                if (player.gameMode == GameMode.CREATIVE) return@schedule
                 val l = player.location.clone().apply { y = Hub.spawn.y }
                 val distance = Hub.spawn.distance(l)
 
                 if (player.y < 87) {
                     player.toHub()
-                    return@forEach
+                    return@schedule
                 }
 
                 val t = l.world.getHighestBlockAt(l).type
