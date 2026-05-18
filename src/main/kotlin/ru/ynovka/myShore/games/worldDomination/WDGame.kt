@@ -3,20 +3,17 @@ package ru.ynovka.myShore.games.worldDomination
 import ru.ynovka.myShore.games.worldDomination.states.WDWaitingForPlayers
 import ru.ynovka.myShore.games.worldDomination.entity.WDGameHistory
 import ru.ynovka.myShore.games.worldDomination.entity.Country
-import ru.ynovka.myShore.games.NoopGameWorld
 import ru.ynovka.myShore.games.GameManager
 import ru.ynovka.myShore.games.GameWorld
 import ru.ynovka.myShore.games.Game
 import org.bukkit.entity.Player
-import org.bukkit.Location
-import org.bukkit.Bukkit
 
 
 class WDGame : Game<WDPlayer, GameWorld>() {
     override val initialState = WDWaitingForPlayers(this)
     override val maxPlayers = 50
     override val gamePlayers: MutableSet<WDPlayer> = mutableSetOf()
-    override val gameWorld = NoopGameWorld
+    override val gameWorld: WDWorld = WDWorld
 
     /** Текущий раунд игры */
     var round = 0
@@ -35,10 +32,6 @@ class WDGame : Game<WDPlayer, GameWorld>() {
     companion object {
         const val MIN_PLAYERS = 1 // todo заменить на 12
         const val ECOLOGY_START = 0.80
-
-        val world by lazy { Bukkit.getWorld("world_domination")!! }
-        val hubLoc by lazy { Location(world, 0.0, 100.0, 0.0) }
-        val unLoc by lazy { Location(world, 1000.0, 100.0, 0.0) }
 
         fun Player.currentWDGame(): WDGame? = GameManager.run { currentGame() }
     }
