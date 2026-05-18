@@ -1,6 +1,7 @@
 package ru.ynovka.myShore.games.tag.maps.impl
 
 import com.github.darksoulq.abyssallib.world.item.component.builtin.CooldownUse
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import io.papermc.paper.datacomponent.item.UseCooldown.useCooldown
 import ru.ynovka.myShore.games.tag.TagGame.Companion.currentTagGame
 import com.github.darksoulq.abyssallib.server.event.ActionResult
@@ -9,6 +10,7 @@ import ru.ynovka.myShore.MyShore.Companion.ITEMS
 import ru.ynovka.myShore.texturepack.TexturePack
 import ru.ynovka.myShore.games.tag.maps.MapSpawn
 import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.games.tag.findPlayer
 import java.util.concurrent.ThreadLocalRandom
@@ -130,7 +132,7 @@ object TagJungleMap : TagMap {
             val duration = 20
             val startTime = System.currentTimeMillis()
 
-            Bukkit.getScheduler().runTaskTimer(inst, Runnable {
+            scheduler.schedule {
                 val angle = ((System.currentTimeMillis() - startTime) / 5L % 360).toFloat() * (Math.PI.toFloat() / 180f)
                 val mat = Matrix4f().scale(0.5f).rotateY(angle)
                 val gameIterator = darts.iterator()
@@ -149,9 +151,12 @@ object TagJungleMap : TagMap {
                     }
                     if (set.isEmpty()) gameIterator.remove()
                 }
-            }, 1L, duration.toLong())
+            }
+                .sync()
+                .after(1L, Clock.TICKS)
+                .repeatEvery(duration.toLong(), Clock.TICKS)
 
-            Bukkit.getScheduler().runTaskTimer(inst, Runnable {
+            scheduler.schedule {
                 Bukkit.getWorld(mapId)?.players?.forEach { player ->
                     if (player.gameMode != GameMode.ADVENTURE) return@forEach
                     val game = player.currentTagGame() ?: return@forEach
@@ -169,7 +174,10 @@ object TagJungleMap : TagMap {
                     player.inventory.setItem(0, Items.poisonDart.getStack(null))
                     player.playSound(player.location, Sound.ENTITY_ITEM_PICKUP, 1f, 1f)
                 }
-            }, 1L, 2L)
+            }
+                .sync()
+                .after(1L, Clock.TICKS)
+                .repeatEvery(2L, Clock.TICKS)
         }
     }
 

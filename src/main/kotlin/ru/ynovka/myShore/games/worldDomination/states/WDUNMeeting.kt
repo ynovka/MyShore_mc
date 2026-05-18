@@ -7,7 +7,9 @@ import net.kyori.adventure.text.format.NamedTextColor
 import ru.ynovka.myShore.games.worldDomination.WDGame
 import ru.ynovka.myShore.text.actionBar.ActionBar
 import org.bukkit.persistence.PersistentDataType
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.utils.BossBarTimer
 import ru.ynovka.myShore.plasmo.StageVoice
 import net.kyori.adventure.text.Component
@@ -78,9 +80,11 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
         val seatLocation = assignSeat(country, gamePlayer) ?: return
 
         gamePlayer.player.teleportAsync(seatLocation).thenRun {
-            inst.server.scheduler.runTask(inst, Runnable {
+            scheduler.schedule {
                 sitOnSeat(gamePlayer)
-            })
+            }
+                .sync()
+                .once()
         }
     }
 
@@ -134,9 +138,11 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
                 val seatLocation = assignSeat(country, wdPlayer) ?: return@forEach
 
                 wdPlayer.player.teleportAsync(seatLocation).thenRun {
-                    inst.server.scheduler.runTask(inst, Runnable {
+                    scheduler.schedule {
                         sitOnSeat(wdPlayer)
-                    })
+                    }
+                        .sync()
+                        .once()
                 }
             }
         }
@@ -144,9 +150,12 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
 
     private fun startSpeakingCycle() {
         game.countries.forEachIndexed { index, country ->
-            inst.server.scheduler.runTaskLater(inst, Runnable {
+            scheduler.schedule {
                 startCountrySpeech(country)
-            }, getSpeechStartDelay(index))
+            }
+                .sync()
+                .after(getSpeechStartDelay(index), Clock.TICKS)
+                .once()
         }
     }
 
@@ -218,15 +227,17 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
             val seatLocation = getOccupiedSeatLocation(wdPlayer.playerId) ?: return@forEach
 
             wdPlayer.player.teleportAsync(seatLocation).thenRun {
-                inst.server.scheduler.runTask(inst, Runnable {
+                scheduler.schedule {
                     sitOnSeat(wdPlayer)
-                })
+                }
+                    .sync()
+                    .once()
             }
         }
     }
 
     private fun scheduleMeetingFinish() {
-        inst.server.scheduler.runTaskLater(inst, Runnable {
+        scheduler.schedule {
             val nextState = if (shouldFinishGame()) {
                 WDFinishingState(game)
             } else {
@@ -234,7 +245,10 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
             }
 
             game.fsm.transitionTo(nextState)
-        }, getMeetingFinishDelay())
+        }
+            .sync()
+            .after(getMeetingFinishDelay(), Clock.TICKS)
+            .once()
     }
 
     private fun shouldFinishGame(): Boolean {

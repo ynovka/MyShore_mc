@@ -83,7 +83,9 @@ class VisibilityGroup {
         if (Bukkit.isPrimaryThread()) {
             block()
         } else {
-            Bukkit.getScheduler().runTask(MyShore.Companion.inst, Runnable { block() })
+            MyShore.scheduler.schedule { block() }
+                .sync()
+                .once()
         }
     }
 }

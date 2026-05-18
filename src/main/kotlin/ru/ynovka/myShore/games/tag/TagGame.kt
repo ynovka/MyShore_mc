@@ -6,7 +6,7 @@ import ru.ynovka.myShore.games.tag.states.TagFinishing
 import ru.ynovka.myShore.games.tag.states.TagPreparing
 import ru.ynovka.myShore.text.actionBar.clearActionBar
 import ru.ynovka.myShore.games.tag.states.TagVoting
-import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.MyShore
 import ru.ynovka.myShore.games.tag.maps.TagMaps
 import ru.ynovka.myShore.games.tag.maps.TagMap
 import java.util.concurrent.CompletableFuture
@@ -16,7 +16,6 @@ import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.games.Game
 import org.bukkit.entity.Player
 import org.bukkit.Location
-import org.bukkit.Bukkit
 import java.util.UUID
 
 
@@ -26,7 +25,7 @@ class TagGame : Game<TagPlayer, GameWorld>() {
     override val maxPlayers: Int = 5
     override val gamePlayers: MutableSet<TagPlayer> = mutableSetOf()
 
-    val scheduler = inst.server.scheduler
+    val scheduler = MyShore.scheduler
 
     var map: TagMap = TagMaps.RANDOM.mapProvider()
     override val gameWorld: TagMap
@@ -139,7 +138,9 @@ fun TagMap.teleport(
 
     return player.teleportAsync(destination).thenApply { success ->
         if (success) {
-            Bukkit.getScheduler().runTask(inst, Runnable { onComplete() })
+            game.scheduler.schedule { onComplete() }
+                .sync()
+                .once()
         }
         success
     }

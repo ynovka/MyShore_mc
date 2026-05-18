@@ -1,13 +1,16 @@
 package ru.ynovka.myShore.text.actionBar
 
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
+import com.github.darksoulq.abyssallib.server.scheduler.ScheduledTask
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import java.util.UUID
 
 object ActionBar {
     private val playerMessages = HashMap<UUID, HashMap<Int, ArrayDeque<ActionBarEntry>>>()
-    private var taskId = -1
+    private var task: ScheduledTask? = null
 
     fun send(player: Player, message: Component, priority: Int = 1, durationMs: Long? = null) {
         val entry = ActionBarEntry(
@@ -80,14 +83,16 @@ object ActionBar {
     }
 
     private fun ensureTaskRunning() {
-        if (taskId != -1) return
-        taskId = inst.server.scheduler
-            .runTaskTimer(inst, Runnable { tick() }, 1L, 2L).taskId
+        if (task != null) return
+        task = scheduler.schedule { tick() }
+            .sync()
+            .after(1L, Clock.TICKS)
+            .repeatEvery(2L, Clock.TICKS)
     }
 
     private fun stopTask() {
-        inst.server.scheduler.cancelTask(taskId)
-        taskId = -1
+        task?.cancel()
+        task = null
     }
 }
 

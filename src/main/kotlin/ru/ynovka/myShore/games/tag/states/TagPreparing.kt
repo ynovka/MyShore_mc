@@ -1,5 +1,6 @@
 package ru.ynovka.myShore.games.tag.states
 
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.applyInProgressInventory
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
 import ru.ynovka.myShore.text.actionBar.sendPermanentActionBar
@@ -9,7 +10,6 @@ import net.kyori.adventure.text.format.NamedTextColor
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.text.ComponentDecorator
 import ru.ynovka.myShore.utils.Utils.clearTeams
-import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.TagPlayer
 import ru.ynovka.myShore.games.tag.TagGame
 import org.bukkit.potion.PotionEffectType
@@ -152,7 +152,10 @@ class TagPreparing(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(gam
                     tagPlayer.player.playSound(tagPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_ON, 0.5f, 2f)
                 }
 
-                game.scheduler.runTaskLater(inst, Runnable { tick(timeLeft - 1) }, 20L)
+                game.scheduler.schedule { tick(timeLeft - 1) }
+                    .sync()
+                    .after(20L, Clock.TICKS)
+                    .once()
             } else {
                 game.gamePlayers.forEach { tagPlayer ->
                     tagPlayer.player.clearActionBar()

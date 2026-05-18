@@ -1,6 +1,7 @@
 package ru.ynovka.myShore.antiCheat
 
-import ru.ynovka.myShore.MyShore.Companion.inst
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import java.util.concurrent.ConcurrentHashMap
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
@@ -14,7 +15,7 @@ object AntiCheat {
     private val playersPackets = ConcurrentHashMap<UUID, Int>(128)
 
     fun register() {
-        inst.server.scheduler.runTaskTimer(inst, Runnable {
+        scheduler.schedule {
             playersPackets.entries.removeIf { (uuid, tick) ->
                 val player = Bukkit.getPlayer(uuid) ?: return@removeIf true
 
@@ -26,7 +27,10 @@ object AntiCheat {
                     false
                 } else false
             }
-        }, 60L, 60L)
+        }
+            .sync()
+            .after(60L, Clock.TICKS)
+            .repeatEvery(60L, Clock.TICKS)
     }
 
     fun handlePacket(player: Player) {

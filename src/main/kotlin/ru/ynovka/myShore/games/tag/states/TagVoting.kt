@@ -1,8 +1,8 @@
 package ru.ynovka.myShore.games.tag.states
 
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupForVoting
-import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.maps.TagMap
 import ru.ynovka.myShore.games.tag.TagPlayer
 import ru.ynovka.myShore.games.tag.teleport
@@ -24,13 +24,16 @@ class TagVoting(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(game) 
             tagPlayer.player.playSound(tagPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
         }
 
-        game.scheduler.runTaskLater(inst, Runnable {
-            if (game.fsm.current !is TagVoting) return@Runnable
+        game.scheduler.schedule {
+            if (game.fsm.current !is TagVoting) return@schedule
 
             resolveMapVoting(game)?.let { setupMap(game, it) }
             game.mapVotes.clear()
             game.fsm.transitionTo(TagPreparing(this@TagVoting.game))
-        }, 10 * 20L)
+        }
+            .sync()
+            .after(10 * 20L, Clock.TICKS)
+            .once()
     }
 
     override fun onPlayerJoin(gamePlayer: TagPlayer) {

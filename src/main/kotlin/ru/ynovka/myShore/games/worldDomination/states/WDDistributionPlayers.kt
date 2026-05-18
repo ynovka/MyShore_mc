@@ -5,6 +5,7 @@ import ru.ynovka.myShore.games.worldDomination.WDPlayer.Companion.asWDPlayer
 import com.github.darksoulq.abyssallib.world.advancement.AdvancementFrame
 import ru.ynovka.myShore.games.worldDomination.entity.CountryType
 import com.github.darksoulq.abyssallib.world.advancement.Toast
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.games.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.games.worldDomination.entity.Country
 import ru.ynovka.myShore.games.worldDomination.WDPlayerRole
@@ -16,7 +17,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
-import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.utils.BossBarTimer
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.games.GamePlayer
@@ -26,7 +27,6 @@ import ru.ynovka.myShore.games.GameWorld
 import org.bukkit.inventory.ItemStack
 import org.bukkit.entity.Player
 import org.bukkit.Material
-import org.bukkit.Bukkit
 import kotlin.math.ceil
 import java.util.UUID
 
@@ -306,11 +306,14 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGam
 
         invites.add(i)
 
-        Bukkit.getScheduler().runTaskLater(inst, Runnable {
+        scheduler.schedule {
             if (invites.contains(i)) {
                 invites.remove(i)
             }
-        }, 15 * 20L)
+        }
+            .sync()
+            .after(15 * 20L, Clock.TICKS)
+            .once()
 
         val presidentFormatedName = president.asWDPlayer()?.getFormattedName() ?: Component.text(president.name)
 

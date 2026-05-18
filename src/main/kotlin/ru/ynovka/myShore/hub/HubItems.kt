@@ -1,11 +1,13 @@
 package ru.ynovka.myShore.hub
 
 import com.github.darksoulq.abyssallib.server.event.ActionResult
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import com.github.darksoulq.abyssallib.extension.openGui
 import com.github.darksoulq.abyssallib.world.item.item
 import ru.ynovka.myShore.MyShore.Companion.ITEMS
 import ru.ynovka.myShore.texturepack.TexturePack
 import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.hub.menus.PlayMenu
 import org.bukkit.inventory.EquipmentSlot
 import ru.ynovka.myShore.utils.cancelItem
@@ -39,11 +41,13 @@ object HubItems {
         val stack = player.inventory.getItem(hand)
         val meta = stack.itemMeta
         for (i in 1..3) {
-            inst.server.scheduler.runTaskLater(inst,
-                Runnable {
-                    meta.itemModel = NamespacedKey(inst, "${playMenu.id.value()}_$i")
-                    stack.itemMeta = meta
-                }, i * 2L)
+            scheduler.schedule {
+                meta.itemModel = NamespacedKey(inst, "${playMenu.id.value()}_$i")
+                stack.itemMeta = meta
+            }
+                .sync()
+                .after(i * 2L, Clock.TICKS)
+                .once()
         }
         player.openGui(PlayMenu.get())
     }

@@ -1,10 +1,10 @@
 package ru.ynovka.myShore.games.tag.states
 
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
 import ru.ynovka.myShore.text.actionBar.clearActionBar
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.text.ComponentDecorator
-import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.TagPlayer
 import ru.ynovka.myShore.games.tag.TagGame
 import net.kyori.adventure.text.Component
@@ -59,7 +59,10 @@ class TagInProgressState(game: TagGame) : GameState<TagPlayer, GameWorld, TagGam
                     )
                 }
 
-            game.scheduler.runTaskLater(inst, Runnable { tick() }, 2L)
+            game.scheduler.schedule { tick() }
+                .sync()
+                .after(2L, Clock.TICKS)
+                .once()
         }
 
         tick()
@@ -89,7 +92,10 @@ class TagInProgressState(game: TagGame) : GameState<TagPlayer, GameWorld, TagGam
                 bar.setTitle("Осталось ${game.remainingTime} секунд")
                 bar.progress = game.remainingTime.toDouble() / game.totalTime.toDouble()
                 game.remainingTime--
-                game.scheduler.runTaskLater(inst, Runnable { tick() }, 20L)
+                game.scheduler.schedule { tick() }
+                    .sync()
+                    .after(20L, Clock.TICKS)
+                    .once()
             } else {
                 bar.removeAll()
                 bossBar = null

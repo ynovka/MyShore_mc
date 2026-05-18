@@ -1,10 +1,9 @@
 package ru.ynovka.myShore.games.tag
 
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.text.actionBar.sendPermanentActionBar
-import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.states.TagWaitingForPlayers
 import ru.ynovka.myShore.games.tag.states.TagVoting
-import org.bukkit.scheduler.BukkitRunnable
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.hub.HubItems
@@ -44,33 +43,35 @@ object TagPlayerSetup {
         clearActivePotionEffects()
         canMove(true)
 
-        object : BukkitRunnable() {
-            val frames = arrayOf(".", "..", "...")
-            var frame = 0
+        val frames = arrayOf(".", "..", "...")
+        var frame = 0
+        var active = true
 
-            override fun run() {
-                if (game.fsm.current !is TagWaitingForPlayers) {
-                    cancel()
-                    return
-                }
-                if (game.findPlayer(this@setupForWaiting) == null) {
-                    clearActionBar()
-                    cancel()
-                    return
-                }
-
-                sendPermanentActionBar(
-                    ComponentDecorator.addBackground(
-                        Component.translatable("bar.myshore.waiting_for_players")
-                            .append(Component.text(frames[frame])),
-                        this@setupForWaiting
-                    )
-                )
-
-                frame++
-                if (frame == frames.size) frame = 0
+        game.scheduler.schedule {
+            if (game.fsm.current !is TagWaitingForPlayers) {
+                active = false
+                return@schedule
             }
-        }.runTaskTimer(inst, 0L, 10L)
+            if (game.findPlayer(this@setupForWaiting) == null) {
+                clearActionBar()
+                active = false
+                return@schedule
+            }
+
+            sendPermanentActionBar(
+                ComponentDecorator.addBackground(
+                    Component.translatable("bar.myshore.waiting_for_players")
+                        .append(Component.text(frames[frame])),
+                    this@setupForWaiting
+                )
+            )
+
+            frame++
+            if (frame == frames.size) frame = 0
+        }
+            .sync()
+            .repeatWhile { active }
+            .repeatEvery(10L, Clock.TICKS)
     }
 
     /** Телепорт + gameMode + инвентарь для состояния VOTING */
@@ -81,33 +82,35 @@ object TagPlayerSetup {
         applyVotingInventory()
         canMove(true)
 
-        object : BukkitRunnable() {
-            val frames = arrayOf(".", "..", "...")
-            var frame = 0
+        val frames = arrayOf(".", "..", "...")
+        var frame = 0
+        var active = true
 
-            override fun run() {
-                if (game.fsm.current !is TagVoting) {
-                    cancel()
-                    return
-                }
-                if (game.findPlayer(this@setupForVoting) == null) {
-                    clearActionBar()
-                    cancel()
-                    return
-                }
-
-                sendPermanentActionBar(
-                    ComponentDecorator.addBackground(
-                        Component.translatable("bar.myshore.tag.voting")
-                            .append(Component.text(frames[frame])),
-                        this@setupForVoting
-                    )
-                )
-
-                frame++
-                if (frame == frames.size) frame = 0
+        game.scheduler.schedule {
+            if (game.fsm.current !is TagVoting) {
+                active = false
+                return@schedule
             }
-        }.runTaskTimer(inst, 0L, 10L)
+            if (game.findPlayer(this@setupForVoting) == null) {
+                clearActionBar()
+                active = false
+                return@schedule
+            }
+
+            sendPermanentActionBar(
+                ComponentDecorator.addBackground(
+                    Component.translatable("bar.myshore.tag.voting")
+                        .append(Component.text(frames[frame])),
+                    this@setupForVoting
+                )
+            )
+
+            frame++
+            if (frame == frames.size) frame = 0
+        }
+            .sync()
+            .repeatWhile { active }
+            .repeatEvery(10L, Clock.TICKS)
     }
 
     /** Спектатор при входе во время активной игры */

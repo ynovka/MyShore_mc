@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 import ru.ynovka.myShore.text.actionBar.ActionBar
 import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.plasmo.PhoneCall
 import org.bukkit.event.EventPriority
 import org.bukkit.event.EventHandler
@@ -86,9 +87,11 @@ object WDEvents : Listener{
 
         e.isCancelled = true
 
-        inst.server.scheduler.runTask(inst, Runnable {
+        scheduler.schedule {
             meeting.ensureStillSitting(player)
-        })
+        }
+            .sync()
+            .once()
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
@@ -98,8 +101,10 @@ object WDEvents : Listener{
 
         if (!meeting.isSitting(e.player.uniqueId)) return
 
-        inst.server.scheduler.runTask(inst, Runnable {
+        scheduler.schedule {
             meeting.forceUnsitAfterTeleport(e.player)
-        })
+        }
+            .sync()
+            .once()
     }
 }

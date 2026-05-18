@@ -1,10 +1,10 @@
 package ru.ynovka.myShore.games.tag.states
 
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.games.tag.statistics.TagPlayerStatistics.saveStats
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.applyFinishingInventory
 import ru.ynovka.myShore.games.tag.TagPlayerSetup.setupAsSpectator
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
-import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.utils.Utils.clearTeams
 import ru.ynovka.myShore.games.tag.hasVictims
 import ru.ynovka.myShore.games.tag.hasHunter
@@ -41,14 +41,17 @@ class TagFinishing(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(gam
             tagPlayer.role = TagPlayerRoles.UNDEFINED
         }
 
-        game.scheduler.runTaskLater(inst, Runnable {
+        game.scheduler.schedule {
             val nextState = if (game.gamePlayers.size >= 2) {
                 TagVoting(game)
             } else {
                 TagWaitingForPlayers(game)
             }
             game.fsm.transitionTo(nextState)
-        }, 5 * 20L)
+        }
+            .sync()
+            .after(5 * 20L, Clock.TICKS)
+            .once()
 
         game.map.onGameEnd(game)
     }
