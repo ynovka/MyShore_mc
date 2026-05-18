@@ -4,21 +4,27 @@ import ru.ynovka.myShore.games.pillars.Pillar.Companion.TELEPORT_Y
 import ru.ynovka.myShore.utils.VoidWorldGenerator
 import org.bukkit.WorldCreator
 import org.bukkit.Location
+import org.bukkit.World
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import java.util.UUID
+import java.util.concurrent.CompletableFuture
 
 
 object PillarsWorldManager {
 
     fun createWorld(): PillarsWorld {
-        val world = PillarsWorld(
-            WorldCreator.name("pillars_${UUID.randomUUID()}")
-                .generateStructures(false)
-                .generator(VoidWorldGenerator())
-                .createWorld()?.uid
-                ?: error("Failed to create pillars world")
-        )
-
-        return world
+        val future = CompletableFuture<PillarsWorld>()
+        scheduler.schedule {
+            val world = PillarsWorld(
+                WorldCreator.name("pillars_${UUID.randomUUID()}")
+                    .generateStructures(false)
+                    .generator(VoidWorldGenerator())
+                    .createWorld()?.uid
+                    ?: error("Failed to create pillars world")
+            )
+            future.complete(world)
+        }.global().once()
+        return future.get()
     }
 
     fun spawnPlayer(pGame: PillarsGame, pPlayer: PillarsPlayer) {

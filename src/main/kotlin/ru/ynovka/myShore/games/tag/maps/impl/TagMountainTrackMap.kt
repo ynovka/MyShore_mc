@@ -52,6 +52,7 @@ object TagMountainTrackMap : TagMap {
             }
                 .sync()
                 .after(20L, Clock.TICKS)
+                .once()
 
             scheduler.schedule {
                 Bukkit.getServer().getWorld(mapId)?.players?.forEach { player ->
