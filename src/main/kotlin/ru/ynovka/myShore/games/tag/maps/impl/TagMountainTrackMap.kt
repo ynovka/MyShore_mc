@@ -45,16 +45,16 @@ object TagMountainTrackMap : TagMap {
         private val lightNearbyPositions = HashSet<BlockPos>()
 
         fun register() {
-            val world by lazy { Bukkit.getServer().getWorld(mapId)!! }
-
             scheduler.schedule {
-                precomputeLightPositions(world)
+                Bukkit.getServer().getWorld(mapId)?.let { world ->
+                    precomputeLightPositions(world)
+                }
             }
                 .sync()
                 .after(20L, Clock.TICKS)
 
             scheduler.schedule {
-                world.players.forEach { player ->
+                Bukkit.getServer().getWorld(mapId)?.players?.forEach { player ->
                     if (player.gameMode == GameMode.CREATIVE) return@forEach
 
                     if (player.y <= 65) {
