@@ -7,6 +7,7 @@ import ru.ynovka.myShore.games.GameManager
 import ru.ynovka.myShore.games.GameWorld
 import ru.ynovka.myShore.games.Game
 import org.bukkit.entity.Player
+import org.bukkit.Location
 
 
 class WDGame : Game<WDPlayer, GameWorld>() {
@@ -32,6 +33,11 @@ class WDGame : Game<WDPlayer, GameWorld>() {
     companion object {
         const val MIN_PLAYERS = 1 // todo заменить на 12
         const val ECOLOGY_START = 0.80
+
+        val hubLoc: Location
+            get() = WDWorld.hubLoc
+        val unLoc: Location
+            get() = WDWorld.unLoc
 
         fun Player.currentWDGame(): WDGame? = GameManager.run { currentGame() }
     }
