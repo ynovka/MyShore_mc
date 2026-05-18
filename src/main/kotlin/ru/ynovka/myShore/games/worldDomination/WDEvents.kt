@@ -26,7 +26,7 @@ object WDEvents : Listener{
 
     @EventHandler
     fun onPlayerInteraction(e: PlayerInteractEvent) {
-        if (e.player.world.name != WDGame.world.name || e.player.gameMode == GameMode.CREATIVE) return
+        if (e.player.world.name != WDWorld.WORLD_NAME || e.player.gameMode == GameMode.CREATIVE) return
         e.isCancelled = true
     }
 

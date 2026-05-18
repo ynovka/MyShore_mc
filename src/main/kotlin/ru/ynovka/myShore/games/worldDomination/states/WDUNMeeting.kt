@@ -20,6 +20,7 @@ import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 import org.bukkit.NamespacedKey
 import org.bukkit.Location
+import ru.ynovka.myShore.games.worldDomination.WDWorld
 import java.time.Duration
 import kotlin.math.atan2
 import java.util.UUID
@@ -406,84 +407,84 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
         val seats: Map<Int, List<Location>> by lazy {
             mapOf(
                 0 to listOf(
-                    Location(WDGame.world, 1018.5, 105.0, -5.5),
-                    Location(WDGame.world, 1016.5, 105.0, -3.5),
-                    Location(WDGame.world, 1014.5, 105.0, -2.5),
-                    Location(WDGame.world, 1010.5, 105.0, 0.5),
-                    Location(WDGame.world, 1008.5, 105.0, 0.5)
+                    Location(WDWorld.world, 1018.5, 105.0, -5.5),
+                    Location(WDWorld.world, 1016.5, 105.0, -3.5),
+                    Location(WDWorld.world, 1014.5, 105.0, -2.5),
+                    Location(WDWorld.world, 1010.5, 105.0, 0.5),
+                    Location(WDWorld.world, 1008.5, 105.0, 0.5)
                 ),
                 1 to listOf(
-                    Location(WDGame.world, 1018.5, 104.0, -7.5),
-                    Location(WDGame.world, 1015.5, 104.0, -5.5),
-                    Location(WDGame.world, 1013.5, 104.0, -4.5),
-                    Location(WDGame.world, 1010.5, 104.0, -3.5),
-                    Location(WDGame.world, 1007.5, 104.0, -2.5)
+                    Location(WDWorld.world, 1018.5, 104.0, -7.5),
+                    Location(WDWorld.world, 1015.5, 104.0, -5.5),
+                    Location(WDWorld.world, 1013.5, 104.0, -4.5),
+                    Location(WDWorld.world, 1010.5, 104.0, -3.5),
+                    Location(WDWorld.world, 1007.5, 104.0, -2.5)
                 ),
                 2 to listOf(
-                    Location(WDGame.world, 1016.5, 103.0, -8.5),
-                    Location(WDGame.world, 1013.5, 103.0, -6.5),
-                    Location(WDGame.world, 1010.5, 103.0, -5.5),
-                    Location(WDGame.world, 1008.5, 103.0, -4.5),
-                    Location(WDGame.world, 1006.5, 103.0, -4.5)
+                    Location(WDWorld.world, 1016.5, 103.0, -8.5),
+                    Location(WDWorld.world, 1013.5, 103.0, -6.5),
+                    Location(WDWorld.world, 1010.5, 103.0, -5.5),
+                    Location(WDWorld.world, 1008.5, 103.0, -4.5),
+                    Location(WDWorld.world, 1006.5, 103.0, -4.5)
                 ),
                 3 to listOf(
-                    Location(WDGame.world, 1015.5, 102.0, -10.5),
-                    Location(WDGame.world, 1012.5, 102.0, -8.5),
-                    Location(WDGame.world, 1010.5, 102.0, -7.5),
-                    Location(WDGame.world, 1008.5, 102.0, -7.5),
-                    Location(WDGame.world, 1005.5, 102.0, -6.5)
+                    Location(WDWorld.world, 1015.5, 102.0, -10.5),
+                    Location(WDWorld.world, 1012.5, 102.0, -8.5),
+                    Location(WDWorld.world, 1010.5, 102.0, -7.5),
+                    Location(WDWorld.world, 1008.5, 102.0, -7.5),
+                    Location(WDWorld.world, 1005.5, 102.0, -6.5)
                 ),
                 4 to listOf(
-                    Location(WDGame.world, 1013.5, 101.0, -11.5),
-                    Location(WDGame.world, 1010.5, 101.0, -10.5),
-                    Location(WDGame.world, 1008.5, 101.0, -9.5),
-                    Location(WDGame.world, 1006.5, 101.0, -8.5),
-                    Location(WDGame.world, 1004.5, 101.0, -8.5)
+                    Location(WDWorld.world, 1013.5, 101.0, -11.5),
+                    Location(WDWorld.world, 1010.5, 101.0, -10.5),
+                    Location(WDWorld.world, 1008.5, 101.0, -9.5),
+                    Location(WDWorld.world, 1006.5, 101.0, -8.5),
+                    Location(WDWorld.world, 1004.5, 101.0, -8.5)
                 ),
                 5 to listOf(
-                    Location(WDGame.world, 993.5, 105.0, 0.5),
-                    Location(WDGame.world, 990.5, 105.0, -1.5),
-                    Location(WDGame.world, 987.5, 105.0, -2.5),
-                    Location(WDGame.world, 984.5, 105.0, -3.5),
-                    Location(WDGame.world, 982.5, 105.0, -5.5)
+                    Location(WDWorld.world, 993.5, 105.0, 0.5),
+                    Location(WDWorld.world, 990.5, 105.0, -1.5),
+                    Location(WDWorld.world, 987.5, 105.0, -2.5),
+                    Location(WDWorld.world, 984.5, 105.0, -3.5),
+                    Location(WDWorld.world, 982.5, 105.0, -5.5)
                 ),
                 6 to listOf(
-                    Location(WDGame.world, 992.5, 104.0, -2.5),
-                    Location(WDGame.world, 989.5, 104.0, -3.5),
-                    Location(WDGame.world, 986.5, 104.0, -4.5),
-                    Location(WDGame.world, 984.5, 104.0, -5.5),
-                    Location(WDGame.world, 982.5, 104.0, -7.5)
+                    Location(WDWorld.world, 992.5, 104.0, -2.5),
+                    Location(WDWorld.world, 989.5, 104.0, -3.5),
+                    Location(WDWorld.world, 986.5, 104.0, -4.5),
+                    Location(WDWorld.world, 984.5, 104.0, -5.5),
+                    Location(WDWorld.world, 982.5, 104.0, -7.5)
                 ),
                 7 to listOf(
-                    Location(WDGame.world, 993.5, 103.0, -4.5),
-                    Location(WDGame.world, 990.5, 103.0, -5.5),
-                    Location(WDGame.world, 988.5, 103.0, -6.5),
-                    Location(WDGame.world, 986.5, 103.0, -7.5),
-                    Location(WDGame.world, 984.5, 103.0, -8.5)
+                    Location(WDWorld.world, 993.5, 103.0, -4.5),
+                    Location(WDWorld.world, 990.5, 103.0, -5.5),
+                    Location(WDWorld.world, 988.5, 103.0, -6.5),
+                    Location(WDWorld.world, 986.5, 103.0, -7.5),
+                    Location(WDWorld.world, 984.5, 103.0, -8.5)
                 ),
                 8 to listOf(
-                    Location(WDGame.world, 995.5, 102.0, -6.5),
-                    Location(WDGame.world, 992.5, 102.0, -7.5),
-                    Location(WDGame.world, 989.5, 102.0, -8.5),
-                    Location(WDGame.world, 987.5, 102.0, -9.5),
-                    Location(WDGame.world, 985.5, 102.0, -11.5)
+                    Location(WDWorld.world, 995.5, 102.0, -6.5),
+                    Location(WDWorld.world, 992.5, 102.0, -7.5),
+                    Location(WDWorld.world, 989.5, 102.0, -8.5),
+                    Location(WDWorld.world, 987.5, 102.0, -9.5),
+                    Location(WDWorld.world, 985.5, 102.0, -11.5)
                 ),
                 9 to listOf(
-                    Location(WDGame.world, 996.5, 101.0, -8.5),
-                    Location(WDGame.world, 994.5, 101.0, -8.5),
-                    Location(WDGame.world, 992.5, 101.0, -9.5),
-                    Location(WDGame.world, 989.5, 101.0, -10.5),
-                    Location(WDGame.world, 987.5, 101.0, -12.5)
+                    Location(WDWorld.world, 996.5, 101.0, -8.5),
+                    Location(WDWorld.world, 994.5, 101.0, -8.5),
+                    Location(WDWorld.world, 992.5, 101.0, -9.5),
+                    Location(WDWorld.world, 989.5, 101.0, -10.5),
+                    Location(WDWorld.world, 987.5, 101.0, -12.5)
                 )
             )
         }
 
         val sceneTeleport: Location by lazy {
-            Location(WDGame.world, 1000.5, 100.0, 0.0, 180f, 0f)
+            Location(WDWorld.world, 1000.5, 100.0, 0.0, 180f, 0f)
         }
 
         val sceneCenter: Location by lazy {
-            Location(WDGame.world, 1000.5, 101.0, -16.5)
+            Location(WDWorld.world, 1000.5, 101.0, -16.5)
         }
     }
 }

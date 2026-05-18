@@ -14,7 +14,7 @@ class WDGame : Game<WDPlayer, GameWorld>() {
     override val initialState = WDWaitingForPlayers(this)
     override val maxPlayers = 50
     override val gamePlayers: MutableSet<WDPlayer> = mutableSetOf()
-    override val gameWorld: WDWorld = WDWorld
+    override val gameWorld = WDWorld
 
     /** Текущий раунд игры */
     var round = 0
