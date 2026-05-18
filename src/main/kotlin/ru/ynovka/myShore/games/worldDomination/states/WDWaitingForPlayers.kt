@@ -19,7 +19,7 @@ class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>
         game.gamePlayers.forEach { gamePlayer ->
             val player = gamePlayer.player
 
-            player.teleportAsync(WDGame.hubLoc)
+            player.teleportAsync(game.gameWorld.hubLoc)
             player.inventory.clear()
             timer.addPlayer(player)
         }
@@ -40,7 +40,7 @@ class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>
     override fun onPlayerJoin(gamePlayer: WDPlayer) {
         val player = gamePlayer.player
 
-        player.teleportAsync(WDGame.hubLoc)
+        player.teleportAsync(game.gameWorld.hubLoc)
         player.inventory.clear()
         timer.addPlayer(player)
 
