@@ -10,7 +10,6 @@ import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.maps.TagMaps
 import ru.ynovka.myShore.games.tag.maps.TagMap
 import java.util.concurrent.CompletableFuture
-import ru.ynovka.myShore.games.NoopGameWorld
 import ru.ynovka.myShore.games.GameManager
 import ru.ynovka.myShore.games.GameWorld
 import ru.ynovka.myShore.utils.canMove
@@ -26,11 +25,13 @@ class TagGame : Game<TagPlayer, GameWorld>() {
     override val initialState = TagWaitingForPlayers(this)
     override val maxPlayers: Int = 5
     override val gamePlayers: MutableSet<TagPlayer> = mutableSetOf()
-    override val gameWorld = NoopGameWorld
 
     val scheduler = inst.server.scheduler
 
     var map: TagMap = TagMaps.RANDOM.mapProvider()
+    override val gameWorld: TagMap
+        get() = map
+
     val mapVotes: MutableMap<UUID, TagMap> = mutableMapOf()
 
     /**
