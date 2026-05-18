@@ -8,9 +8,11 @@ import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.CompletableFuture
 import ru.ynovka.myShore.games.tag.teleport
 import ru.ynovka.myShore.games.tag.TagGame
+import ru.ynovka.myShore.games.GameWorld
 import org.bukkit.entity.Player
 import org.bukkit.Location
 import org.bukkit.Bukkit
+import org.bukkit.World
 
 
 enum class TagMaps(
@@ -21,31 +23,47 @@ enum class TagMaps(
     MOUNTAIN_TRACK({ TagMap.byId("tag_mountain_track") });
 }
 
-interface TagMap {
+interface TagMap : GameWorld {
 
     val mapId: String
     val mapName: TranslatableComponent
     val authors: List<String>
 
+    override val world: World
+        get() = Bukkit.getWorld(mapId)
+            ?: error("World '$mapId' is not loaded")
+
     val hunterSpawn: MapSpawn
     val victimSpawns: List<MapSpawn>
 
-    /** Вызывается после телепорта игроков в начале игры */
+    /**
+     * Вызывается после телепорта игроков в начале игры
+     */
     fun onGameStart(game: TagGame) {}
 
-    /** Вызывается при завершении игры */
+    /**
+     * Вызывается при завершении игры
+     */
     fun onGameEnd(game: TagGame) {}
 
-    /** Вызывается когда игрок присоединяется к игре */
+    /**
+     * Вызывается когда игрок присоединяется к игре
+     */
     fun onPlayerJoin(game: TagGame, player: Player) {}
 
-    /** Вызывается когда игрок покидает игру */
+    /**
+     * Вызывается когда игрок покидает игру
+     */
     fun onPlayerLeave(game: TagGame, player: Player) {}
 
-    /** Вызывается вместе с TagEvents.register() */
+    /**
+     * Вызывается вместе с TagEvents.register()
+     */
     fun registerEvents() {}
 
-    /** Вызывается вместе с TagItems.register() */
+    /**
+     * Вызывается вместе с TagItems.register()
+     */
     fun registerItems() {}
 
     companion object Registry {
