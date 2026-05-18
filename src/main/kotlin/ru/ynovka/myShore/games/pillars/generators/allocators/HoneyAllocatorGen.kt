@@ -3,7 +3,8 @@ package ru.ynovka.myShore.games.pillars.generators.allocators
 import ru.ynovka.myShore.games.pillars.PillarsGame
 import org.bukkit.Location
 import ru.ynovka.myShore.games.pillars.Footprints
-import ru.ynovka.myShore.games.pillars.PillarLoc
+import ru.ynovka.myShore.games.pillars.Pillar
+import java.util.UUID
 import kotlin.math.atan2
 import kotlin.math.abs
 import kotlin.math.PI
@@ -11,38 +12,55 @@ import kotlin.math.sqrt
 
 
 object HoneyAllocatorGen : AllocatorGen {
-    override fun generate(pGame: PillarsGame) {
-        val points = honeycombRingLocations(
-            center = pGame.gameWorld.world.spawnLocation,
-            pointCount = pGame.gamePlayers.size,
-            y = 100.0
-        )
 
-        val footprint = Footprints.hexagon(computeHexFootprintRadius(points))
+    override fun generate(pGame: PillarsGame, playerId: UUID): Pillar {
+        val occupied = pGame.gameWorld.pillars
+        val center = pGame.gameWorld.world.spawnLocation
 
-        points.forEach { loc ->
-            pGame.gameWorld.pillars += PillarLoc(
-                x = loc.blockX,
-                z = loc.blockZ,
-                footprint = footprint
+        var pointCount = maxOf(1, pGame.gamePlayers.size)
+
+        while (true) {
+            val points = honeycombRingLocations(
+                center = center,
+                pointCount = pointCount,
+                playerId = playerId
             )
+
+            val footprint = Footprints.hexagon(computeHexFootprintRadius(points))
+
+            val free = points
+                .map { loc -> loc.copy(footprint = footprint) }
+                .firstOrNull { loc -> loc !in occupied }
+
+            if (free != null) {
+                occupied += free
+                return free
+            }
+
+            pointCount++
         }
     }
 
-    /** Вычисляет радиус footprint из минимального расстояния между точками, оставляя 1 блок зазора */
-    private fun computeHexFootprintRadius(points: List<Location>): Int {
+    private fun computeHexFootprintRadius(points: List<Pillar>): Int {
         if (points.size <= 1) return 0
+
         var minDistSq = Double.MAX_VALUE
+
         for (i in points.indices) {
             for (j in i + 1 until points.size) {
-                val dx = points[i].blockX - points[j].blockX
-                val dz = points[i].blockZ - points[j].blockZ
+                val dx = points[i].x - points[j].x
+                val dz = points[i].z - points[j].z
                 val dSq = (dx * dx + dz * dz).toDouble()
-                if (dSq < minDistSq) minDistSq = dSq
+
+                if (dSq < minDistSq) {
+                    minDistSq = dSq
+                }
             }
         }
+
         val minDist = sqrt(minDistSq)
-        return (minDist / 2).toInt()
+
+        return maxOf(0, (minDist / 2).toInt())
     }
 }
 
@@ -62,18 +80,15 @@ private data class IntPoint(
 private fun honeycombRingLocations(
     center: Location,
     pointCount: Int,
-    y: Double = 100.0
-): List<Location> {
+    playerId: UUID
+): List<Pillar> {
     require(pointCount >= 1) { "pointCount must be at least 1" }
 
     return honeycombRingPoints(pointCount).map { point ->
-        Location(
-            center.world,
-            (center.blockX + point.x).toDouble(),
-            y,
-            (center.blockZ + point.z).toDouble(),
-            center.yaw,
-            center.pitch
+        Pillar(
+            x = center.blockX + point.x,
+            z = center.blockZ + point.z,
+            owner = playerId
         )
     }
 }

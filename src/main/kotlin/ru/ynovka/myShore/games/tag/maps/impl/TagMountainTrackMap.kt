@@ -1,19 +1,20 @@
 package ru.ynovka.myShore.games.tag.maps.impl
 
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.games.tag.TagGame.Companion.currentTagGame
 import ru.ynovka.myShore.games.tag.states.TagFinishing
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.games.tag.TagPlayerRoles
 import ru.ynovka.myShore.games.tag.maps.MapSpawn
-import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.games.tag.maps.TagMap
-import ru.ynovka.myShore.games.tag.hasVictims
 import ru.ynovka.myShore.games.tag.findPlayer
+import ru.ynovka.myShore.games.tag.hasVictims
 import ru.ynovka.myShore.games.tag.teleport
 import net.kyori.adventure.text.Component
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Block
-import org.bukkit.Material
 import org.bukkit.GameMode
+import org.bukkit.Material
 import org.bukkit.Bukkit
 import kotlin.math.sqrt
 
@@ -44,10 +45,15 @@ object TagMountainTrackMap : TagMap {
         private val lightNearbyPositions = HashSet<BlockPos>()
 
         fun register() {
-            val world = Bukkit.getServer().getWorld(mapId)!!
-            precomputeLightPositions(world)
+            val world by lazy { Bukkit.getServer().getWorld(mapId)!! }
 
-            inst.server.scheduler.runTaskTimer(inst, Runnable {
+            scheduler.schedule {
+                precomputeLightPositions(world)
+            }
+                .sync()
+                .after(20L, Clock.TICKS)
+
+            scheduler.schedule {
                 world.players.forEach { player ->
                     if (player.gameMode == GameMode.CREATIVE) return@forEach
 
@@ -105,7 +111,10 @@ object TagMountainTrackMap : TagMap {
                         )
                     }
                 }
-            }, 0L, 5L)
+            }
+                .sync()
+                .after(20L, Clock.TICKS)
+                .repeatEvery(5L, Clock.TICKS)
         }
 
         private fun precomputeLightPositions(world: org.bukkit.World) {

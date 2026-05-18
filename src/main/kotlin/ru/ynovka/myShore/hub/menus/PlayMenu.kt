@@ -11,8 +11,10 @@ import net.kyori.adventure.text.Component
 import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.games.GameManager
+import ru.ynovka.myShore.games.pillars.PillarsGame
 import ru.ynovka.myShore.games.tag.TagGame
 import ru.ynovka.myShore.games.worldDomination.WDGame
+import ru.ynovka.myShore.hub.HubItems.playPillarsItem
 import ru.ynovka.myShore.hub.HubItems.playTagItem
 import ru.ynovka.myShore.hub.HubItems.playWDItem
 
@@ -39,6 +41,13 @@ object PlayMenu {
             GuiButton.of(playWDItem.getStack(null)) { ctx ->
                 val player = ctx.view.inventoryView.player as Player
                 GameManager.join(player, ::WDGame)
+            }
+        )
+        set(
+            SlotPosition.top(4),
+            GuiButton.of(playPillarsItem.getStack(null)) { ctx ->
+                val player = ctx.view.inventoryView.player as Player
+                GameManager.join(player, ::PillarsGame)
             }
         )
     }

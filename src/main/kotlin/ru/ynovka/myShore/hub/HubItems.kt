@@ -106,4 +106,10 @@ object HubItems {
             line(Component.translatable("desc.myshore.play_wd.3"))
         }
     }
+
+    val playPillarsItem = cancelItem(Key.key(inst, "play_pillars")) {
+        tooltip { p ->
+            line(Component.translatable("desc.myshore.play_pillars.1"))
+        }
+    }
 }

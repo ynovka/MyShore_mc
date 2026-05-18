@@ -61,7 +61,7 @@ object TagPlayerSetup {
 
                 sendPermanentActionBar(
                     ComponentDecorator.addBackground(
-                        Component.translatable("bar.myshore.tag.waiting_for_players")
+                        Component.translatable("bar.myshore.waiting_for_players")
                             .append(Component.text(frames[frame])),
                         this@setupForWaiting
                     )

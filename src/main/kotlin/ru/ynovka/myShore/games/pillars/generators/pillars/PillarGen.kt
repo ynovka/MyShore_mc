@@ -1,16 +1,11 @@
 package ru.ynovka.myShore.games.pillars.generators.pillars
 
+import ru.ynovka.myShore.games.pillars.Pillar
 import org.bukkit.World
-import ru.ynovka.myShore.games.pillars.PillarsWorld
-import ru.ynovka.myShore.games.pillars.PillarLoc
 
 
 interface PillarGen {
-    fun generate(pWorld: PillarsWorld) {
-        val world = pWorld.world
-        pWorld.pillars.forEach { generate(world, it) }
-    }
-    fun generate(world: World, pillar: PillarLoc)
+    fun generate(world: World, pillar: Pillar)
 }
 
 enum class PillarGenerator(val gen: PillarGen) {

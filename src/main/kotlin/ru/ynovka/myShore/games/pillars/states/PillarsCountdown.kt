@@ -1,9 +1,15 @@
 package ru.ynovka.myShore.games.pillars.states
 
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
+import org.bukkit.GameMode
+import ru.ynovka.myShore.MyShore.Companion.scheduler
+import ru.ynovka.myShore.games.GamePlayer
 import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.games.pillars.PillarsGame
 import ru.ynovka.myShore.games.pillars.PillarsPlayer
 import ru.ynovka.myShore.games.pillars.PillarsWorld
+import ru.ynovka.myShore.games.pillars.PillarsWorldManager
+import ru.ynovka.myShore.utils.canMove
 
 
 /**
@@ -19,7 +25,35 @@ import ru.ynovka.myShore.games.pillars.PillarsWorld
  */
 class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
     override fun onEnterState() {
+        // Переводим спеков в игроков
         game.gamePlayers += game.spectatorPlayers
         game.spectatorPlayers.clear()
+
+        // Очищаем мир
+        game.gameWorld.countdownPrepare()
+        // Спавн колб, столбов и площадки + телепорт игроков
+        PillarsWorldManager.spawnPlayers(game)
+
+        // Отключаем передвищение игрокам
+        game.gamePlayers.map(GamePlayer::player).forEach {
+            it.canMove(false)
+            it.gameMode = GameMode.ADVENTURE
+        }
+
+
+        scheduler.schedule {
+
+        }
+            .sync()
+            .after(10 * 20L, Clock.TICKS)
+    }
+
+    private fun countdownTimer() {
+        // todo
+    }
+
+    override fun onPlayerJoin(gamePlayer: PillarsPlayer) {
+        // todo
+        PillarsWorldManager.spawnPlayer(game, gamePlayer)
     }
 }

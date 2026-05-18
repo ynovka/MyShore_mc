@@ -55,8 +55,9 @@ object WDPhoneMenu {
                 .sortedBy { it.country?.president?.playerId }
 
             players.forEachIndexed { index, target ->
-                val head = try { target.player.skull
-                } catch (_: Exception) { ItemStack(Material.PLAYER_HEAD) }
+                /*val head = try { target.player.skull
+                } catch (_: Exception) { ItemStack(Material.PLAYER_HEAD) }*/
+                val head = ItemStack.of(Material.RABBIT_FOOT)
 
                 view.inventoryView.setItem(SlotPosition.top(index).index, head)
                 view.gui.elements[SlotPosition.top(index)] = GuiButton.of(head) { ctx ->

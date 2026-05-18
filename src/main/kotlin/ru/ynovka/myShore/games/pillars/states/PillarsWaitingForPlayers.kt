@@ -1,73 +1,73 @@
 package ru.ynovka.myShore.games.pillars.states
 
-import net.kyori.adventure.text.Component
-import org.bukkit.GameMode
-import org.bukkit.Sound
-import org.bukkit.entity.Player
-import org.bukkit.scheduler.BukkitRunnable
-import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.games.GameState
-import ru.ynovka.myShore.games.pillars.PillarsGame
+import ru.ynovka.myShore.text.actionBar.sendPermanentActionBar
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
+import ru.ynovka.myShore.games.pillars.PillarsWorldManager
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.games.pillars.PillarsPlayer
 import ru.ynovka.myShore.games.pillars.PillarsWorld
+import ru.ynovka.myShore.games.pillars.PillarsGame
 import ru.ynovka.myShore.text.ComponentDecorator
-import ru.ynovka.myShore.text.actionBar.clearActionBar
-import ru.ynovka.myShore.text.actionBar.sendPermanentActionBar
+import ru.ynovka.myShore.games.GamePlayer
+import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.games.GameState
 import ru.ynovka.myShore.utils.canMove
+import ru.ynovka.myShore.hub.HubItems
+import org.bukkit.GameMode
+import org.bukkit.Sound
 
 
 class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
 
     override fun onEnterState() {
-        game.gamePlayers.forEach { tagPlayer ->
-            tagPlayer.player.setupForWaiting(game)
-            tagPlayer.player.playSound(tagPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
+        waitingForPlayersActionbar()
+
+        game.gamePlayers.forEach { pPlayer ->
+            pPlayer.setupForWaiting(game)
+            pPlayer.player.playSound(pPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
         }
     }
 
+    private fun waitingForPlayersActionbar() {
+        val frames = arrayOf(".", "..", "...")
+        var frame = 0
+
+        scheduler.schedule {
+            game.gamePlayers.map(GamePlayer::player).forEach { player ->
+                player.sendPermanentActionBar(
+                    ComponentDecorator.addBackground(
+                        Component.translatable("bar.myshore.waiting_for_players")
+                            .append(Component.text(frames[frame])),
+                        player
+                    )
+                )
+
+                frame++
+                if (frame == frames.size) frame = 0
+            }
+        }
+            .sync()
+            .repeatWhile { game.fsm.current is PillarsWaitingForPlayers }
+            .repeatEvery(10L, Clock.TICKS)
+    }
+
     override fun onPlayerJoin(gamePlayer: PillarsPlayer) {
-        gamePlayer.player.setupForWaiting(game)
+        gamePlayer.setupForWaiting(game)
 
         if (game.gamePlayers.size >= 2) {
-            // todo game.fsm.transitionTo(TagVoting(game))
+            game.fsm.transitionTo(PillarsCountdown(game))
         }
     }
 
     companion object {
-        fun Player.setupForWaiting(game: PillarsGame) {
-            // game.map.teleport(this, game)
-            gameMode = GameMode.ADVENTURE
-            // todo хотбар - выбор лобби, выход в хаб
-            clearActivePotionEffects()
-            canMove(true)
-
-            object : BukkitRunnable() {
-                val frames = arrayOf(".", "..", "...")
-                var frame = 0
-
-                override fun run() {
-                    if (game.fsm.current !is PillarsWaitingForPlayers) {
-                        cancel()
-                        return
-                    }
-                    if (game.gamePlayers.firstOrNull { it.playerId == this@setupForWaiting.uniqueId } == null) {
-                        clearActionBar()
-                        cancel()
-                        return
-                    }
-
-                    sendPermanentActionBar(
-                        ComponentDecorator.addBackground(
-                            Component.translatable("bar.myshore.tag.waiting_for_players")
-                                .append(Component.text(frames[frame])),
-                            this@setupForWaiting
-                        )
-                    )
-
-                    frame++
-                    if (frame == frames.size) frame = 0
-                }
-            }.runTaskTimer(inst, 0L, 10L)
+        fun PillarsPlayer.setupForWaiting(game: PillarsGame) {
+            val player = this.player
+            PillarsWorldManager.spawnPlayer(game, this)
+            player.gameMode = GameMode.ADVENTURE
+            player.clearActivePotionEffects()
+            player.canMove(false)
+            player.inventory.clear()
+            player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
         }
     }
 }

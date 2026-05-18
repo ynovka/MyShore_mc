@@ -1,5 +1,6 @@
 package ru.ynovka.myShore.games.pillars
 
+import org.bukkit.Material
 import ru.ynovka.myShore.games.pillars.generators.allocators.AllocatorGenerator
 import ru.ynovka.myShore.games.pillars.generators.pillars.PillarGenerator
 import ru.ynovka.myShore.games.pillars.states.PillarsWaitingForPlayers
@@ -15,9 +16,11 @@ class PillarsGame : Game<PillarsPlayer, PillarsWorld>() {
     override val maxPlayers: Int = 50
     override val gamePlayers: MutableSet<PillarsPlayer> = mutableSetOf()
 
-    var nextRoundAllocator = AllocatorGenerator.HONEY
-    var nextRoundPillar = PillarGenerator.DEFAULT
-    override val gameWorld = PillarsWorldManager.createWorld(nextRoundAllocator, nextRoundPillar)
+    var pillar = PillarGenerator.DEFAULT
+    var allocator = AllocatorGenerator.HONEY
+    var nextRoundPillar = pillar
+    var nextRoundAllocator = allocator
+    override val gameWorld = PillarsWorldManager.createWorld()
 
     override fun getOrCreatePlayer(player: Player): PillarsPlayer =
         gamePlayers.firstOrNull { it.player.uniqueId == player.uniqueId }

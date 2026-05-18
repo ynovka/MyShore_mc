@@ -2,11 +2,11 @@ package ru.ynovka.myShore.games.pillars.generators.pillars
 
 import org.bukkit.Material
 import org.bukkit.World
-import ru.ynovka.myShore.games.pillars.PillarLoc
+import ru.ynovka.myShore.games.pillars.Pillar
 
 
 object DefaultPillarGen : PillarGen {
-    override fun generate(world: World, pillar: PillarLoc) {
+    override fun generate(world: World, pillar: Pillar) {
         val minY = 100 - 64
         val maxY = 100
 

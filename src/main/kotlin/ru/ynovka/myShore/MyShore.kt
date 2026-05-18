@@ -2,6 +2,7 @@ package ru.ynovka.myShore
 
 import com.github.darksoulq.abyssallib.server.registry.DeferredRegistry
 import com.github.darksoulq.abyssallib.server.registry.Registries
+import com.github.darksoulq.abyssallib.server.scheduler.Scheduler
 import com.github.darksoulq.abyssallib.world.data.statistic.StatisticType
 import com.github.darksoulq.abyssallib.world.item.Item
 import dev.jorel.commandapi.CommandAPI
@@ -18,6 +19,8 @@ class MyShore : JavaPlugin() {
     companion object {
         lateinit var inst: MyShore
             private set
+        lateinit var scheduler: Scheduler
+            private set
         const val PLUGIN_ID = "myshore"
         val mm = MiniMessage.miniMessage()
         val ITEMS: DeferredRegistry<Item> = DeferredRegistry.create(Registries.ITEMS, PLUGIN_ID)
@@ -32,6 +35,7 @@ class MyShore : JavaPlugin() {
 
     override fun onEnable() {
         inst = this
+        scheduler = Scheduler(this)
         dataFolder.mkdirs()
         CommandAPI.onEnable()
 
