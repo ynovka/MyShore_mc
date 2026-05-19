@@ -66,9 +66,9 @@ object GameManager {
             games.add(newGame)
         }
 
-        party.members.asPlayers()
-            .filter { !it.uniqueId.inGame() }
-            .forEach { member -> game.onPlayerJoin(member) }
+        party.members
+            .filter { !it.inGame() }
+            .forEach { game.onPlayerJoin(it) }
 
         return Result.success(game)
     }

@@ -17,17 +17,21 @@ object Hub {
     val hubVisibilityGroup = VisibilityGroup()
 
     fun Player.toHub() {
-        hubVisibilityGroup.addViewer(uniqueId)
-        teleportAsync(spawn)
-        clearActivePotionEffects()
-        applyHubInventory()
-        GameManager.leave(this)
-        clearTeams()
-        ActionBar.clear(this)
-        canMove(true)
-        gameMode = GameMode.ADVENTURE
-        saturation = 20f
-        health = 20.0
+        ru.ynovka.myShore.MyShore.scheduler.schedule {
+            hubVisibilityGroup.addViewer(uniqueId)
+            teleportAsync(spawn)
+            clearActivePotionEffects()
+            applyHubInventory()
+            GameManager.leave(this.uniqueId)
+            clearTeams()
+            ActionBar.clear(this)
+            canMove(true)
+            gameMode = GameMode.ADVENTURE
+            saturation = 20f
+            health = 20.0
+        }
+            .entity(this)
+            .once()
     }
 
     private fun Player.applyHubInventory() {

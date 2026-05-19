@@ -73,7 +73,7 @@ object WDItems {
     private fun openPhoneMenu(
         player: Player
     ): ActionResult {
-        val game = player.currentWDGame() ?: return ActionResult.PASS
+        val game = player.uniqueId.currentWDGame() ?: return ActionResult.PASS
         when (game.fsm.current) {
             is WDDistributionPlayers -> player.openGui(WDPhoneMenu.get(game, player.uniqueId, WDPlayerRole.UNDEFINED))
             is WDNegotiations -> player.openGui(WDPhoneMenu.get(game, player.uniqueId, WDPlayerRole.PRESIDENT))

@@ -15,6 +15,7 @@ import ru.ynovka.myShore.utils.Utils.fill
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.game.worldDomination.WDPlayer.Companion.asWDPlayer
 
 
 @Suppress("UnstableApiUsage")
@@ -33,7 +34,7 @@ object WDLaptopMainMenu {
 }
 
 fun getLaptopTitle(player: Player): Component {
-    val balance = player.asWDPlayer()?.country?.balance ?: 0
+    val balance = player.uniqueId.asWDPlayer()?.country?.balance ?: 0
     return Component.translatable(
         "menu.myshore.wd.laptop",
         Component.text(balance)
@@ -62,7 +63,7 @@ internal fun GuiBuilder.laptopNavBar(
         SlotPosition.top(fromSlot),
         GuiButton.of(citiesItem) { ctx ->
             val player = ctx.view.inventoryView.player as Player
-            val wdPlayer = player.asWDPlayer() ?: return@of
+            val wdPlayer = player.uniqueId.asWDPlayer() ?: return@of
 
             wdPlayer.country?.let { country ->
                 player.openGui(
@@ -79,7 +80,7 @@ internal fun GuiBuilder.laptopNavBar(
         SlotPosition.top(fromSlot + 3),
         GuiButton.of(scienceItem) { ctx ->
             val player = ctx.view.inventoryView.player as Player
-            val wdPlayer = player.asWDPlayer() ?: return@of
+            val wdPlayer = player.uniqueId.asWDPlayer() ?: return@of
             val country = wdPlayer.country ?: return@of
 
             player.openGui(WDLaptopScienceMenu.get(country, player))
@@ -91,7 +92,7 @@ internal fun GuiBuilder.laptopNavBar(
         SlotPosition.top(fromSlot + 6),
         GuiButton.of(policyItem) { ctx ->
             val player = ctx.view.inventoryView.player as Player
-            val wdPlayer = player.asWDPlayer() ?: return@of
+            val wdPlayer = player.uniqueId.asWDPlayer() ?: return@of
 
             player.openGui(WDLaptopPolicyMenu.get(player, wdPlayer))
         }
