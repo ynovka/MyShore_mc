@@ -6,7 +6,6 @@ import ru.ynovka.myShore.game.pillars.states.PillarsWaitingForPlayers
 import ru.ynovka.myShore.text.actionBar.clearActionBar
 import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.game.Game
-import org.bukkit.entity.Player
 import java.util.UUID
 
 
@@ -26,14 +25,14 @@ class PillarsGame : Game<PillarsPlayer, PillarsWorld>() {
         gamePlayers.firstOrNull { it.player.uniqueId == playerId }
             ?: PillarsPlayer(playerId)
 
-    override fun handlePlayerJoin(player: PillarsPlayer) {
+    override fun handlePlayerJoin(gamePlayer: PillarsPlayer) {
         // map.onPlayerJoin(this, player.player)
     }
 
-    override fun handlePlayerLeave(player: PillarsPlayer) {
-        player.player.clearActivePotionEffects()
-        player.player.canMove(true)
-        player.player.clearActionBar()
+    override fun handlePlayerLeave(gamePlayer: PillarsPlayer) {
+        gamePlayer.player.clearActivePotionEffects()
+        gamePlayer.player.canMove(true)
+        gamePlayer.player.clearActionBar()
 
         when (fsm.current) {
             else -> Unit

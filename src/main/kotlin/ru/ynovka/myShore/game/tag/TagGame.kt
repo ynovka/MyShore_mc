@@ -37,15 +37,15 @@ class TagGame : Game<TagPlayer, GameWorld>() {
         gamePlayers.firstOrNull { it.player.uniqueId == playerId }
             ?: TagPlayer(playerId)
 
-    override fun handlePlayerJoin(player: TagPlayer) {
-        map.onPlayerJoin(this, player.player)
+    override fun handlePlayerJoin(gamePlayer: TagPlayer) {
+        map.onPlayerJoin(this, gamePlayer.player)
     }
 
-    override fun handlePlayerLeave(player: TagPlayer) {
-        player.player.clearActivePotionEffects()
-        player.player.canMove(true)
-        player.player.clearActionBar()
-        map.onPlayerLeave(this, player.player)
+    override fun handlePlayerLeave(gamePlayer: TagPlayer) {
+        gamePlayer.player.clearActivePotionEffects()
+        gamePlayer.player.canMove(true)
+        gamePlayer.player.clearActionBar()
+        map.onPlayerLeave(this, gamePlayer.player)
 
         when (fsm.current) {
             is TagVoting ->

@@ -16,6 +16,8 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
+import ru.ynovka.myShore.MyShore.Companion.scheduler
+import ru.ynovka.myShore.game.SpectatorReason
 import ru.ynovka.myShore.game.tag.states.TagInProgressState
 
 
@@ -49,8 +51,10 @@ object TagEvents : Listener {
     private fun catchVictim(victim: Player, hunter: Player, game: TagGame) {
         val victimTagPlayer = game.findPlayer(victim) ?: return
 
-        victim.gameMode = GameMode.SPECTATOR
-        victim.clearActivePotionEffects()
+        game.movePlayerToSpectator(
+            victim,
+            SpectatorReason.ELIMINATED
+        )
         victimTagPlayer.role = TagPlayerRoles.SPECTATOR_VICTIM
 
         val msg = Component.translatable(
@@ -60,9 +64,13 @@ object TagEvents : Listener {
         )
 
         RiftEffect.play(game, victim)
-        game.gamePlayers.asPlayers().forEach {
-            it.sendMessage(msg)
-            SoundsPack.RIFT_SOUND.play(it, 0.3f, 2f)
+        game.gamePlayers.asPlayers().forEach { player ->
+            scheduler.schedule {
+                player.sendMessage(msg)
+                SoundsPack.RIFT_SOUND.play(player, 0.3f, 2f)
+            }
+                .entity(player)
+                .once()
         }
 
         if (!game.hasVictims()) {
@@ -71,7 +79,8 @@ object TagEvents : Listener {
             val state = game.fsm.current
             if (state is TagInProgressState) {
                 state.timer.addTime(20)
-            }        }
+            }
+        }
     }
 
     // Запрещаем взаимодействие с миром в игровых мирах (не для CREATIVE)

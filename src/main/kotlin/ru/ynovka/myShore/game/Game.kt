@@ -100,10 +100,10 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
         return true
     }
 
-    protected open fun handlePlayerJoin(player: P)  {}
-    protected open fun handlePlayerReconnect(player: P)  {}
-    protected open fun handlePlayerLeave(player: P) {}
-    protected open fun handlePlayerBecomeSpectator(player: P, reason: SpectatorReason) {}
+    protected open fun handlePlayerJoin(gamePlayer: P)  {}
+    protected open fun handlePlayerReconnect(gamePlayer: P)  {}
+    protected open fun handlePlayerLeave(gamePlayer: P) {}
+    protected open fun handlePlayerBecomeSpectator(gamePlayer: P, reason: SpectatorReason) {}
 
     abstract fun getOrCreatePlayer(playerId: UUID): P
 }

@@ -3,6 +3,8 @@ package ru.ynovka.myShore.game.tag.utils
 import com.github.darksoulq.abyssallib.world.particle.ParticleRenderer
 import com.github.darksoulq.abyssallib.world.particle.impl.Renderers
 import com.github.darksoulq.abyssallib.world.particle.Generator
+import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
+import ru.ynovka.myShore.game.Game
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import kotlin.random.Random
@@ -10,8 +12,6 @@ import org.bukkit.Location
 import org.bukkit.Particle
 import org.bukkit.Color
 import particles
-import ru.ynovka.myShore.game.Game
-import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 
 
 object RiftEffect {
@@ -23,7 +23,7 @@ object RiftEffect {
         particles {
             origin(loc)
             shape(scatterCloud(65, 0.7, 1.0, 0.7))
-            render(dustTransitionRenderer(1.2f, RIFT_COLOR, RIFT_COLOR))
+            render(dustTransitionRenderer())
             duration(2L)
             interval(1L)
             viewers(game.gamePlayers.asPlayers())
@@ -53,35 +53,33 @@ object RiftEffect {
             interval(1L)
         }.start()
     }
-}
 
-private fun scatterCloud(count: Int, ox: Double, oy: Double, oz: Double): Generator =
-    Generator { _ ->
-        List(count) {
-            Vector(
-                (Random.nextDouble() * 2.0 - 1.0) * ox,
-                (Random.nextDouble() * 2.0 - 1.0) * oy,
-                (Random.nextDouble() * 2.0 - 1.0) * oz
-            )
-        }
-    }
 
-private fun dustTransitionRenderer(
-    size: Float,
-    from: Color,
-    to: Color
-): ParticleRenderer = ParticleRenderer { center, points, viewers ->
-    for (v in points) {
-        val loc = center.clone().add(v)
-        for (viewer in viewers) {
-            viewer.spawnParticle(
-                Particle.DUST_COLOR_TRANSITION,
-                loc,
-                1,
-                0.0, 0.0, 0.0,
-                0.0,
-                Particle.DustTransition(from, to, size)
-            )
+    private fun scatterCloud(count: Int, ox: Double, oy: Double, oz: Double): Generator =
+        Generator { _ ->
+            List(count) {
+                Vector(
+                    (Random.nextDouble() * 2.0 - 1.0) * ox,
+                    (Random.nextDouble() * 2.0 - 1.0) * oy,
+                    (Random.nextDouble() * 2.0 - 1.0) * oz
+                )
+            }
         }
-    }
+
+    private fun dustTransitionRenderer(): ParticleRenderer =
+        ParticleRenderer { center, points, viewers ->
+            for (v in points) {
+                val loc = center.clone().add(v)
+                for (viewer in viewers) {
+                    viewer.spawnParticle(
+                        Particle.DUST_COLOR_TRANSITION,
+                        loc,
+                        1,
+                        0.0, 0.0, 0.0,
+                        0.0,
+                        Particle.DustTransition(RIFT_COLOR, FLASH_COLOR, 1.2f)
+                    )
+                }
+            }
+        }
 }
