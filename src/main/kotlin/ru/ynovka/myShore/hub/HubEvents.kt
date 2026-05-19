@@ -9,7 +9,7 @@ import ru.ynovka.myShore.MyShore.Companion.scheduler
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import ru.ynovka.myShore.party.PartyManager
-import ru.ynovka.myShore.games.GameManager
+import ru.ynovka.myShore.game.GameManager
 import org.bukkit.potion.PotionEffectType
 import ru.ynovka.myShore.party.LeftReason
 import ru.ynovka.myShore.hub.Hub.toHub

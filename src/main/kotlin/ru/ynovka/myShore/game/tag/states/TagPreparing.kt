@@ -1,0 +1,177 @@
+package ru.ynovka.myShore.game.tag.states
+
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
+import ru.ynovka.myShore.game.tag.TagPlayerSetup.applyInProgressInventory
+import ru.ynovka.myShore.game.tag.TagPlayerSetup.setupAsSpectator
+import ru.ynovka.myShore.text.actionBar.sendPermanentActionBar
+import ru.ynovka.myShore.game.tag.maps.teleportPlayers
+import ru.ynovka.myShore.text.actionBar.clearActionBar
+import net.kyori.adventure.text.format.NamedTextColor
+import ru.ynovka.myShore.game.tag.TagPlayerRoles
+import ru.ynovka.myShore.text.ComponentDecorator
+import ru.ynovka.myShore.utils.Utils.clearTeams
+import ru.ynovka.myShore.game.tag.TagPlayer
+import ru.ynovka.myShore.game.tag.TagGame
+import org.bukkit.potion.PotionEffectType
+import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameState
+import ru.ynovka.myShore.utils.canMove
+import net.kyori.adventure.title.Title
+import org.bukkit.potion.PotionEffect
+import org.bukkit.scoreboard.Team
+import org.bukkit.GameMode
+import java.time.Duration
+import org.bukkit.Bukkit
+import org.bukkit.Sound
+import java.util.UUID
+
+
+// 5 сек перед началом (что бы у игроков загрузилась карта, они ознакомились со своими ролями)
+class TagPreparing(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(game) {
+
+    val MAX_HISTORY = 10
+
+    val hunterHistory: ArrayDeque<UUID> = ArrayDeque()
+    val hunterCount: MutableMap<UUID, Int> = mutableMapOf()
+
+    private val scoreboard by lazy { Bukkit.getScoreboardManager().mainScoreboard }
+    private val hunterTeam by lazy {
+        (scoreboard.getTeam("tag_hunter") ?: scoreboard.registerNewTeam("tag_hunter"))
+            .apply {
+                color(NamedTextColor.RED)
+                setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER)
+            }
+    }
+    private val victimTeam by lazy {
+        (scoreboard.getTeam("tag_victim") ?: scoreboard.registerNewTeam("tag_victim"))
+            .apply {
+                color(NamedTextColor.AQUA)
+                setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER)
+            }
+    }
+
+    private val glowingEffect = PotionEffect(PotionEffectType.GLOWING, -1, 0, false, false)
+
+    override fun onEnterState() {
+        val hunterUuid = chooseHunter(game.gamePlayers.map { it.player.uniqueId })
+        registerHunter(hunterUuid)
+
+        game.gamePlayers.forEach { tagPlayer ->
+            val player = tagPlayer.player
+            val isHunter = player.uniqueId == hunterUuid
+
+            player.applyInProgressInventory()
+            player.clearTeams()
+
+            if (isHunter) {
+                hunterTeam.addEntry(player.name)
+                player.showTitle(Title.title(
+                    Component.text(""),
+                    Component.translatable("sub.title.myshore.tag.player_is_hunter"),
+                    Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
+                ))
+                tagPlayer.role = TagPlayerRoles.HUNTER
+            } else {
+                victimTeam.addEntry(player.name)
+                player.showTitle(Title.title(
+                    Component.text(""),
+                    Component.translatable("sub.title.myshore.tag.player_is_runner"),
+                    Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
+                ))
+                tagPlayer.role = TagPlayerRoles.VICTIM
+            }
+
+            player.addPotionEffect(glowingEffect)
+            player.gameMode = GameMode.ADVENTURE
+            player.canMove(false)
+        }
+
+        game.map.teleportPlayers(game)
+        game.map.onGameStart(game)
+
+        startCountdown(game)
+    }
+
+    override fun onPlayerJoin(gamePlayer: TagPlayer) {
+        gamePlayer.player.setupAsSpectator(game)
+    }
+
+    // ---------- выбор охотника ----------
+
+    fun chooseHunter(players: List<UUID>): UUID {
+        val banned: Set<UUID> = if (hunterHistory.size >= 2 &&
+            hunterHistory.last() == hunterHistory[hunterHistory.size - 2]
+        ) {
+            setOf(hunterHistory.last())
+        } else {
+            emptySet()
+        }
+
+        val candidates = players.filterNot { it in banned }.ifEmpty { players }
+
+        val totalWeight = candidates.sumOf { 1.0 / (1 + hunterCount.getOrDefault(it, 0)) }
+        var random = Math.random() * totalWeight
+
+        for (uuid in candidates) {
+            random -= 1.0 / (1 + hunterCount.getOrDefault(uuid, 0))
+            if (random <= 0) return uuid
+        }
+
+        return candidates.random()
+    }
+
+    fun registerHunter(hunter: UUID) {
+        hunterHistory.addLast(hunter)
+        hunterCount[hunter] = hunterCount.getOrDefault(hunter, 0) + 1
+
+        if (hunterHistory.size > MAX_HISTORY) {
+            val removed = hunterHistory.removeFirst()
+            val newCount = hunterCount.getOrDefault(removed, 1) - 1
+            if (newCount <= 0) hunterCount.remove(removed) else hunterCount[removed] = newCount
+        }
+    }
+
+    // ---------- обратный отсчёт ----------
+
+    fun startCountdown(game: TagGame, seconds: Int = 5) {
+        fun tick(timeLeft: Int) {
+            if (game.fsm.current !is TagPreparing) return
+
+            if (timeLeft > 0) {
+                game.gamePlayers.forEach { tagPlayer ->
+                    tagPlayer.player.sendPermanentActionBar(
+                        ComponentDecorator.addBackground(
+                            Component.translatable(
+                                "bar.myshore.tag.start_in",
+                                Component.text(timeLeft)
+                            ),
+                            tagPlayer.player
+                        )
+                    )
+                    tagPlayer.player.playSound(tagPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_ON, 0.5f, 2f)
+                }
+
+                game.scheduler.schedule { tick(timeLeft - 1) }
+                    .sync()
+                    .after(20L, Clock.TICKS)
+                    .once()
+            } else {
+                game.gamePlayers.forEach { tagPlayer ->
+                    tagPlayer.player.clearActionBar()
+                    tagPlayer.player.sendActionBar(
+                        ComponentDecorator.addBackground(
+                            Component.translatable("bar.myshore.tag.lets_run"),
+                            tagPlayer.player
+                        )
+                    )
+                    tagPlayer.player.playSound(tagPlayer.player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
+                }
+
+                game.fsm.transitionTo(TagInProgressState(game))
+            }
+        }
+
+        tick(seconds)
+    }
+}

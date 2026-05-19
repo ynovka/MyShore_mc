@@ -2,7 +2,7 @@ package ru.ynovka.myShore.texturepack
 
 import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import com.github.darksoulq.abyssallib.server.resource.asset.Font
-import ru.ynovka.myShore.games.worldDomination.entity.CountryType
+import ru.ynovka.myShore.game.worldDomination.entity.CountryType
 import ru.ynovka.myShore.texturepack.TexturePack.fontGlyphs
 import ru.ynovka.myShore.texturepack.TexturePack.ns
 

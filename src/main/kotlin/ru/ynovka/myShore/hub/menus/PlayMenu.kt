@@ -10,10 +10,10 @@ import ru.ynovka.myShore.texturepack.GuiTextures
 import net.kyori.adventure.text.Component
 import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
-import ru.ynovka.myShore.games.GameManager
-import ru.ynovka.myShore.games.pillars.PillarsGame
-import ru.ynovka.myShore.games.tag.TagGame
-import ru.ynovka.myShore.games.worldDomination.WDGame
+import ru.ynovka.myShore.game.GameManager
+import ru.ynovka.myShore.game.pillars.PillarsGame
+import ru.ynovka.myShore.game.tag.TagGame
+import ru.ynovka.myShore.game.worldDomination.WDGame
 import ru.ynovka.myShore.hub.HubItems.playPillarsItem
 import ru.ynovka.myShore.hub.HubItems.playTagItem
 import ru.ynovka.myShore.hub.HubItems.playWDItem

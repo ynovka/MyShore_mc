@@ -1,7 +1,7 @@
 package ru.ynovka.myShore
 
 import com.github.darksoulq.abyssallib.common.database.relational.sql.Database
-import ru.ynovka.myShore.games.tag.statistics.TagCaughtsRepository
+import ru.ynovka.myShore.game.tag.statistics.TagCaughtsRepository
 import java.io.File
 
 object Database {
