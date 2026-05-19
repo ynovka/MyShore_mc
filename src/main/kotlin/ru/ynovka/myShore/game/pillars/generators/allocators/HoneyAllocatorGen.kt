@@ -1,14 +1,14 @@
 package ru.ynovka.myShore.game.pillars.generators.allocators
 
 import ru.ynovka.myShore.game.pillars.PillarsGame
-import org.bukkit.Location
 import ru.ynovka.myShore.game.pillars.Footprints
 import ru.ynovka.myShore.game.pillars.Pillar
-import java.util.UUID
+import org.bukkit.Location
 import kotlin.math.atan2
-import kotlin.math.abs
-import kotlin.math.PI
 import kotlin.math.sqrt
+import kotlin.math.abs
+import java.util.UUID
+import kotlin.math.PI
 
 
 object HoneyAllocatorGen : AllocatorGen {

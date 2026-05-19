@@ -1,5 +1,6 @@
 package ru.ynovka.myShore.game.gameUtils
 
+import ru.ynovka.myShore.text.actionBar.sendPermanentActionBar
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.MyShore.Companion.scheduler
@@ -9,7 +10,6 @@ import ru.ynovka.myShore.game.GamePlayer
 import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.game.GameWorld
 import ru.ynovka.myShore.game.Game
-import ru.ynovka.myShore.text.actionBar.sendPermanentActionBar
 
 
 object ActionbarWaitingFor {

@@ -39,7 +39,7 @@ object PillarsWorldManager {
         // Создаём столб на нужных координтах
         pGame.pillar.gen.generate(world, loc)
         // Создаём коробку игрока
-        PillarsPlayerBox.create(world, pPlayer, loc)
+        PillarsPlayerBox.create(world, loc)
         // телепортируем игрока в коробку
         pPlayer.player.teleportAsync(
             Location(

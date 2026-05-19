@@ -1,16 +1,15 @@
 package ru.ynovka.myShore.game.pillars.states
 
-import com.github.darksoulq.abyssallib.server.scheduler.Clock
-import org.bukkit.GameMode
-import ru.ynovka.myShore.MyShore.Companion.scheduler
-import ru.ynovka.myShore.game.GamePlayer
 import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
-import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.game.pillars.PillarsGame
+import ru.ynovka.myShore.game.pillars.PillarsWorldManager
+import ru.ynovka.myShore.game.gameUtils.ActionbarTimer
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.pillars.PillarsPlayer
 import ru.ynovka.myShore.game.pillars.PillarsWorld
-import ru.ynovka.myShore.game.pillars.PillarsWorldManager
+import ru.ynovka.myShore.game.pillars.PillarsGame
+import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.utils.canMove
+import org.bukkit.GameMode
 
 
 /**
@@ -36,17 +35,24 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
         PillarsWorldManager.spawnPlayers(game)
 
         // Отключаем передвищение игрокам
-        game.gamePlayers.asPlayers().forEach {
-            it.canMove(false)
-            it.gameMode = GameMode.ADVENTURE
+        game.gamePlayers.asPlayers().forEach { player ->
+            scheduler.schedule {
+                player.canMove(false)
+                player.gameMode = GameMode.ADVENTURE
+            }.entity(player).once()
         }
 
         // Начинаем игру
-        scheduler.schedule {
-            if (game.gamePlayers.size >= 2) {
-
+        ActionbarTimer.startCountdownTimer(
+            time = 10,
+            game = game,
+            state = this,
+            onCompletion = { game, _ ->
+                if (game.gamePlayers.size >= 2) {
+                    game.fsm.transitionTo(PillarsInProgress(game))
+                }
             }
-        }.after(10 * 20L, Clock.TICKS)
+        )
     }
 
     override fun onPlayerJoin(gamePlayer: PillarsPlayer) {

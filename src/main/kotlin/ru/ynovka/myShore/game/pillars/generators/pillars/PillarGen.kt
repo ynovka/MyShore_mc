@@ -8,7 +8,10 @@ interface PillarGen {
     fun generate(world: World, pillar: Pillar)
 }
 
-enum class PillarGenerator(val gen: PillarGen) {
+enum class PillarGenerator(
+    val gen: PillarGen
+) {
     DEFAULT(DefaultPillarGen),
-    VOID(VoidPillarGen)
+    VOID(VoidPillarGen),
+    SLIME(SlimePillarGen)
 }

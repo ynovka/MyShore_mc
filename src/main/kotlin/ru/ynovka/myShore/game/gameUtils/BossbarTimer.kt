@@ -4,19 +4,18 @@ import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.text.ComponentDecorator
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import ru.ynovka.myShore.MyShore.Companion.inst
 import java.util.concurrent.ConcurrentHashMap
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
-import org.apache.commons.lang3.StringUtils.overlay
 import ru.ynovka.myShore.game.GamePlayer
 import ru.ynovka.myShore.game.GameWorld
 import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.game.Game
 import org.bukkit.Sound
 import java.util.UUID
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 
 
 object BossbarTimer {

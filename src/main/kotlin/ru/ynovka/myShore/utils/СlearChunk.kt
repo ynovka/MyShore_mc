@@ -12,16 +12,23 @@ import net.minecraft.core.SectionPos
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 
 
 object InstantChunkClear {
 
     fun clearChunk(chunk: Chunk) {
-        check(Bukkit.isPrimaryThread()) { "clearChunk must be called only on the main server thread" }
+        check(Bukkit.isOwnedByCurrentRegion(chunk.world, chunk.x, chunk.z)) {
+            "clearChunk must be called only on the owning region thread"
+        }
 
         val nmsChunk = (chunk as CraftChunk).getHandle(ChunkStatus.FULL) as LevelChunk
 
-        chunk.entities.forEach { if (it !is Player) it.remove() }
+        chunk.entities.filter { it !is Player }.forEach {
+            scheduler.schedule {
+                it.remove()
+            }.entity(it).once()
+        }
 
         nmsChunk.clearAllBlockEntities()
         clearPendingBlockEntities(nmsChunk)

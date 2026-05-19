@@ -1,89 +1,130 @@
 package ru.ynovka.myShore.visibilityGroup
 
-import org.bukkit.Bukkit
-import org.bukkit.entity.Player
-import ru.ynovka.myShore.MyShore
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import ru.ynovka.myShore.MyShore
+import org.bukkit.entity.Player
+import org.bukkit.Bukkit
+import java.util.UUID
+
 
 class VisibilityGroup {
 
     private val members: MutableSet<UUID> = ConcurrentHashMap.newKeySet()
 
     companion object {
-        // Глобальный реестр: UUID -> группа, в которой состоит игрок
-        private val playerGroupIndex: ConcurrentHashMap<UUID, VisibilityGroup> =
-            ConcurrentHashMap()
+        private val playerGroupIndex = ConcurrentHashMap<UUID, VisibilityGroup>()
+        private val membershipLock = Any()
 
         fun onPlayerQuit(uuid: UUID) {
-            playerGroupIndex[uuid]?.removeMember(uuid)
+            val oldMembers: Set<UUID>
+
+            synchronized(membershipLock) {
+                val group = playerGroupIndex[uuid] ?: return
+                oldMembers = group.members.toSet() - uuid
+                group.removeMemberLocked(uuid)
+            }
+
+            val group = playerGroupIndex[uuid]
+            oldMembers.forEach { memberId ->
+                group?.hideBoth(uuid, memberId)
+            }
         }
 
-        fun UUID.getVisiblePlayers(include: Boolean = false): MutableSet<UUID> {
-            return playerGroupIndex[this]
-                ?.members
-                ?.filter { include || it != this }
-                ?.toMutableSet()
-                ?: mutableSetOf()
+        fun UUID.getVisiblePlayers(include: Boolean = false): Set<UUID> {
+            val group = playerGroupIndex[this] ?: return emptySet()
+
+            return group.members
+                .filterTo(mutableSetOf()) { include || it != this }
         }
 
-        fun Player.getVisiblePlayers(include: Boolean = false) = this.uniqueId.getVisiblePlayers(include)
+        fun Player.getVisiblePlayers(include: Boolean = false): Set<UUID> =
+            uniqueId.getVisiblePlayers(include)
     }
 
-    // --- Public API ---
-
     fun addViewer(uuid: UUID) {
-        // Выходим из старой группы если есть
-        playerGroupIndex[uuid]?.removeMember(uuid)
+        val oldMembers: Set<UUID>
+        val newMembers: Set<UUID>
 
-        members.add(uuid)
-        playerGroupIndex[uuid] = this
+        synchronized(membershipLock) {
+            val oldGroup = playerGroupIndex[uuid]
 
-        applyOnMain {
-            val newPlayer = Bukkit.getPlayer(uuid) ?: return@applyOnMain
-            for (memberId in members) {
-                if (memberId == uuid) continue
-                val member = Bukkit.getPlayer(memberId) ?: continue
-                // Новый видит всех в группе
-                newPlayer.showPlayer(MyShore.Companion.inst, member)
-                // Все в группе видят нового
-                member.showPlayer(MyShore.Companion.inst, newPlayer)
-            }
+            oldMembers = oldGroup
+                ?.members
+                ?.toSet()
+                ?.minus(uuid)
+                .orEmpty()
+
+            oldGroup?.removeMemberLocked(uuid)
+
+            members.add(uuid)
+            playerGroupIndex[uuid] = this
+
+            newMembers = members.toSet() - uuid
+        }
+
+        oldMembers.forEach { memberId ->
+            hideBoth(uuid, memberId)
+        }
+
+        newMembers.forEach { memberId ->
+            showBoth(uuid, memberId)
         }
     }
 
     fun removeViewer(uuid: UUID) {
-        if (!members.contains(uuid)) return
-        removeMember(uuid)
+        val oldMembers: Set<UUID>
+
+        synchronized(membershipLock) {
+            if (uuid !in members) return
+
+            oldMembers = members.toSet() - uuid
+            removeMemberLocked(uuid)
+        }
+
+        oldMembers.forEach { memberId ->
+            hideBoth(uuid, memberId)
+        }
     }
 
     fun hasViewer(uuid: UUID): Boolean = uuid in members
 
-    fun getViewers(): Set<UUID> = members.toHashSet()
+    fun getViewers(): Set<UUID> = members.toSet()
 
-    // --- Internal ---
-
-    private fun removeMember(uuid: UUID) {
+    private fun removeMemberLocked(uuid: UUID) {
         members.remove(uuid)
-        playerGroupIndex.remove(uuid)
 
-        applyOnMain {
-            val removedPlayer = Bukkit.getPlayer(uuid)
-            for (memberId in members) {
-                val member = Bukkit.getPlayer(memberId) ?: continue
-                // Ушедший больше не видит участников
-                removedPlayer?.hidePlayer(MyShore.Companion.inst, member)
-                // Участники больше не видят ушедшего
-                member.hidePlayer(MyShore.Companion.inst, removedPlayer ?: continue)
-            }
-        }
+        playerGroupIndex.remove(uuid, this)
     }
 
-    private fun applyOnMain(block: () -> Unit) {
-        if (Bukkit.isPrimaryThread()) {
-            block()
-        } else {
-            MyShore.scheduler.schedule { block() }.once()
-        }
+    private fun showBoth(a: UUID, b: UUID) {
+        showOneWay(a, b)
+        showOneWay(b, a)
+    }
+
+    private fun hideBoth(a: UUID, b: UUID) {
+        hideOneWay(a, b)
+        hideOneWay(b, a)
+    }
+
+    private fun showOneWay(viewerId: UUID, targetId: UUID) {
+        val viewer = Bukkit.getPlayer(viewerId) ?: return
+
+        MyShore.scheduler.schedule {
+            val currentViewer = Bukkit.getPlayer(viewerId) ?: return@schedule
+            val target = Bukkit.getPlayer(targetId) ?: return@schedule
+
+            currentViewer.showPlayer(MyShore.inst, target)
+        }.entity(viewer).once()
+    }
+
+    private fun hideOneWay(viewerId: UUID, targetId: UUID) {
+        val viewer = Bukkit.getPlayer(viewerId) ?: return
+
+        MyShore.scheduler.schedule {
+            val currentViewer = Bukkit.getPlayer(viewerId) ?: return@schedule
+            val target = Bukkit.getPlayer(targetId) ?: return@schedule
+
+            currentViewer.hidePlayer(MyShore.inst, target)
+        }.entity(viewer).once()
     }
 }

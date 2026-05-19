@@ -2,6 +2,7 @@ package ru.ynovka.myShore.game
 
 import org.bukkit.GameMode
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
 import ru.ynovka.myShore.party.PartyManager.Party
 import java.util.UUID
@@ -95,7 +96,9 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
         exitedPlayers.removeIf { it.playerId == player.uniqueId }
         spectatorPlayers.add(p)
 
-        player.gameMode = GameMode.SPECTATOR
+        scheduler.schedule {
+            player.gameMode = GameMode.SPECTATOR
+        }.entity(player).once()
         fsm.playerBecomeSpectator(p, reason)
         handlePlayerBecomeSpectator(p, reason)
 

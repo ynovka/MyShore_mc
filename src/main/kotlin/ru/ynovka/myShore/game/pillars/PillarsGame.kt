@@ -3,7 +3,8 @@ package ru.ynovka.myShore.game.pillars
 import ru.ynovka.myShore.game.pillars.generators.allocators.AllocatorGenerator
 import ru.ynovka.myShore.game.pillars.generators.pillars.PillarGenerator
 import ru.ynovka.myShore.game.pillars.states.PillarsWaitingForPlayers
-import ru.ynovka.myShore.text.actionBar.clearActionBar
+import ru.ynovka.myShore.MyShore.Companion.scheduler
+import ru.ynovka.myShore.game.GameManager
 import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.game.Game
 import java.util.UUID
@@ -30,12 +31,14 @@ class PillarsGame : Game<PillarsPlayer, PillarsWorld>() {
     }
 
     override fun handlePlayerLeave(gamePlayer: PillarsPlayer) {
-        gamePlayer.player.clearActivePotionEffects()
-        gamePlayer.player.canMove(true)
-        gamePlayer.player.clearActionBar()
+        val player = gamePlayer.player
+        scheduler.schedule {
+            player.clearActivePotionEffects()
+            player.canMove(true)
+        }.entity(player).once()
+    }
 
-        when (fsm.current) {
-            else -> Unit
-        }
+    companion object {
+        fun UUID.currentPillarsGame(): PillarsGame? = GameManager.run { currentGame() }
     }
 }

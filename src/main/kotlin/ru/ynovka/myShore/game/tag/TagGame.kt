@@ -42,9 +42,11 @@ class TagGame : Game<TagPlayer, GameWorld>() {
     }
 
     override fun handlePlayerLeave(gamePlayer: TagPlayer) {
-        gamePlayer.player.clearActivePotionEffects()
-        gamePlayer.player.canMove(true)
-        gamePlayer.player.clearActionBar()
+        val player = gamePlayer.player
+        MyShore.scheduler.schedule {
+            player.clearActivePotionEffects()
+            player.canMove(true)
+        }.entity(player).once()
         map.onPlayerLeave(this, gamePlayer.player)
 
         when (fsm.current) {

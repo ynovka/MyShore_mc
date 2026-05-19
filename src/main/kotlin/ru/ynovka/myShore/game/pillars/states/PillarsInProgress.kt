@@ -1,47 +1,60 @@
 package ru.ynovka.myShore.game.pillars.states
 
-import com.github.darksoulq.abyssallib.server.scheduler.TimeUnit
+import ru.ynovka.myShore.game.pillars.Pillar.Companion.TELEPORT_Y
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
-import org.bukkit.GameMode
+import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.pillars.PillarsPlayer
 import ru.ynovka.myShore.game.pillars.PillarsWorld
 import ru.ynovka.myShore.game.pillars.PillarsGame
-import ru.ynovka.myShore.game.GameState
-import org.bukkit.inventory.ItemStack
-import org.bukkit.Material
-import org.bukkit.potion.PotionEffect
+import ru.ynovka.myShore.game.SpectatorReason
 import org.bukkit.potion.PotionEffectType
-import ru.ynovka.myShore.game.GamePlayer
-import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
+import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.utils.canMove
+import org.bukkit.inventory.ItemStack
+import org.bukkit.potion.PotionEffect
+import org.bukkit.Material
+import org.bukkit.GameMode
+import org.bukkit.Location
 
 
 class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
 
     override fun onEnterState() {
         // удаляем колбы
-        // todo ^
+        val world = game.gameWorld.world
+        game.gameWorld.pillars.forEach { pillar ->
+            val blockLoc = Location(world, pillar.x.toDouble(), TELEPORT_Y - 1, pillar.z.toDouble())
+            // todo обход всей колбы а не 1 блока
+            scheduler.schedule {
+                val block = world.getBlockAt(blockLoc)
+                block.type = Material.AIR
+            }.region(blockLoc)
+        }
 
         // даём эффект плавного падения
-        game.gamePlayers.asPlayers().forEach {
-            it.addPotionEffect(
-                PotionEffect(
-                    PotionEffectType.SLOW_FALLING,
-                    60,
-                    0,
-                    false,
-                    false,
-                    false
+        game.gamePlayers.asPlayers().forEach { player ->
+            scheduler.schedule {
+                player.addPotionEffect(
+                    PotionEffect(
+                        PotionEffectType.SLOW_FALLING,
+                        60,
+                        0,
+                        false,
+                        false,
+                        false
+                    )
                 )
-            )
+            }.entity(player).once()
         }
 
         // даём возможность двигаться по приземлению
         scheduler.schedule {
-            game.gamePlayers.asPlayers().forEach {
-                it.canMove(true)
-                it.gameMode = GameMode.SURVIVAL
+            game.gamePlayers.asPlayers().forEach { player ->
+                scheduler.schedule {
+                    player.canMove(true)
+                    player.gameMode = GameMode.SURVIVAL
+                }.entity(player).once()
             }
         }.after(60L, Clock.TICKS).once()
 
@@ -52,20 +65,31 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
         // todo ^
     }
 
-    private fun startGiveRandomItemsTimer() {
-        scheduler.schedule {
-            scheduler.schedule {
-                game.gamePlayers.forEach { pPlayer ->
-                    pPlayer.player.inventory.addItem(ItemStack.of(items.random()))
-                }
-            }.once()
-        }
-            .async()
-            .repeatWhile { game.fsm.current is PillarsInProgress }
-            .repeatEvery(7, TimeUnit.SECONDS, Clock.REALTIME)
+    override fun onPlayerBecomeSpectator(gamePlayer: PillarsPlayer, reason: SpectatorReason) {
+        if (game.gamePlayers.size != 1) return
+
+        // todo Победитель !!
+        val winner = game.gamePlayers.firstOrNull() ?: return
     }
 
-    // todo listeners: onMove -> y<=0 - player to spec ; onDeath -> player to spec
+    override fun onPlayerLeave(gamePlayer: PillarsPlayer) {
+        if (game.gamePlayers.size != 1) return
+
+        // todo Победитель !!
+        val winner = game.gamePlayers.firstOrNull() ?: return
+    }
+
+    private fun startGiveRandomItemsTimer() {
+        scheduler.schedule {
+            game.gamePlayers.asPlayers().forEach { player ->
+                scheduler.schedule {
+                    player.inventory.addItem(ItemStack.of(items.random()))
+                }.entity(player).once()
+            }
+        }
+            .repeatWhile { game.fsm.current is PillarsInProgress }
+            .repeatEvery(7 * 20L, Clock.TICKS)
+    }
 
     override fun canPlayerJoin(gamePlayer: PillarsPlayer) = false
 
