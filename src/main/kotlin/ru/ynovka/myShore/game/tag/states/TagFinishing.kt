@@ -1,19 +1,19 @@
 package ru.ynovka.myShore.game.tag.states
 
-import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.game.tag.statistics.TagPlayerStatistics.saveStats
 import ru.ynovka.myShore.game.tag.TagPlayerSetup.applyFinishingInventory
-import ru.ynovka.myShore.game.tag.TagPlayerSetup.setupAsSpectator
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.game.tag.TagPlayerRoles
 import ru.ynovka.myShore.utils.Utils.clearTeams
 import ru.ynovka.myShore.game.tag.hasVictims
 import ru.ynovka.myShore.game.tag.hasHunter
-import ru.ynovka.myShore.game.tag.TagGame
 import ru.ynovka.myShore.game.tag.TagPlayer
-import ru.ynovka.myShore.game.GameState
+import ru.ynovka.myShore.game.tag.TagGame
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.title.Title
+import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.game.GameWorld
+import net.kyori.adventure.title.Title
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.utils.canMove
 import java.time.Duration
 
@@ -32,13 +32,18 @@ class TagFinishing(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(gam
         saveStats(game, winnerRole)
 
         game.gamePlayers.forEach { tagPlayer ->
-            val player = tagPlayer.player
-            player.clearActivePotionEffects()
-            player.applyFinishingInventory()
-            player.showTitle(buildWinnerTitle(winnerRole))
-            player.canMove(true)
-            player.clearTeams()
             tagPlayer.role = TagPlayerRoles.UNDEFINED
+
+            val player = tagPlayer.player
+            scheduler.schedule {
+                player.clearActivePotionEffects()
+                player.applyFinishingInventory()
+                player.showTitle(buildWinnerTitle(winnerRole))
+                player.canMove(true)
+                player.clearTeams()
+            }
+                .entity(player)
+                .once()
         }
 
         game.scheduler.schedule {
@@ -49,16 +54,10 @@ class TagFinishing(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(gam
             }
             game.fsm.transitionTo(nextState)
         }
-            .sync()
             .after(5 * 20L, Clock.TICKS)
             .once()
 
         game.map.onGameEnd(game)
-    }
-
-    override fun onPlayerJoin(gamePlayer: TagPlayer) {
-        gamePlayer.role = TagPlayerRoles.SPECTATOR
-        gamePlayer.player.setupAsSpectator(game)
     }
 
     private fun buildWinnerTitle(winnerRole: TagPlayerRoles): Title {
@@ -72,4 +71,6 @@ class TagFinishing(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(gam
             Title.Times.times(Duration.ofMillis(500), Duration.ofSeconds(3), Duration.ofMillis(500))
         )
     }
+
+    override fun canPlayerJoin(gamePlayer: TagPlayer): Boolean = false
 }

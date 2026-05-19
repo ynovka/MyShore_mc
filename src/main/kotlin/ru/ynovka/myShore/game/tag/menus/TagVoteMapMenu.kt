@@ -60,7 +60,7 @@ object TagVoteMapMenu {
         val mapNameTranslatable = if (isRandom) Component.translatable("name.myshore.tag.map.random") else map.mapName
         val mapNameComp = ServerTranslator.translate(mapNameTranslatable, player)
 
-        val game = player.currentTagGame() ?: return
+        val game = player.uniqueId.currentTagGame() ?: return
         if (game.fsm.current is TagWaitingForPlayers) {
             setupMap(game, map, true)
             return

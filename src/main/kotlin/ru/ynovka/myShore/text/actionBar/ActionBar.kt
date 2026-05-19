@@ -85,7 +85,6 @@ object ActionBar {
     private fun ensureTaskRunning() {
         if (task != null) return
         task = scheduler.schedule { tick() }
-            .sync()
             .after(1L, Clock.TICKS)
             .repeatEvery(2L, Clock.TICKS)
     }

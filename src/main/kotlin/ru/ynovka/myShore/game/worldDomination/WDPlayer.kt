@@ -1,6 +1,5 @@
 package ru.ynovka.myShore.game.worldDomination
 
-import org.bukkit.entity.Player
 import ru.ynovka.myShore.game.worldDomination.entity.Country
 import ru.ynovka.myShore.game.GamePlayer
 import ru.ynovka.myShore.game.worldDomination.WDGame.Companion.currentWDGame
@@ -14,7 +13,7 @@ class WDPlayer(
     var country: Country? = null
 
     companion object {
-        fun Player.asWDPlayer(): WDPlayer? = currentWDGame()?.getOrCreatePlayer(this)
+        fun UUID.asWDPlayer(): WDPlayer? = currentWDGame()?.getOrCreatePlayer(this)
     }
 }
 

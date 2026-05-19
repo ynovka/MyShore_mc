@@ -1,19 +1,19 @@
 package ru.ynovka.myShore.game.tag.maps.impl
 
 import com.github.darksoulq.abyssallib.world.item.component.builtin.CooldownUse
-import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import io.papermc.paper.datacomponent.item.UseCooldown.useCooldown
 import ru.ynovka.myShore.game.tag.TagGame.Companion.currentTagGame
 import com.github.darksoulq.abyssallib.server.event.ActionResult
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.tag.TagPlayerRoles
 import ru.ynovka.myShore.MyShore.Companion.ITEMS
 import ru.ynovka.myShore.texturepack.TexturePack
-import ru.ynovka.myShore.game.tag.maps.MapSpawn
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.MyShore.Companion.scheduler
+import ru.ynovka.myShore.game.tag.maps.MapSpawn
 import ru.ynovka.myShore.game.tag.maps.TagMap
-import ru.ynovka.myShore.game.tag.findPlayer
 import java.util.concurrent.ThreadLocalRandom
+import ru.ynovka.myShore.game.tag.findPlayer
 import ru.ynovka.myShore.game.tag.TagGame
 import ru.ynovka.myShore.utils.cancelItem
 import net.kyori.adventure.text.Component
@@ -152,14 +152,13 @@ object TagJungleMap : TagMap {
                     if (set.isEmpty()) gameIterator.remove()
                 }
             }
-                .sync()
                 .after(1L, Clock.TICKS)
                 .repeatEvery(duration.toLong(), Clock.TICKS)
 
             scheduler.schedule {
                 Bukkit.getWorld(mapId)?.players?.forEach { player ->
                     if (player.gameMode != GameMode.ADVENTURE) return@forEach
-                    val game = player.currentTagGame() ?: return@forEach
+                    val game = player.uniqueId.currentTagGame() ?: return@forEach
                     val tagPlayer = game.findPlayer(player) ?: return@forEach
                     if (tagPlayer.role != TagPlayerRoles.VICTIM) return@forEach
                     if (player.inventory.getItem(0) != null) return@forEach
@@ -175,7 +174,6 @@ object TagJungleMap : TagMap {
                     player.playSound(player.location, Sound.ENTITY_ITEM_PICKUP, 1f, 1f)
                 }
             }
-                .sync()
                 .after(1L, Clock.TICKS)
                 .repeatEvery(2L, Clock.TICKS)
         }
@@ -219,7 +217,7 @@ object TagJungleMap : TagMap {
         private fun usePotionDart(player: Player, itemSlot: EquipmentSlot) {
             val i = player.inventory.getItem(itemSlot)
             if (i.type == Material.AIR || player.hasCooldown(i)) return
-            val game = player.currentTagGame() ?: return
+            val game = player.uniqueId.currentTagGame() ?: return
             player.setCooldown(Key.key(inst, "tag_jungle_poison_dart"), 20 * 20)
             game.gamePlayers.forEach { it.player.playSound(player.location, Sound.BLOCK_BAMBOO_HIT, 1f, 2f) }
             player.inventory.clear(0)

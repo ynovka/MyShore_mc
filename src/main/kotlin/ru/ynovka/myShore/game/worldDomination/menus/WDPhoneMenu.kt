@@ -1,7 +1,6 @@
 package ru.ynovka.myShore.game.worldDomination.menus
 
 import ru.ynovka.myShore.game.worldDomination.entity.Country.Companion.getFormattedName
-import ru.ynovka.myShore.game.worldDomination.WDPlayer.Companion.asWDPlayer
 import ru.ynovka.myShore.game.worldDomination.states.WDDistributionPlayers
 import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import ru.ynovka.myShore.game.worldDomination.states.WDNegotiations
@@ -62,12 +61,12 @@ object WDPhoneMenu {
                 view.inventoryView.setItem(SlotPosition.top(index).index, head)
                 view.gui.elements[SlotPosition.top(index)] = GuiButton.of(head) { ctx ->
                     val player = ctx.view.inventoryView.player as Player
-                    val playerFormattedName = player.asWDPlayer()?.getFormattedName() ?: return@of
+                    val playerFormattedName = game.getOrCreatePlayer(player.uniqueId).getFormattedName()
 
                     val head = ctx.currentItem ?: return@of
                     val targetPlayerUUID = (head.itemMeta as SkullMeta).owningPlayer?.uniqueId ?: return@of
                     val targetPlayer = Bukkit.getPlayer(targetPlayerUUID) ?: return@of
-                    val targetFormattedName = targetPlayer.asWDPlayer()?.getFormattedName() ?: return@of
+                    val targetFormattedName = game.getOrCreatePlayer(targetPlayer.uniqueId).getFormattedName()
 
 
                     // звоним выбранному игроку

@@ -4,35 +4,39 @@ import ru.ynovka.myShore.party.PartyManager.Party
 import java.util.concurrent.CopyOnWriteArrayList
 import ru.ynovka.myShore.party.PartyManager
 import org.bukkit.entity.Player
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.utils.Utils.asPlayers
+import java.util.UUID
 
 object GameManager {
     val games: MutableList<Game<*, *>> = CopyOnWriteArrayList()
 
-    inline fun <reified G : Game<*, *>> Player.currentGame(): G? =
-        games.firstOrNull { it is G && it.hasActivePlayer(uniqueId) } as? G
+    inline fun <reified G : Game<*, *>> UUID.currentGame(): G? =
+        games.firstOrNull { it is G && it.hasActivePlayer(this) } as? G
 
-    fun Player.inGame(): Boolean = currentGame<Game<*, *>>() != null
+    fun UUID.inGame(): Boolean = currentGame<Game<*, *>>() != null
 
     fun <G : Game<*, *>> join(
         player: Player,
         factory: () -> G,
         partyFactory: (Party) -> G = { factory() },
     ): Result<G> {
-        if (player.inGame())
+        if (player.uniqueId.inGame())
             return Result.failure(IllegalStateException("Player ${player.name} is already in a game"))
 
-        player.inventory.clear()
-        player.activePotionEffects.clear()
+        scheduler.schedule {
+            player.inventory.clear()
+            player.activePotionEffects.clear()
+        }.entity(player).once()
 
         val party = PartyManager.getParty(player)
         return if (party != null)
             joinPrivate(party, factory, partyFactory)
         else
-            joinPublic(player, factory)
+            joinPublic(player.uniqueId, factory)
     }
 
-    private fun <G : Game<*, *>> joinPublic(player: Player, factory: () -> G): Result<G> {
+    private fun <G : Game<*, *>> joinPublic(playerId: UUID, factory: () -> G): Result<G> {
         val templateClass = factory().javaClass
         @Suppress("UNCHECKED_CAST")
         val existing = games.firstOrNull { g ->
@@ -43,7 +47,7 @@ object GameManager {
             games.add(newGame)
         }
 
-        game.onPlayerJoin(player)
+        game.onPlayerJoin(playerId)
         return Result.success(game)
     }
 
@@ -63,15 +67,15 @@ object GameManager {
         }
 
         party.members.asPlayers()
-            .filter { !it.inGame() }
+            .filter { !it.uniqueId.inGame() }
             .forEach { member -> game.onPlayerJoin(member) }
 
         return Result.success(game)
     }
 
-    fun leave(player: Player) {
-        val game = player.currentGame<Game<*, *>>() ?: return
-        game.onPlayerLeave(player)
+    fun leave(playerId: UUID) {
+        val game = playerId.currentGame<Game<*, *>>() ?: return
+        game.onPlayerLeave(playerId)
         if (game.isEmpty()) games.remove(game)
     }
 }

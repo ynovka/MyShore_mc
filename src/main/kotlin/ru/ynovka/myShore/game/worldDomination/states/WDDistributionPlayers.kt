@@ -1,7 +1,6 @@
 package ru.ynovka.myShore.game.worldDomination.states
 
 import ru.ynovka.myShore.game.worldDomination.entity.Country.Companion.getFormattedName
-import ru.ynovka.myShore.game.worldDomination.WDPlayer.Companion.asWDPlayer
 import com.github.darksoulq.abyssallib.world.advancement.AdvancementFrame
 import ru.ynovka.myShore.game.worldDomination.entity.CountryType
 import com.github.darksoulq.abyssallib.world.advancement.Toast
@@ -68,7 +67,7 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGam
             }
         )
 
-        wdPlayers.map(GamePlayer::player).forEach { player ->
+        wdPlayers.asPlayers().forEach { player ->
             player.inventory.setItem(8, WDItems.wdNotebook.getStack(player))
             toast.send(player)
             timer.addPlayer(player)
@@ -110,7 +109,7 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGam
 
         game.gamePlayers
             .filter { it.role == WDPlayerRole.PRESIDENT }
-            .map(GamePlayer::player)
+            .asPlayers()
             .forEach { it.inventory.clear(7) }
 
         game.gamePlayers.asPlayers().forEach { player ->
@@ -311,11 +310,10 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGam
                 invites.remove(i)
             }
         }
-            .sync()
             .after(15 * 20L, Clock.TICKS)
             .once()
 
-        val presidentFormatedName = president.asWDPlayer()?.getFormattedName() ?: Component.text(president.name)
+        val presidentFormatedName = game.getOrCreatePlayer(president.uniqueId).getFormattedName()
 
         vice.sendMessage(
             Component.text()
@@ -357,12 +355,12 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGam
     }
 
     fun acceptInviteVice(
-        vice: Player,
+        viceId: UUID,
         president: Player,
         game: WDGame
     ) {
         val i = invites.firstOrNull {
-            it.vice == vice.uniqueId && it.president == president.uniqueId
+            it.vice == viceId && it.president == president.uniqueId
         } ?: return
 
         invites.remove(i)
@@ -373,7 +371,7 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGam
 
         if (country.vicePresident != null) return
 
-        val wdPlayer = game.getOrCreatePlayer(vice)
+        val wdPlayer = game.getOrCreatePlayer(viceId)
 
         if (wdPlayer.country != null) return
 
@@ -381,7 +379,7 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGam
         country.teleport(wdPlayer.player)
 
         invites.removeIf {
-            it.vice == vice.uniqueId || it.president == president.uniqueId
+            it.vice == viceId || it.president == president.uniqueId
         }
 
         // TODO: Пишем в чат президенту сообщение "{игрок} принял приглашение"

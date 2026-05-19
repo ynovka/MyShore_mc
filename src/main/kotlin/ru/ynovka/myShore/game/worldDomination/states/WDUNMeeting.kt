@@ -82,9 +82,7 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
         gamePlayer.player.teleportAsync(seatLocation).thenRun {
             scheduler.schedule {
                 sitOnSeat(gamePlayer)
-            }
-                .sync()
-                .once()
+            }.once()
         }
     }
 
@@ -140,9 +138,7 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
                 wdPlayer.player.teleportAsync(seatLocation).thenRun {
                     scheduler.schedule {
                         sitOnSeat(wdPlayer)
-                    }
-                        .sync()
-                        .once()
+                    }.once()
                 }
             }
         }
@@ -153,7 +149,6 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
             scheduler.schedule {
                 startCountrySpeech(country)
             }
-                .sync()
                 .after(getSpeechStartDelay(index), Clock.TICKS)
                 .once()
         }
@@ -229,9 +224,7 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
             wdPlayer.player.teleportAsync(seatLocation).thenRun {
                 scheduler.schedule {
                     sitOnSeat(wdPlayer)
-                }
-                    .sync()
-                    .once()
+                }.once()
             }
         }
     }
@@ -246,7 +239,6 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
 
             game.fsm.transitionTo(nextState)
         }
-            .sync()
             .after(getMeetingFinishDelay(), Clock.TICKS)
             .once()
     }

@@ -45,7 +45,6 @@ object HubItems {
                 meta.itemModel = NamespacedKey(inst, "${playMenu.id.value()}_$i")
                 stack.itemMeta = meta
             }
-                .sync()
                 .after(i * 2L, Clock.TICKS)
                 .once()
         }

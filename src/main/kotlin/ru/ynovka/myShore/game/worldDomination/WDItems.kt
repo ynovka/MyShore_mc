@@ -1,24 +1,24 @@
 package ru.ynovka.myShore.game.worldDomination
 
-import com.github.darksoulq.abyssallib.extension.openGui
-import com.github.darksoulq.abyssallib.server.event.ActionResult
+import ru.ynovka.myShore.game.worldDomination.WDGame.Companion.currentWDGame
 import com.github.darksoulq.abyssallib.world.item.component.builtin.ItemModel
 import com.github.darksoulq.abyssallib.world.item.component.builtin.ItemName
+import ru.ynovka.myShore.game.worldDomination.states.WDDistributionPlayers
+import ru.ynovka.myShore.game.worldDomination.menus.WDLaptopMainMenu
+import ru.ynovka.myShore.game.worldDomination.states.WDNegotiations
+import com.github.darksoulq.abyssallib.server.event.ActionResult
+import ru.ynovka.myShore.game.worldDomination.menus.WDPhoneMenu
+import com.github.darksoulq.abyssallib.extension.openGui
 import com.github.darksoulq.abyssallib.world.item.item
-import net.kyori.adventure.key.Key
-import net.kyori.adventure.text.Component
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
-import org.bukkit.entity.Player
+import ru.ynovka.myShore.texturepack.TexturePack
 import ru.ynovka.myShore.MyShore.Companion.ITEMS
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.game.worldDomination.WDGame.Companion.currentWDGame
-import ru.ynovka.myShore.game.worldDomination.menus.WDLaptopMainMenu
-import ru.ynovka.myShore.game.worldDomination.menus.WDPhoneMenu
-import ru.ynovka.myShore.game.worldDomination.states.WDDistributionPlayers
-import ru.ynovka.myShore.game.worldDomination.states.WDNegotiations
-import ru.ynovka.myShore.texturepack.TexturePack
+import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.utils.cancelItem
+import net.kyori.adventure.key.Key
+import org.bukkit.NamespacedKey
+import org.bukkit.entity.Player
+import org.bukkit.Material
 
 object WDItems {
 
@@ -55,7 +55,7 @@ object WDItems {
     private fun openLaptopMenu(
         player: Player
     ): ActionResult {
-        val game = player.currentWDGame() ?: return ActionResult.PASS
+        val game = player.uniqueId.currentWDGame() ?: return ActionResult.PASS
         if (game.fsm.current !is WDNegotiations) return ActionResult.PASS
 
         player.openGui(WDLaptopMainMenu.get(player))

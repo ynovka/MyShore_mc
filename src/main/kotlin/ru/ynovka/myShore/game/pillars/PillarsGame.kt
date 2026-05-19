@@ -7,6 +7,7 @@ import ru.ynovka.myShore.text.actionBar.clearActionBar
 import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.game.Game
 import org.bukkit.entity.Player
+import java.util.UUID
 
 
 class PillarsGame : Game<PillarsPlayer, PillarsWorld>() {
@@ -21,9 +22,9 @@ class PillarsGame : Game<PillarsPlayer, PillarsWorld>() {
     var nextRoundAllocator = allocator
     override val gameWorld = PillarsWorldManager.createWorld()
 
-    override fun getOrCreatePlayer(player: Player): PillarsPlayer =
-        gamePlayers.firstOrNull { it.player.uniqueId == player.uniqueId }
-            ?: PillarsPlayer(player.uniqueId)
+    override fun getOrCreatePlayer(playerId: UUID): PillarsPlayer =
+        gamePlayers.firstOrNull { it.player.uniqueId == playerId }
+            ?: PillarsPlayer(playerId)
 
     override fun handlePlayerJoin(player: PillarsPlayer) {
         // map.onPlayerJoin(this, player.player)

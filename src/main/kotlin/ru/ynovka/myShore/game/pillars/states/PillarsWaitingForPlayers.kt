@@ -15,6 +15,7 @@ import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.hub.HubItems
 import org.bukkit.GameMode
 import org.bukkit.Sound
+import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 
 
 class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
@@ -41,7 +42,7 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
         var frame = 0
 
         scheduler.schedule {
-            game.gamePlayers.map(GamePlayer::player).forEach { player ->
+            game.gamePlayers.asPlayers().forEach { player ->
                 player.sendPermanentActionBar(
                     ComponentDecorator.addBackground(
                         Component.translatable("bar.myshore.waiting_for_players")
@@ -54,7 +55,6 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
                 if (frame == frames.size) frame = 0
             }
         }
-            .sync()
             .repeatWhile { game.fsm.current is PillarsWaitingForPlayers }
             .repeatEvery(10L, Clock.TICKS)
     }

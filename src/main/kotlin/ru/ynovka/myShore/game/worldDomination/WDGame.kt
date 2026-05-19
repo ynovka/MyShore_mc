@@ -8,6 +8,7 @@ import ru.ynovka.myShore.game.GameWorld
 import ru.ynovka.myShore.game.Game
 import org.bukkit.entity.Player
 import org.bukkit.Location
+import java.util.UUID
 
 
 class WDGame : Game<WDPlayer, GameWorld>() {
@@ -27,8 +28,9 @@ class WDGame : Game<WDPlayer, GameWorld>() {
     val history = WDGameHistory()
 
 
-    override fun getOrCreatePlayer(player: Player): WDPlayer =
-        gamePlayers.firstOrNull { it.playerId == player.uniqueId} ?: WDPlayer(player.uniqueId)
+    override fun getOrCreatePlayer(playerId: UUID): WDPlayer =
+        gamePlayers.firstOrNull { it.playerId == playerId}
+            ?: WDPlayer(playerId)
 
     companion object {
         const val MIN_PLAYERS = 1 // todo заменить на 12
@@ -39,6 +41,6 @@ class WDGame : Game<WDPlayer, GameWorld>() {
         val unLoc: Location
             get() = WDWorld.unLoc
 
-        fun Player.currentWDGame(): WDGame? = GameManager.run { currentGame() }
+        fun UUID.currentWDGame(): WDGame? = GameManager.run { currentGame() }
     }
 }

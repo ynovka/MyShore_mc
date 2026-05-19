@@ -1,7 +1,7 @@
 package ru.ynovka.myShore.game.tag.maps.impl
 
-import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.game.tag.TagGame.Companion.currentTagGame
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.game.tag.states.TagFinishing
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.tag.TagPlayerRoles
@@ -16,6 +16,8 @@ import org.bukkit.block.Block
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.Bukkit
+import ru.ynovka.myShore.game.tag.states.TagInProgressState
+import kotlin.concurrent.timer
 import kotlin.math.sqrt
 
 
@@ -50,7 +52,6 @@ object TagMountainTrackMap : TagMap {
                     precomputeLightPositions(world)
                 }
             }
-                .sync()
                 .after(20L, Clock.TICKS)
                 .once()
 
@@ -59,7 +60,7 @@ object TagMountainTrackMap : TagMap {
                     if (player.gameMode == GameMode.CREATIVE) return@forEach
 
                     if (player.y <= 65) {
-                        val game = player.currentTagGame() ?: return@forEach
+                        val game = player.uniqueId.currentTagGame() ?: return@forEach
                         val tagPlayer = game.findPlayer(player) ?: return@forEach
 
                         when (tagPlayer.role) {
@@ -83,7 +84,10 @@ object TagMountainTrackMap : TagMap {
                                 if (!game.hasVictims()) {
                                     game.fsm.transitionTo(TagFinishing(game))
                                 } else {
-                                    game.totalTime += 20
+                                    val state = game.fsm.current
+                                    if (state is TagInProgressState) {
+                                        state.timer.addTime(20)
+                                    }
                                 }
                             }
                             TagPlayerRoles.UNDEFINED -> {
@@ -113,7 +117,6 @@ object TagMountainTrackMap : TagMap {
                     }
                 }
             }
-                .sync()
                 .after(20L, Clock.TICKS)
                 .repeatEvery(5L, Clock.TICKS)
         }

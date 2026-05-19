@@ -13,6 +13,7 @@ import org.bukkit.Material
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import ru.ynovka.myShore.game.GamePlayer
+import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.utils.canMove
 
 
@@ -23,7 +24,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
         // todo ^
 
         // даём эффект плавного падения
-        game.gamePlayers.map(GamePlayer::player).forEach {
+        game.gamePlayers.asPlayers().forEach {
             it.addPotionEffect(
                 PotionEffect(
                     PotionEffectType.SLOW_FALLING,
@@ -38,11 +39,11 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
 
         // даём возможность двигаться по приземлению
         scheduler.schedule {
-            game.gamePlayers.map(GamePlayer::player).forEach {
+            game.gamePlayers.asPlayers().forEach {
                 it.canMove(true)
                 it.gameMode = GameMode.SURVIVAL
             }
-        }.sync().after(60L, Clock.TICKS).once()
+        }.after(60L, Clock.TICKS).once()
 
         // Выдача рандом предметов
         startGiveRandomItemsTimer()
@@ -57,7 +58,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
                 game.gamePlayers.forEach { pPlayer ->
                     pPlayer.player.inventory.addItem(ItemStack.of(items.random()))
                 }
-            }.sync().once()
+            }.once()
         }
             .async()
             .repeatWhile { game.fsm.current is PillarsInProgress }

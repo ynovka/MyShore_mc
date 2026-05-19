@@ -1,8 +1,11 @@
 package ru.ynovka.myShore.game.tag.states
 
-import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
-import ru.ynovka.myShore.game.tag.TagPlayerSetup.setupForVoting
+import ru.ynovka.myShore.game.tag.TagPlayerSetup.setupForWaitingOrVoting
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
+import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
+import ru.ynovka.myShore.game.gameUtils.ActionbarWaitingFor
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.tag.maps.TagMap
 import ru.ynovka.myShore.game.tag.TagPlayer
 import ru.ynovka.myShore.game.tag.teleport
@@ -19,25 +22,35 @@ import kotlin.math.ceil
 class TagVoting(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(game) {
 
     override fun onEnterState() {
-        game.gamePlayers.forEach { tagPlayer ->
-            tagPlayer.player.setupForVoting(game)
-            tagPlayer.player.playSound(tagPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
+        ActionbarWaitingFor.startRendering(
+            game = game,
+            state = this,
+            componentKey = "bar.myshore.tag.voting"
+        )
+
+        game.gamePlayers.asPlayers().forEach { player ->
+            scheduler.schedule {
+                player.setupForWaitingOrVoting(game)
+                player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
+            }.entity(player).once()
         }
 
         game.scheduler.schedule {
-            if (game.fsm.current !is TagVoting) return@schedule
+            if (game.fsm.current !== this) return@schedule
 
             resolveMapVoting(game)?.let { setupMap(game, it) }
             game.mapVotes.clear()
-            game.fsm.transitionTo(TagPreparing(this@TagVoting.game))
+            game.fsm.transitionTo(TagCountdown(this@TagVoting.game))
         }
-            .sync()
             .after(10 * 20L, Clock.TICKS)
             .once()
     }
 
     override fun onPlayerJoin(gamePlayer: TagPlayer) {
-        gamePlayer.player.setupForVoting(game)
+        val player = gamePlayer.player
+        scheduler.schedule {
+            player.setupForWaitingOrVoting(game)
+        }.entity(player).once()
     }
 
     /**
@@ -62,17 +75,19 @@ class TagVoting(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(game) 
     companion object {
         fun setupMap(game: TagGame, map: TagMap, shouldTeleport: Boolean = false) {
             game.map = map
-            game.gamePlayers.forEach { tagPlayer ->
-                val mapNameComp = ServerTranslator.translate(map.mapName, tagPlayer.player)
-                tagPlayer.player.sendMessage(
-                    Component.translatable("msg.myshore.tag.choosen_map", mapNameComp)
-                )
+            game.gamePlayers.asPlayers().forEach { player ->
+                scheduler.schedule {
+                    val mapNameComp = ServerTranslator.translate(map.mapName, player)
+                    player.sendMessage(
+                        Component.translatable("msg.myshore.tag.choosen_map", mapNameComp)
+                    )
 
-                if (shouldTeleport) {
-                    game.map.teleport(tagPlayer.player, game) {
-                        tagPlayer.player.gameMode = GameMode.ADVENTURE
+                    if (shouldTeleport) {
+                        game.map.teleport(player, game) {
+                            player.gameMode = GameMode.ADVENTURE
+                        }
                     }
-                }
+                }.entity(player).once()
             }
         }
     }

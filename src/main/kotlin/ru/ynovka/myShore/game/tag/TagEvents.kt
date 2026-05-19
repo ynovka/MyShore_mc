@@ -5,7 +5,7 @@ import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import ru.ynovka.myShore.Database.tagCaughtsRepository
 import ru.ynovka.myShore.game.tag.states.TagFinishing
-import ru.ynovka.myShore.game.tag.effects.RiftEffect
+import ru.ynovka.myShore.game.tag.utils.RiftEffect
 import org.bukkit.event.player.PlayerInteractEvent
 import ru.ynovka.myShore.texturepack.SoundsPack
 import ru.ynovka.myShore.MyShore.Companion.inst
@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
+import ru.ynovka.myShore.game.tag.states.TagInProgressState
 
 
 object TagEvents : Listener {
@@ -30,7 +31,7 @@ object TagEvents : Listener {
         val victim  = event.entity  as? Player ?: return
         val hunter  = event.damager as? Player ?: return
 
-        val game = hunter.currentTagGame() ?: return
+        val game = hunter.uniqueId.currentTagGame() ?: return
         val hunterTagPlayer = game.findPlayer(hunter) ?: return
 
         // Только охотник может "пятнать"
@@ -67,8 +68,10 @@ object TagEvents : Listener {
         if (!game.hasVictims()) {
             game.fsm.transitionTo(TagFinishing(game))
         } else {
-            game.totalTime += 20 // +20 сек за поимку жертвы
-        }
+            val state = game.fsm.current
+            if (state is TagInProgressState) {
+                state.timer.addTime(20)
+            }        }
     }
 
     // Запрещаем взаимодействие с миром в игровых мирах (не для CREATIVE)

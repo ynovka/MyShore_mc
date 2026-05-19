@@ -124,9 +124,7 @@ class BossBarTimer(
                     hideBars()
                     onFinish()
                 }
-            }
-                .sync()
-                .once()
+            }.once()
         }
             .async()
             .repeatWhile { running.get() }
@@ -138,9 +136,7 @@ class BossBarTimer(
 
         scheduler.schedule {
             hideBars()
-        }
-            .sync()
-            .once()
+        }.once()
     }
 
     private fun hideBars() {

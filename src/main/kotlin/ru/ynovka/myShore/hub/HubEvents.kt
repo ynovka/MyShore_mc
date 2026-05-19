@@ -56,7 +56,6 @@ object HubEvents : Listener {
                 }
             }
         }
-            .sync()
             .repeatEvery(2L, Clock.TICKS)
     }
 
@@ -77,7 +76,6 @@ object HubEvents : Listener {
                 player.sendMessage("Если считаете что произошла ошибка, попробуйте /vrc")
             }
         }
-            .sync()
             .after(6 * 20L, Clock.TICKS)
             .once()
 
@@ -88,14 +86,12 @@ object HubEvents : Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerLeave(e: PlayerQuitEvent) {
-
         ActionBar.clear(e.player)
-        GameManager.leave(e.player)
+        GameManager.leave(e.player.uniqueId)
         PartyManager.leave(e.player, LeftReason.QUIT)
         scheduler.schedule {
             TabController.updateAll()
         }
-            .sync()
             .after(5L, Clock.TICKS)
             .once()
     }

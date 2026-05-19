@@ -1,4 +1,4 @@
-package ru.ynovka.myShore.game.tag.effects
+package ru.ynovka.myShore.game.tag.utils
 
 import com.github.darksoulq.abyssallib.world.particle.ParticleRenderer
 import com.github.darksoulq.abyssallib.world.particle.impl.Renderers

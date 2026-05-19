@@ -34,11 +34,10 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
     fun hasParticipant(uuid: UUID): Boolean =
         hasActivePlayer(uuid) || hasSpectator(uuid)
 
-    fun onPlayerJoin(player: Player) {
-        player.inventory.close()
-        gameVisibilityGroup.addViewer(player.uniqueId)
+    fun onPlayerJoin(playerId: UUID) {
+        gameVisibilityGroup.addViewer(playerId)
 
-        val p = getOrCreatePlayer(player)
+        val p = getOrCreatePlayer(playerId)
 
         val canJoin = !isFull() && fsm.canPlayerJoin(p)
         if (!canJoin) {
@@ -62,16 +61,15 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
         handlePlayerJoin(p)
     }
 
-    fun onPlayerLeave(player: Player) {
-        val uuid = player.uniqueId
-        gameVisibilityGroup.removeViewer(uuid)
+    fun onPlayerLeave(playerId: UUID) {
+        gameVisibilityGroup.removeViewer(playerId)
 
-        val fromGame = gamePlayers.find { it.playerId == uuid }
-        val fromSpec = spectatorPlayers.find { it.playerId == uuid }
+        val fromGame = gamePlayers.find { it.playerId == playerId }
+        val fromSpec = spectatorPlayers.find { it.playerId == playerId }
         val p = fromGame ?: fromSpec ?: return
 
-        gamePlayers.removeIf { it.playerId == uuid }
-        spectatorPlayers.removeIf { it.playerId == uuid }
+        gamePlayers.removeIf { it.playerId == playerId }
+        spectatorPlayers.removeIf { it.playerId == playerId }
 
         if (fromGame != null) {
             exitedPlayers.add(p)
@@ -107,5 +105,5 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
     protected open fun handlePlayerLeave(player: P) {}
     protected open fun handlePlayerBecomeSpectator(player: P, reason: SpectatorReason) {}
 
-    abstract fun getOrCreatePlayer(player: Player): P
+    abstract fun getOrCreatePlayer(playerId: UUID): P
 }

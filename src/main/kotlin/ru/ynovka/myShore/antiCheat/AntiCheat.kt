@@ -28,7 +28,6 @@ object AntiCheat {
                 } else false
             }
         }
-            .sync()
             .after(60L, Clock.TICKS)
             .repeatEvery(60L, Clock.TICKS)
     }

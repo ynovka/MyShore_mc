@@ -15,7 +15,7 @@ object WDCommands {
             entitySelectorArgumentOnePlayer("vice")
             playerExecutor { president, args ->
                 val vice = args["vice"] as Player
-                val game = president.currentWDGame() ?: return@playerExecutor
+                val game = president.uniqueId.currentWDGame() ?: return@playerExecutor
                 val state = game.fsm.current as? WDDistributionPlayers ?: return@playerExecutor
 
                 state.inviteVice(vice, president)
@@ -26,10 +26,10 @@ object WDCommands {
             entitySelectorArgumentOnePlayer("president")
             playerExecutor { vice, args ->
                 val president = args["president"] as Player
-                val game = vice.currentWDGame() ?: return@playerExecutor
+                val game = vice.uniqueId.currentWDGame() ?: return@playerExecutor
                 val state = game.fsm.current as? WDDistributionPlayers ?: return@playerExecutor
 
-                state.acceptInviteVice(vice, president, game)
+                state.acceptInviteVice(vice.uniqueId, president, game)
             }
         }
 
@@ -37,7 +37,7 @@ object WDCommands {
             entitySelectorArgumentOnePlayer("president")
             playerExecutor { vice, args ->
                 val president = args["president"] as Player
-                val game = vice.currentWDGame() ?: return@playerExecutor
+                val game = vice.uniqueId.currentWDGame() ?: return@playerExecutor
                 val state = game.fsm.current as? WDDistributionPlayers ?: return@playerExecutor
 
                 state.denyInviteVice(vice, president)

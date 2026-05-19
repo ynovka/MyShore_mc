@@ -65,7 +65,7 @@ class WDNegotiations(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game
         // Выдаём телефоны, ноутбуки президентам
         game.gamePlayers
             .filter { it.role == WDPlayerRole.PRESIDENT }
-            .map(GamePlayer::player)
+            .asPlayers()
             .forEach {
                 it.inventory.setItem(0, WDItems.wdLaptopMenu.getStack(null))
                 it.inventory.setItem(7, WDItems.wdPhoneMenu.getStack(null))
@@ -79,7 +79,7 @@ class WDNegotiations(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game
         // Забираем телефоны
         game.gamePlayers
             .filter { it.role == WDPlayerRole.PRESIDENT }
-            .map(GamePlayer::player)
+            .asPlayers()
             .forEach {
                 it.inventory.clear(0)
                 it.inventory.clear(7)

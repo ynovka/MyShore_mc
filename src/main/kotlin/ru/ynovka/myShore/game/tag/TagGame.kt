@@ -3,7 +3,7 @@ package ru.ynovka.myShore.game.tag
 import ru.ynovka.myShore.game.tag.states.TagWaitingForPlayers
 import ru.ynovka.myShore.game.tag.states.TagInProgressState
 import ru.ynovka.myShore.game.tag.states.TagFinishing
-import ru.ynovka.myShore.game.tag.states.TagPreparing
+import ru.ynovka.myShore.game.tag.states.TagCountdown
 import ru.ynovka.myShore.text.actionBar.clearActionBar
 import ru.ynovka.myShore.game.tag.states.TagVoting
 import ru.ynovka.myShore.MyShore
@@ -33,26 +33,9 @@ class TagGame : Game<TagPlayer, GameWorld>() {
 
     val mapVotes: MutableMap<UUID, TagMap> = mutableMapOf()
 
-    /**
-     * Максимальное время игры в секундах.
-     * При изменении [remainingTime] смещается пропорционально, чтобы BossBar
-     * отображал прогресс корректно.
-     */
-    var totalTime: Int = 40
-        set(newValue) {
-            if (newValue == 40) {
-                remainingTime = 40
-            } else {
-                remainingTime += newValue - field
-            }
-            field = newValue
-        }
-
-    var remainingTime: Int = 40
-
-    override fun getOrCreatePlayer(player: Player): TagPlayer =
-        gamePlayers.firstOrNull { it.player.uniqueId == player.uniqueId }
-            ?: TagPlayer(player.uniqueId)
+    override fun getOrCreatePlayer(playerId: UUID): TagPlayer =
+        gamePlayers.firstOrNull { it.player.uniqueId == playerId }
+            ?: TagPlayer(playerId)
 
     override fun handlePlayerJoin(player: TagPlayer) {
         map.onPlayerJoin(this, player.player)
@@ -68,7 +51,7 @@ class TagGame : Game<TagPlayer, GameWorld>() {
             is TagVoting ->
                 if (gamePlayers.size <= 1) fsm.transitionTo(TagWaitingForPlayers(this))
 
-            is TagPreparing, is TagInProgressState ->
+            is TagCountdown, is TagInProgressState ->
                 if (!hasVictims() || !hasHunter()) fsm.transitionTo(TagFinishing(this))
 
             else -> Unit
@@ -76,7 +59,7 @@ class TagGame : Game<TagPlayer, GameWorld>() {
     }
 
     companion object {
-        fun Player.currentTagGame(): TagGame? = GameManager.run { currentGame() }
+        fun UUID.currentTagGame(): TagGame? = GameManager.run { currentGame() }
     }
 }
 
@@ -111,7 +94,7 @@ fun TagMap.teleport(
     game.gameVisibilityGroup.addViewer(player.uniqueId)
 
     val role = game.findPlayer(player)?.role
-        ?: if (game.fsm.current is TagInProgressState || game.fsm.current is TagPreparing) {
+        ?: if (game.fsm.current is TagInProgressState || game.fsm.current is TagCountdown) {
             TagPlayerRoles.SPECTATOR
         } else {
             TagPlayerRoles.UNDEFINED
@@ -138,9 +121,7 @@ fun TagMap.teleport(
 
     return player.teleportAsync(destination).thenApply { success ->
         if (success) {
-            game.scheduler.schedule { onComplete() }
-                .sync()
-                .once()
+            game.scheduler.schedule { onComplete() }.once()
         }
         success
     }

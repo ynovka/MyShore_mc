@@ -106,7 +106,6 @@ object PhoneCall {
                 )
             }
         }
-            .sync()
             .after(CALL_DURATION_TICKS, Clock.TICKS)
             .once()
     }

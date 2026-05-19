@@ -1,12 +1,12 @@
 package ru.ynovka.myShore.game.tag
 
-import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.game.tag.TagGame.Companion.currentTagGame
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import dev.jorel.commandapi.kotlindsl.commandAPICommand
 import ru.ynovka.myShore.Database.tagCaughtsRepository
 import dev.jorel.commandapi.kotlindsl.playerExecutor
-import ru.ynovka.myShore.game.tag.maps.TagMaps
 import ru.ynovka.myShore.MyShore.Companion.scheduler
+import ru.ynovka.myShore.game.tag.maps.TagMaps
 import org.bukkit.Particle
 import org.bukkit.Color
 
@@ -43,7 +43,7 @@ object TagCommands {
                 }
 
                 // Достаточно найти TagGame через GameManager — lobby больше не нужен
-                player.currentTagGame() ?: return@playerExecutor
+                player.uniqueId.currentTagGame() ?: return@playerExecutor
 
                 val task = scheduler.schedule {
                     points.forEach { pt ->
@@ -55,14 +55,11 @@ object TagCommands {
                             Particle.DustOptions(color, 1.0f),
                         )
                     }
-                }
-                    .sync()
-                    .repeatEvery(4L, Clock.TICKS)
+                }.repeatEvery(4L, Clock.TICKS)
 
                 scheduler.schedule {
                     task.cancel()
                 }
-                    .sync()
                     .after(20L * 10, Clock.TICKS)
                     .once()
 

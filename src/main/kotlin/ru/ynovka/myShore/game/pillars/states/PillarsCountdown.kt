@@ -4,6 +4,7 @@ import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import org.bukkit.GameMode
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.GamePlayer
+import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.game.pillars.PillarsGame
 import ru.ynovka.myShore.game.pillars.PillarsPlayer
@@ -35,7 +36,7 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
         PillarsWorldManager.spawnPlayers(game)
 
         // Отключаем передвищение игрокам
-        game.gamePlayers.map(GamePlayer::player).forEach {
+        game.gamePlayers.asPlayers().forEach {
             it.canMove(false)
             it.gameMode = GameMode.ADVENTURE
         }
@@ -45,9 +46,7 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
             if (game.gamePlayers.size >= 2) {
 
             }
-        }
-            .sync()
-            .after(10 * 20L, Clock.TICKS)
+        }.after(10 * 20L, Clock.TICKS)
     }
 
     override fun onPlayerJoin(gamePlayer: PillarsPlayer) {

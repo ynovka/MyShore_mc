@@ -1,21 +1,20 @@
 package ru.ynovka.myShore.game.worldDomination.menus
 
-import com.github.darksoulq.abyssallib.extension.openGui
 import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
-import com.github.darksoulq.abyssallib.world.gui.Gui
-import com.github.darksoulq.abyssallib.world.gui.GuiBuilder
-import com.github.darksoulq.abyssallib.world.gui.SlotPosition
+import ru.ynovka.myShore.game.worldDomination.WDItems.wdInvisibleItem
 import com.github.darksoulq.abyssallib.world.gui.element.GuiButton
-import com.github.darksoulq.abyssallib.world.gui.gui
-import net.kyori.adventure.text.Component
+import com.github.darksoulq.abyssallib.world.gui.SlotPosition
+import com.github.darksoulq.abyssallib.world.gui.GuiBuilder
+import com.github.darksoulq.abyssallib.extension.openGui
 import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.entity.Player
+import com.github.darksoulq.abyssallib.world.gui.Gui
+import com.github.darksoulq.abyssallib.world.gui.gui
+import ru.ynovka.myShore.texturepack.GuiTextures
+import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.utils.Utils.fill
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
-import ru.ynovka.myShore.game.worldDomination.WDItems.wdInvisibleItem
-import ru.ynovka.myShore.game.worldDomination.WDPlayer.Companion.asWDPlayer
-import ru.ynovka.myShore.texturepack.GuiTextures
-import ru.ynovka.myShore.utils.Utils.fill
+import org.bukkit.entity.Player
 
 
 @Suppress("UnstableApiUsage")
