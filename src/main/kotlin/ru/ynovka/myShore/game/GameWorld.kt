@@ -31,9 +31,13 @@ abstract class GameWorld {
             return access.load(key)
         }
 
+        val preset = Preset.THE_VOID.toBuilder()
+            .features(false)
+            .build()
+
         val level = Level.builder(key)
             .dimension(Dimension.OVERWORLD)
-            .generatorType(GeneratorType.FLAT.with(Preset.THE_VOID))
+            .generatorType(GeneratorType.FLAT.with(preset))
             .structures(false)
             .build()
 

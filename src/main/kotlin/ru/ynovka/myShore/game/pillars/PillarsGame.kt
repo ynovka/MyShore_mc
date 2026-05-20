@@ -3,10 +3,8 @@ package ru.ynovka.myShore.game.pillars
 import ru.ynovka.myShore.game.pillars.generators.allocators.AllocatorGenerator
 import ru.ynovka.myShore.game.pillars.generators.pillars.PillarGenerator
 import ru.ynovka.myShore.game.pillars.states.PillarsWaitingForPlayers
-import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.HubGameWorld
 import ru.ynovka.myShore.game.GameManager
-import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.game.Game
 import java.util.UUID
 
@@ -26,18 +24,6 @@ class PillarsGame : Game<PillarsPlayer, PillarsWorld>() {
     override fun getOrCreatePlayer(playerId: UUID): PillarsPlayer =
         gamePlayers.firstOrNull { it.player.uniqueId == playerId }
             ?: PillarsPlayer(playerId)
-
-    override fun handlePlayerJoin(gamePlayer: PillarsPlayer) {
-        // map.onPlayerJoin(this, player.player)
-    }
-
-    override fun handlePlayerLeave(gamePlayer: PillarsPlayer) {
-        val player = gamePlayer.player
-        scheduler.schedule {
-            player.clearActivePotionEffects()
-            player.canMove(true)
-        }.entity(player).once()
-    }
 
     companion object {
         val hubWorld = HubGameWorld("pillars")

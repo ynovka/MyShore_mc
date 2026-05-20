@@ -17,7 +17,7 @@ object TexturePack {
     val fontGlyphs = ns.font("glyphs", true)
 
     fun register() {
-        ServerTranslator.loadResource(inst, "lang/en_en.properties")
+        ServerTranslator.loadResource(inst, "lang/en_us.properties")
 
         GuiTextures.register()
         SoundsPack.register()

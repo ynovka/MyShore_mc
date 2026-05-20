@@ -58,7 +58,9 @@ class PillarsWorld : GameWorld() {
 
 
     fun spawnPlayer(pGame: PillarsGame, pPlayer: PillarsPlayer) {
+        println("spawnPlayer")
         getOrCreate().thenCompose { world ->
+            println("spawnPlayer thenCompose")
             // Ищём свободное место для спавна столба
             val loc = pGame.allocator.gen.generate(pGame, pPlayer.playerId)
             // Создаём столб на нужных координтах

@@ -22,12 +22,14 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
 
         game.gamePlayers.forEach { pPlayer ->
             pPlayer.setupForWaiting(game)
+            game.gameWorld.spawnPlayer(game, pPlayer)
             pPlayer.player.playSound(pPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
         }
     }
 
     override fun onPlayerJoin(gamePlayer: PillarsPlayer) {
         gamePlayer.setupForWaiting(game)
+        game.gameWorld.spawnPlayer(game, gamePlayer)
 
         if (game.gamePlayers.size >= 2) {
             game.fsm.transitionTo(PillarsCountdown(game))
