@@ -41,7 +41,7 @@ class TagCaughtsRepository(private val db: Database) {
         val vl = victim.location
         val hl = hunter.location
 
-        val mapLabel = resolveMapLabel(game.map.mapId)
+        val mapLabel = resolveMapLabel(game.map.name)
 
         db.executor()
             .table("tag_caughts")
@@ -86,11 +86,11 @@ class TagCaughtsRepository(private val db: Database) {
         return cluster(rawPositions)
     }
 
-    private fun resolveMapLabel(mapId: String): String {
+    private fun resolveMapLabel(name: String): String {
         return TagMaps.entries
             .firstOrNull { entry ->
                 entry != TagMaps.RANDOM &&
-                        runCatching { entry.mapProvider().mapId == mapId }.getOrDefault(false)
+                        runCatching { entry.mapProvider().name == name }.getOrDefault(false)
             }
             ?.name
             ?: TagMaps.RANDOM.name   // fallback

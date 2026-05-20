@@ -22,7 +22,7 @@ import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.GamePlayer
 import ru.ynovka.myShore.plasmo.PhoneCall
 import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.game.GameWorldOld
+import ru.ynovka.myShore.game.GameWorld
 import org.bukkit.inventory.ItemStack
 import org.bukkit.entity.Player
 import org.bukkit.Material
@@ -31,7 +31,7 @@ import java.util.UUID
 
 
 /** Этап распределения игроков по странам, длится 3 минуты */
-class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorldOld, WDGame>(game) {
+class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
     private val timer = BossBarTimer()
 
     companion object {
@@ -120,8 +120,6 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorldOld, WD
     override fun onPlayerJoin(gamePlayer: WDPlayer) {
         val player = gamePlayer.player
 
-        player.teleportAsync(WDGame.hubLoc)
-
         player.inventory.setItem(8, WDItems.wdNotebook.getStack(player))
 
         timer.addPlayer(player)
@@ -156,8 +154,6 @@ class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorldOld, WD
             country.teleport(player)
             return
         }
-
-        player.teleportAsync(WDGame.hubLoc)
     }
 
     private fun getBaseCountriesCount(playersCount: Int): Int {

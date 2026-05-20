@@ -14,7 +14,7 @@ import ru.ynovka.myShore.game.tag.TagPlayer
 import ru.ynovka.myShore.game.tag.TagGame
 import org.bukkit.potion.PotionEffectType
 import net.kyori.adventure.text.Component
-import ru.ynovka.myShore.game.GameWorldOld
+import ru.ynovka.myShore.game.GameWorld
 import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.utils.canMove
 import net.kyori.adventure.title.Title
@@ -27,7 +27,7 @@ import org.bukkit.Sound
 
 
 // 5 сек перед началом (что бы у игроков загрузилась карта, они ознакомились со своими ролями)
-class TagCountdown(game: TagGame) : GameState<TagPlayer, GameWorldOld, TagGame>(game) {
+class TagCountdown(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(game) {
 
 
 

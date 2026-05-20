@@ -6,11 +6,11 @@ import ru.ynovka.myShore.game.worldDomination.WDGame
 import ru.ynovka.myShore.text.actionBar.ActionBar
 import ru.ynovka.myShore.utils.BossBarTimer
 import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.game.GameWorldOld
+import ru.ynovka.myShore.game.GameWorld
 
 
 // Ожидание игроков (нужно хотя бы 12)
-class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, GameWorldOld, WDGame>(game) {
+class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
     private val timer = BossBarTimer()
 
     private var started = false
@@ -19,7 +19,6 @@ class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, GameWorldOld, WDGa
         game.gamePlayers.forEach { gamePlayer ->
             val player = gamePlayer.player
 
-            player.teleportAsync(game.gameWorld.hubLoc)
             player.inventory.clear()
             timer.addPlayer(player)
         }
@@ -40,7 +39,6 @@ class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, GameWorldOld, WDGa
     override fun onPlayerJoin(gamePlayer: WDPlayer) {
         val player = gamePlayer.player
 
-        player.teleportAsync(game.gameWorld.hubLoc)
         player.inventory.clear()
         timer.addPlayer(player)
 

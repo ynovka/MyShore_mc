@@ -13,19 +13,17 @@ import org.bukkit.Location
 import org.bukkit.World
 
 
-interface GameWorldOld {
-    val world: World
-}
-
 abstract class GameWorld {
     abstract val name: String
 
     val key by lazy { Key.key(PLUGIN_ID, name.lowercase()) }
 
+    fun get() = WorldsAccess.access().server.getWorld(key)
+
     fun getOrCreate(): CompletableFuture<World> {
         val access = WorldsAccess.access()
 
-        access.server.getWorld(key)?.let {
+        get()?.let {
             return CompletableFuture.completedFuture(it)
         }
 
@@ -42,6 +40,16 @@ abstract class GameWorld {
         return access.create(level).thenApply { world ->
             access.worldRegistry.register(level, true)
             world
+        }
+    }
+
+    fun delete(): CompletableFuture<Boolean> {
+        val access = WorldsAccess.access()
+        val world = get() ?: return CompletableFuture.completedFuture(false)
+
+        return access.delete(world).exceptionally { throwable ->
+            throwable.printStackTrace()
+            false
         }
     }
 

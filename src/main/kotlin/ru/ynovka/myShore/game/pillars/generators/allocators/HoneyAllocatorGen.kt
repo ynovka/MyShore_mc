@@ -15,7 +15,7 @@ object HoneyAllocatorGen : AllocatorGen {
 
     override fun generate(pGame: PillarsGame, playerId: UUID): Pillar {
         val occupied = pGame.gameWorld.pillars
-        val center = pGame.gameWorld.world.spawnLocation
+        val center = pGame.gameWorld.getOrCreate().get().spawnLocation
 
         var pointCount = maxOf(1, pGame.gamePlayers.size)
 

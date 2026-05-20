@@ -32,9 +32,8 @@ import org.bukkit.Sound
 import kotlin.math.abs
 
 
-object TagJungleMap : TagMap {
-
-    override val mapId = "tag_jungle"
+object TagJungleMap : TagMap() {
+    override val name: String = "tag_jungle"
     override val mapName = Component.translatable("name.myshore.tag.map.jungle")
 
     override val authors = listOf(
@@ -49,10 +48,10 @@ object TagJungleMap : TagMap {
     )
 
     override val victimSpawns = listOf(
-        MapSpawn("tag_jungle", 3.5, 102.0, 0.5, 180f, 0f),
-        MapSpawn("tag_jungle", 0.5, 101.0, 0.5, 180f, 0f),
-        MapSpawn("tag_jungle", -2.5, 101.0, 0.5, 180f, 0f),
-        MapSpawn("tag_jungle", -4.5, 101.0, -1.5, 180f, 0f)
+        MapSpawn(name, 3.5, 102.0, 0.5, 180f, 0f),
+        MapSpawn(name, 0.5, 101.0, 0.5, 180f, 0f),
+        MapSpawn(name, -2.5, 101.0, 0.5, 180f, 0f),
+        MapSpawn(name, -4.5, 101.0, -1.5, 180f, 0f)
     )
 
     override fun onGameStart(game: TagGame) = spawnPoisonDarts(game)
@@ -88,7 +87,7 @@ object TagJungleMap : TagMap {
         val victimCount = game.gamePlayers.count { it.role == TagPlayerRoles.VICTIM }
         val count = victimCount * 2
 
-        val world = Bukkit.getWorld(game.map.mapId) ?: return
+        val world = Bukkit.getWorld(game.map.name) ?: return
         val dart = Items.poisonDart.getStack(null)
 
         val d = mutableSetOf<ItemDisplay>()
@@ -156,7 +155,7 @@ object TagJungleMap : TagMap {
                 .repeatEvery(duration.toLong(), Clock.TICKS)
 
             scheduler.schedule {
-                Bukkit.getWorld(mapId)?.players?.forEach { player ->
+                Bukkit.getWorld(name)?.players?.forEach { player ->
                     if (player.gameMode != GameMode.ADVENTURE) return@forEach
                     val game = player.uniqueId.currentTagGame() ?: return@forEach
                     val tagPlayer = game.findPlayer(player) ?: return@forEach

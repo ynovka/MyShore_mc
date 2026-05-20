@@ -11,7 +11,7 @@ import ru.ynovka.myShore.game.Game
 import java.util.UUID
 
 
-class PillarsGame : Game<PillarsPlayer, PillarsWorldOld>() {
+class PillarsGame : Game<PillarsPlayer, PillarsWorld>() {
 
     override val initialState = PillarsWaitingForPlayers(this)
     override val maxPlayers: Int = 50
@@ -21,7 +21,7 @@ class PillarsGame : Game<PillarsPlayer, PillarsWorldOld>() {
     var allocator = AllocatorGenerator.HONEY
     var nextRoundPillar = pillar
     var nextRoundAllocator = allocator
-    override val gameWorld = PillarsWorldManager.createWorld()
+    override val gameWorld = PillarsWorld()
 
     override fun getOrCreatePlayer(playerId: UUID): PillarsPlayer =
         gamePlayers.firstOrNull { it.player.uniqueId == playerId }

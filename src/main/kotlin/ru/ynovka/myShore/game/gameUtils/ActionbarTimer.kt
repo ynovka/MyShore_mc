@@ -7,7 +7,7 @@ import ru.ynovka.myShore.text.ComponentDecorator
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.GamePlayer
 import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.game.GameWorldOld
+import ru.ynovka.myShore.game.GameWorld
 import ru.ynovka.myShore.game.Game
 import org.bukkit.Sound
 
@@ -31,7 +31,7 @@ object ActionbarTimer {
      */
     fun <
             P : GamePlayer,
-            W : GameWorldOld,
+            W : GameWorld,
             G : Game<P, W>,
             S : GameState<P, W, G>
     > startCountdownTimer(

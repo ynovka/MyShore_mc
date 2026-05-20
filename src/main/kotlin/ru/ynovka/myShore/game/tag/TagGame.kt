@@ -5,20 +5,20 @@ import ru.ynovka.myShore.game.tag.states.TagInProgressState
 import ru.ynovka.myShore.game.tag.states.TagFinishing
 import ru.ynovka.myShore.game.tag.states.TagCountdown
 import ru.ynovka.myShore.game.tag.states.TagVoting
-import ru.ynovka.myShore.MyShore
 import ru.ynovka.myShore.game.tag.maps.TagMaps
 import ru.ynovka.myShore.game.tag.maps.TagMap
 import java.util.concurrent.CompletableFuture
 import ru.ynovka.myShore.game.GameManager
-import ru.ynovka.myShore.game.GameWorldOld
+import ru.ynovka.myShore.game.GameWorld
 import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.game.Game
+import ru.ynovka.myShore.MyShore
 import org.bukkit.entity.Player
 import org.bukkit.Location
 import java.util.UUID
 
 
-class TagGame : Game<TagPlayer, GameWorldOld>() {
+class TagGame : Game<TagPlayer, GameWorld>() {
 
     override val initialState = TagWaitingForPlayers(this)
     override val maxPlayers: Int = 5

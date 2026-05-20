@@ -2,6 +2,7 @@ package ru.ynovka.myShore.game.tag.maps.impl
 
 import ru.ynovka.myShore.game.tag.TagGame.Companion.currentTagGame
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
+import io.papermc.paper.datacomponent.item.MapId.mapId
 import ru.ynovka.myShore.game.tag.states.TagFinishing
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.tag.TagPlayerRoles
@@ -21,9 +22,9 @@ import kotlin.concurrent.timer
 import kotlin.math.sqrt
 
 
-object TagMountainTrackMap : TagMap {
+object TagMountainTrackMap : TagMap() {
 
-    override val mapId = "tag_mountain_track"
+    override val name = "tag_mountain_track"
     override val mapName = Component.translatable("name.myshore.tag.map.mountain_track")
 
     override val authors = listOf(
@@ -48,7 +49,7 @@ object TagMountainTrackMap : TagMap {
 
         fun register() {
             scheduler.schedule {
-                Bukkit.getServer().getWorld(mapId)?.let { world ->
+                Bukkit.getServer().getWorld(name)?.let { world ->
                     precomputeLightPositions(world)
                 }
             }
@@ -56,7 +57,7 @@ object TagMountainTrackMap : TagMap {
                 .once()
 
             scheduler.schedule {
-                Bukkit.getServer().getWorld(mapId)?.players?.forEach { player ->
+                Bukkit.getServer().getWorld(name)?.players?.forEach { player ->
                     if (player.gameMode == GameMode.CREATIVE) return@forEach
 
                     if (player.y <= 65) {

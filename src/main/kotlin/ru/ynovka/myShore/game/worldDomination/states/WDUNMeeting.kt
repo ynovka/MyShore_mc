@@ -15,14 +15,14 @@ import ru.ynovka.myShore.plasmo.StageVoice
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.GamePlayer
 import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.game.GameWorldOld
+import ru.ynovka.myShore.game.GameWorld
 import net.kyori.adventure.title.Title
 import ru.ynovka.myShore.plasmo.Stage
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 import org.bukkit.NamespacedKey
 import org.bukkit.Location
-import ru.ynovka.myShore.game.worldDomination.WDWorldOld
+import ru.ynovka.myShore.game.worldDomination.WDWorld
 import java.time.Duration
 import kotlin.math.atan2
 import java.util.UUID
@@ -39,7 +39,7 @@ import java.util.UUID
  * - уровень развития;
  * - название по алфавиту.
  */
-class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorldOld, WDGame>(game) {
+class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
 
     var speakingCountry: Int? = null
         private set
@@ -413,84 +413,84 @@ class WDUNMeeting(game: WDGame) : GameState<WDPlayer, GameWorldOld, WDGame>(game
         val seats: Map<Int, List<Location>> by lazy {
             mapOf(
                 0 to listOf(
-                    Location(WDWorldOld.world, 1018.5, 105.0, -5.5),
-                    Location(WDWorldOld.world, 1016.5, 105.0, -3.5),
-                    Location(WDWorldOld.world, 1014.5, 105.0, -2.5),
-                    Location(WDWorldOld.world, 1010.5, 105.0, 0.5),
-                    Location(WDWorldOld.world, 1008.5, 105.0, 0.5)
+                    Location(WDWorld.get(), 1018.5, 105.0, -5.5),
+                    Location(WDWorld.get(), 1016.5, 105.0, -3.5),
+                    Location(WDWorld.get(), 1014.5, 105.0, -2.5),
+                    Location(WDWorld.get(), 1010.5, 105.0, 0.5),
+                    Location(WDWorld.get(), 1008.5, 105.0, 0.5)
                 ),
                 1 to listOf(
-                    Location(WDWorldOld.world, 1018.5, 104.0, -7.5),
-                    Location(WDWorldOld.world, 1015.5, 104.0, -5.5),
-                    Location(WDWorldOld.world, 1013.5, 104.0, -4.5),
-                    Location(WDWorldOld.world, 1010.5, 104.0, -3.5),
-                    Location(WDWorldOld.world, 1007.5, 104.0, -2.5)
+                    Location(WDWorld.get(), 1018.5, 104.0, -7.5),
+                    Location(WDWorld.get(), 1015.5, 104.0, -5.5),
+                    Location(WDWorld.get(), 1013.5, 104.0, -4.5),
+                    Location(WDWorld.get(), 1010.5, 104.0, -3.5),
+                    Location(WDWorld.get(), 1007.5, 104.0, -2.5)
                 ),
                 2 to listOf(
-                    Location(WDWorldOld.world, 1016.5, 103.0, -8.5),
-                    Location(WDWorldOld.world, 1013.5, 103.0, -6.5),
-                    Location(WDWorldOld.world, 1010.5, 103.0, -5.5),
-                    Location(WDWorldOld.world, 1008.5, 103.0, -4.5),
-                    Location(WDWorldOld.world, 1006.5, 103.0, -4.5)
+                    Location(WDWorld.get(), 1016.5, 103.0, -8.5),
+                    Location(WDWorld.get(), 1013.5, 103.0, -6.5),
+                    Location(WDWorld.get(), 1010.5, 103.0, -5.5),
+                    Location(WDWorld.get(), 1008.5, 103.0, -4.5),
+                    Location(WDWorld.get(), 1006.5, 103.0, -4.5)
                 ),
                 3 to listOf(
-                    Location(WDWorldOld.world, 1015.5, 102.0, -10.5),
-                    Location(WDWorldOld.world, 1012.5, 102.0, -8.5),
-                    Location(WDWorldOld.world, 1010.5, 102.0, -7.5),
-                    Location(WDWorldOld.world, 1008.5, 102.0, -7.5),
-                    Location(WDWorldOld.world, 1005.5, 102.0, -6.5)
+                    Location(WDWorld.get(), 1015.5, 102.0, -10.5),
+                    Location(WDWorld.get(), 1012.5, 102.0, -8.5),
+                    Location(WDWorld.get(), 1010.5, 102.0, -7.5),
+                    Location(WDWorld.get(), 1008.5, 102.0, -7.5),
+                    Location(WDWorld.get(), 1005.5, 102.0, -6.5)
                 ),
                 4 to listOf(
-                    Location(WDWorldOld.world, 1013.5, 101.0, -11.5),
-                    Location(WDWorldOld.world, 1010.5, 101.0, -10.5),
-                    Location(WDWorldOld.world, 1008.5, 101.0, -9.5),
-                    Location(WDWorldOld.world, 1006.5, 101.0, -8.5),
-                    Location(WDWorldOld.world, 1004.5, 101.0, -8.5)
+                    Location(WDWorld.get(), 1013.5, 101.0, -11.5),
+                    Location(WDWorld.get(), 1010.5, 101.0, -10.5),
+                    Location(WDWorld.get(), 1008.5, 101.0, -9.5),
+                    Location(WDWorld.get(), 1006.5, 101.0, -8.5),
+                    Location(WDWorld.get(), 1004.5, 101.0, -8.5)
                 ),
                 5 to listOf(
-                    Location(WDWorldOld.world, 993.5, 105.0, 0.5),
-                    Location(WDWorldOld.world, 990.5, 105.0, -1.5),
-                    Location(WDWorldOld.world, 987.5, 105.0, -2.5),
-                    Location(WDWorldOld.world, 984.5, 105.0, -3.5),
-                    Location(WDWorldOld.world, 982.5, 105.0, -5.5)
+                    Location(WDWorld.get(), 993.5, 105.0, 0.5),
+                    Location(WDWorld.get(), 990.5, 105.0, -1.5),
+                    Location(WDWorld.get(), 987.5, 105.0, -2.5),
+                    Location(WDWorld.get(), 984.5, 105.0, -3.5),
+                    Location(WDWorld.get(), 982.5, 105.0, -5.5)
                 ),
                 6 to listOf(
-                    Location(WDWorldOld.world, 992.5, 104.0, -2.5),
-                    Location(WDWorldOld.world, 989.5, 104.0, -3.5),
-                    Location(WDWorldOld.world, 986.5, 104.0, -4.5),
-                    Location(WDWorldOld.world, 984.5, 104.0, -5.5),
-                    Location(WDWorldOld.world, 982.5, 104.0, -7.5)
+                    Location(WDWorld.get(), 992.5, 104.0, -2.5),
+                    Location(WDWorld.get(), 989.5, 104.0, -3.5),
+                    Location(WDWorld.get(), 986.5, 104.0, -4.5),
+                    Location(WDWorld.get(), 984.5, 104.0, -5.5),
+                    Location(WDWorld.get(), 982.5, 104.0, -7.5)
                 ),
                 7 to listOf(
-                    Location(WDWorldOld.world, 993.5, 103.0, -4.5),
-                    Location(WDWorldOld.world, 990.5, 103.0, -5.5),
-                    Location(WDWorldOld.world, 988.5, 103.0, -6.5),
-                    Location(WDWorldOld.world, 986.5, 103.0, -7.5),
-                    Location(WDWorldOld.world, 984.5, 103.0, -8.5)
+                    Location(WDWorld.get(), 993.5, 103.0, -4.5),
+                    Location(WDWorld.get(), 990.5, 103.0, -5.5),
+                    Location(WDWorld.get(), 988.5, 103.0, -6.5),
+                    Location(WDWorld.get(), 986.5, 103.0, -7.5),
+                    Location(WDWorld.get(), 984.5, 103.0, -8.5)
                 ),
                 8 to listOf(
-                    Location(WDWorldOld.world, 995.5, 102.0, -6.5),
-                    Location(WDWorldOld.world, 992.5, 102.0, -7.5),
-                    Location(WDWorldOld.world, 989.5, 102.0, -8.5),
-                    Location(WDWorldOld.world, 987.5, 102.0, -9.5),
-                    Location(WDWorldOld.world, 985.5, 102.0, -11.5)
+                    Location(WDWorld.get(), 995.5, 102.0, -6.5),
+                    Location(WDWorld.get(), 992.5, 102.0, -7.5),
+                    Location(WDWorld.get(), 989.5, 102.0, -8.5),
+                    Location(WDWorld.get(), 987.5, 102.0, -9.5),
+                    Location(WDWorld.get(), 985.5, 102.0, -11.5)
                 ),
                 9 to listOf(
-                    Location(WDWorldOld.world, 996.5, 101.0, -8.5),
-                    Location(WDWorldOld.world, 994.5, 101.0, -8.5),
-                    Location(WDWorldOld.world, 992.5, 101.0, -9.5),
-                    Location(WDWorldOld.world, 989.5, 101.0, -10.5),
-                    Location(WDWorldOld.world, 987.5, 101.0, -12.5)
+                    Location(WDWorld.get(), 996.5, 101.0, -8.5),
+                    Location(WDWorld.get(), 994.5, 101.0, -8.5),
+                    Location(WDWorld.get(), 992.5, 101.0, -9.5),
+                    Location(WDWorld.get(), 989.5, 101.0, -10.5),
+                    Location(WDWorld.get(), 987.5, 101.0, -12.5)
                 )
             )
         }
 
         val sceneTeleport: Location by lazy {
-            Location(WDWorldOld.world, 1000.5, 100.0, 0.0, 180f, 0f)
+            Location(WDWorld.get(), 1000.5, 100.0, 0.0, 180f, 0f)
         }
 
         val sceneCenter: Location by lazy {
-            Location(WDWorldOld.world, 1000.5, 101.0, -16.5)
+            Location(WDWorld.get(), 1000.5, 101.0, -16.5)
         }
     }
 }

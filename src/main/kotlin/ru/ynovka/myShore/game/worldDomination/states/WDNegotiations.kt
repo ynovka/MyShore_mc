@@ -14,7 +14,7 @@ import ru.ynovka.myShore.plasmo.PhoneCall
 import ru.ynovka.myShore.game.GamePlayer
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.game.GameWorldOld
+import ru.ynovka.myShore.game.GameWorld
 import org.bukkit.inventory.ItemStack
 import org.bukkit.Material
 
@@ -26,7 +26,7 @@ import org.bukkit.Material
  * И может отправить запрес на переговоры 1 другой страной (5 минут) (если страна откланила - не считается)
  * Параллельно с переговорами президент и вице президент могут распределять бюджет страны.
  */
-class WDNegotiations(game: WDGame) : GameState<WDPlayer, GameWorldOld, WDGame>(game) {
+class WDNegotiations(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
     override fun onEnterState() {
         game.round += 1
         game.countries.forEach { it.onStartNewRound() }

@@ -1,14 +1,14 @@
 package ru.ynovka.myShore.game
 
-import org.bukkit.GameMode
-import org.bukkit.entity.Player
-import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.party.PartyManager.Party
+import org.bukkit.entity.Player
+import org.bukkit.GameMode
 import java.util.UUID
 
 
-abstract class Game<P : GamePlayer, W : GameWorldOld>(
+abstract class Game<P : GamePlayer, W : GameWorld>(
     val party: Party? = null  /** null  → публичная игра */
 ) {
     abstract val initialState: GameState<P, W, *>

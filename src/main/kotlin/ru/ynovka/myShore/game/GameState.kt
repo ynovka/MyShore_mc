@@ -1,6 +1,7 @@
 package ru.ynovka.myShore.game
 
-abstract class GameState<P : GamePlayer, W : GameWorldOld, G : Game<P, W>>(protected val game: G) {
+
+abstract class GameState<P : GamePlayer, W : GameWorld, G : Game<P, W>>(protected val game: G) {
     open fun onEnterState() {}
     open fun onExitState() {}
 
