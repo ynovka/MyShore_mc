@@ -6,11 +6,11 @@ import ru.ynovka.myShore.game.worldDomination.WDGame
 import ru.ynovka.myShore.text.actionBar.ActionBar
 import ru.ynovka.myShore.utils.BossBarTimer
 import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameWorldOld
 
 
 // Ожидание игроков (нужно хотя бы 12)
-class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
+class WDWaitingForPlayers(game: WDGame) : GameState<WDPlayer, GameWorldOld, WDGame>(game) {
     private val timer = BossBarTimer()
 
     private var started = false

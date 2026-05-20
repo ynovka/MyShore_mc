@@ -11,10 +11,10 @@ import java.util.concurrent.CompletableFuture
 
 object PillarsWorldManager {
 
-    fun createWorld(): PillarsWorld {
-        val future = CompletableFuture<PillarsWorld>()
+    fun createWorld(): PillarsWorldOld {
+        val future = CompletableFuture<PillarsWorldOld>()
         scheduler.schedule {
-            val world = PillarsWorld(
+            val world = PillarsWorldOld(
                 WorldCreator.name("pillars_${UUID.randomUUID()}")
                     .generateStructures(false)
                     .generator(VoidWorldGenerator())

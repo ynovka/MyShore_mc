@@ -22,7 +22,7 @@ import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.GamePlayer
 import ru.ynovka.myShore.plasmo.PhoneCall
 import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameWorldOld
 import org.bukkit.inventory.ItemStack
 import org.bukkit.entity.Player
 import org.bukkit.Material
@@ -31,7 +31,7 @@ import java.util.UUID
 
 
 /** Этап распределения игроков по странам, длится 3 минуты */
-class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
+class WDDistributionPlayers(game: WDGame) : GameState<WDPlayer, GameWorldOld, WDGame>(game) {
     private val timer = BossBarTimer()
 
     companion object {

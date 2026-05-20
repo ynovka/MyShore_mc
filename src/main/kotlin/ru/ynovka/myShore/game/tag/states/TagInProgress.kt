@@ -6,13 +6,13 @@ import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.gameUtils.BossbarTimer
 import ru.ynovka.myShore.game.tag.TagPlayer
 import ru.ynovka.myShore.game.tag.TagGame
-import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameWorldOld
 import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.utils.canMove
 
 
 // 40-100 сек (сам геймплей салочек)
-class TagInProgressState(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(game) {
+class TagInProgressState(game: TagGame) : GameState<TagPlayer, GameWorldOld, TagGame>(game) {
     lateinit var timer: BossbarTimer.BossbarTimerHandle
 
     override fun onEnterState() {

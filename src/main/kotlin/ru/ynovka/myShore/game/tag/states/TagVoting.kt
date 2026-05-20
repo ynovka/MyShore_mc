@@ -12,14 +12,14 @@ import ru.ynovka.myShore.game.tag.teleport
 import ru.ynovka.myShore.game.tag.TagGame
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameWorldOld
 import org.bukkit.GameMode
 import org.bukkit.Sound
 import kotlin.math.ceil
 
 
 // 10 сек на голосование за карту, режим игры, сменить лобби, посмотреть статистику
-class TagVoting(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(game) {
+class TagVoting(game: TagGame) : GameState<TagPlayer, GameWorldOld, TagGame>(game) {
 
     override fun onEnterState() {
         ActionbarWaitingFor.startRendering(

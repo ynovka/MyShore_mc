@@ -7,12 +7,12 @@ import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.tag.TagPlayer
 import ru.ynovka.myShore.game.tag.TagGame
 import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameWorldOld
 import org.bukkit.Sound
 
 
 // Ожидание игроков (нужно хотя бы 2)
-class TagWaitingForPlayers(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(game) {
+class TagWaitingForPlayers(game: TagGame) : GameState<TagPlayer, GameWorldOld, TagGame>(game) {
 
     override fun onEnterState() {
         ActionbarWaitingFor.startRendering(

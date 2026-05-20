@@ -3,16 +3,16 @@ package ru.ynovka.myShore.game.pillars
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.utils.InstantChunkClear
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameWorldOld
 import org.bukkit.Location
 import org.bukkit.Bukkit
 import org.bukkit.World
 import java.util.UUID
 
 
-class PillarsWorld(
+class PillarsWorldOld(
     val worldId: UUID
-) : GameWorld {
+) : GameWorldOld {
 
     override val world: World
         get() = Bukkit.getWorld(worldId) ?: throw IllegalStateException("World with id $worldId is not loaded")

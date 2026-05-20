@@ -8,7 +8,7 @@ import ru.ynovka.myShore.text.ComponentDecorator
 import ru.ynovka.myShore.game.tag.TagPlayer
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameWorldOld
 import ru.ynovka.myShore.game.Game
 import kotlin.math.roundToInt
 
@@ -16,7 +16,7 @@ import kotlin.math.roundToInt
 object ActionbarHunterDistance {
 
     fun <
-            W : GameWorld,
+            W : GameWorldOld,
             G : Game<TagPlayer, W>,
             S : GameState<TagPlayer, W, G>
     > startRendering(

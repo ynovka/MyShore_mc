@@ -8,7 +8,7 @@ import ru.ynovka.myShore.party.PartyManager.Party
 import java.util.UUID
 
 
-abstract class Game<P : GamePlayer, W : GameWorld>(
+abstract class Game<P : GamePlayer, W : GameWorldOld>(
     val party: Party? = null  /** null  → публичная игра */
 ) {
     abstract val initialState: GameState<P, W, *>

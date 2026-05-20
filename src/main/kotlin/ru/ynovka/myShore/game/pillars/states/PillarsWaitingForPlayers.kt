@@ -3,7 +3,7 @@ package ru.ynovka.myShore.game.pillars.states
 import ru.ynovka.myShore.game.gameUtils.ActionbarWaitingFor
 import ru.ynovka.myShore.game.pillars.PillarsWorldManager
 import ru.ynovka.myShore.game.pillars.PillarsPlayer
-import ru.ynovka.myShore.game.pillars.PillarsWorld
+import ru.ynovka.myShore.game.pillars.PillarsWorldOld
 import ru.ynovka.myShore.game.pillars.PillarsGame
 import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.utils.canMove
@@ -12,7 +12,7 @@ import org.bukkit.GameMode
 import org.bukkit.Sound
 
 
-class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
+class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorldOld, PillarsGame>(game) {
 
     override fun onEnterState() {
         ActionbarWaitingFor.startRendering(

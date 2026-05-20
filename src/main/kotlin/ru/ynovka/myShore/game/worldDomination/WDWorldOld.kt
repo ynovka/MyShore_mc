@@ -1,12 +1,12 @@
 package ru.ynovka.myShore.game.worldDomination
 
-import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameWorldOld
 import org.bukkit.Location
 import org.bukkit.Bukkit
 import org.bukkit.World
 
 
-object WDWorld : GameWorld {
+object WDWorldOld : GameWorldOld {
     const val WORLD_NAME = "world_domination"
 
     override val world: World

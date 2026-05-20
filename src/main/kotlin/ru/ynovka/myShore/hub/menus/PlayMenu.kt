@@ -37,17 +37,19 @@ object PlayMenu {
             }
         )
         set(
+            SlotPosition.top(4),
+            GuiButton.of(playPillarsItem.getStack(null)) { ctx ->
+                val player = ctx.view.inventoryView.player as Player
+                PillarsGame.hubWorld.teleportToSpawn(player)
+                // todo GameManager.join(player, ::PillarsGame)
+                // нужно вынести на NPS хабе / меню
+            }
+        )
+        set(
             SlotPosition.top(11),
             GuiButton.of(playWDItem.getStack(null)) { ctx ->
                 val player = ctx.view.inventoryView.player as Player
                 GameManager.join(player, ::WDGame)
-            }
-        )
-        set(
-            SlotPosition.top(4),
-            GuiButton.of(playPillarsItem.getStack(null)) { ctx ->
-                val player = ctx.view.inventoryView.player as Player
-                GameManager.join(player, ::PillarsGame)
             }
         )
     }

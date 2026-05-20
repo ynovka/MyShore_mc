@@ -5,7 +5,7 @@ import ru.ynovka.myShore.game.pillars.PillarsWorldManager
 import ru.ynovka.myShore.game.gameUtils.ActionbarTimer
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.pillars.PillarsPlayer
-import ru.ynovka.myShore.game.pillars.PillarsWorld
+import ru.ynovka.myShore.game.pillars.PillarsWorldOld
 import ru.ynovka.myShore.game.pillars.PillarsGame
 import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.utils.canMove
@@ -23,7 +23,7 @@ import org.bukkit.GameMode
  *     // Примечание, что мобы спавнятся разово в начале раунда, без спавнеров и в дневное время суток
  *   - батут (сандартная + основание из шума блоков слизи и изумрудов + слизни)
  */
-class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
+class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorldOld, PillarsGame>(game) {
     override fun onEnterState() {
         // Переводим спеков в игроков
         game.gamePlayers += game.spectatorPlayers

@@ -11,7 +11,7 @@ import ru.ynovka.myShore.game.tag.TagPlayer
 import ru.ynovka.myShore.game.tag.TagGame
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameWorldOld
 import net.kyori.adventure.title.Title
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.utils.canMove
@@ -19,7 +19,7 @@ import java.time.Duration
 
 
 // 5 сек после игры - определение победителей
-class TagFinishing(game: TagGame) : GameState<TagPlayer, GameWorld, TagGame>(game) {
+class TagFinishing(game: TagGame) : GameState<TagPlayer, GameWorldOld, TagGame>(game) {
 
     override fun onEnterState() {
         // Жертвы живы или охотник отсутствует → победа жертв

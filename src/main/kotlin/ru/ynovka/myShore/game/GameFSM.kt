@@ -1,6 +1,6 @@
 package ru.ynovka.myShore.game
 
-class GameFSM<P : GamePlayer, W : GameWorld>(initial: GameState<P, W, *>) {
+class GameFSM<P : GamePlayer, W : GameWorldOld>(initial: GameState<P, W, *>) {
     var current: GameState<P, W, *> = initial
         private set
 

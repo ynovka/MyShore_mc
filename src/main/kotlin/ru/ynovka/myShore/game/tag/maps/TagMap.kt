@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.CompletableFuture
 import ru.ynovka.myShore.game.tag.teleport
 import ru.ynovka.myShore.game.tag.TagGame
-import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameWorldOld
 import org.bukkit.entity.Player
 import org.bukkit.Location
 import org.bukkit.Bukkit
@@ -23,7 +23,7 @@ enum class TagMaps(
     MOUNTAIN_TRACK({ TagMap.byId("tag_mountain_track") });
 }
 
-interface TagMap : GameWorld {
+interface TagMap : GameWorldOld {
 
     val mapId: String
     val mapName: TranslatableComponent

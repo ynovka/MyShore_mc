@@ -7,7 +7,7 @@ import ru.ynovka.myShore.game.worldDomination.WDGame
 import net.kyori.adventure.text.format.NamedTextColor
 import ru.ynovka.myShore.utils.BossBarTimer
 import net.kyori.adventure.text.Component
-import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameWorldOld
 import ru.ynovka.myShore.game.GameState
 import org.bukkit.inventory.ItemStack
 import org.bukkit.Material
@@ -17,7 +17,7 @@ import org.bukkit.Material
  *
  * Этап знакомства игроков, длится ровно 1 минуту
  */
-class WDIntroductionPlayers(game: WDGame) : GameState<WDPlayer, GameWorld, WDGame>(game) {
+class WDIntroductionPlayers(game: WDGame) : GameState<WDPlayer, GameWorldOld, WDGame>(game) {
     /**
      * Отправляем сооющение в чат с членами страны
      */

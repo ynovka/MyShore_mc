@@ -4,18 +4,17 @@ import ru.ynovka.myShore.game.worldDomination.states.WDWaitingForPlayers
 import ru.ynovka.myShore.game.worldDomination.entity.WDGameHistory
 import ru.ynovka.myShore.game.worldDomination.entity.Country
 import ru.ynovka.myShore.game.GameManager
-import ru.ynovka.myShore.game.GameWorld
+import ru.ynovka.myShore.game.GameWorldOld
 import ru.ynovka.myShore.game.Game
-import org.bukkit.entity.Player
 import org.bukkit.Location
 import java.util.UUID
 
 
-class WDGame : Game<WDPlayer, GameWorld>() {
+class WDGame : Game<WDPlayer, GameWorldOld>() {
     override val initialState = WDWaitingForPlayers(this)
     override val maxPlayers = 50
     override val gamePlayers: MutableSet<WDPlayer> = mutableSetOf()
-    override val gameWorld = WDWorld
+    override val gameWorld = WDWorldOld
 
     /** Текущий раунд игры */
     var round = 0
@@ -37,9 +36,9 @@ class WDGame : Game<WDPlayer, GameWorld>() {
         const val ECOLOGY_START = 0.80
 
         val hubLoc: Location
-            get() = WDWorld.hubLoc
+            get() = WDWorldOld.hubLoc
         val unLoc: Location
-            get() = WDWorld.unLoc
+            get() = WDWorldOld.unLoc
 
         fun UUID.currentWDGame(): WDGame? = GameManager.run { currentGame() }
     }
