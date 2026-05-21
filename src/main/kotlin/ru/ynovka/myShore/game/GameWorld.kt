@@ -61,6 +61,8 @@ abstract class GameWorld {
         return getOrCreate().thenCompose { world ->
             val target = location.clone().apply { this.world = world }
             player.teleportAsync(target)
+        }.whenComplete { _, throwable ->
+            if (throwable != null) throwable.printStackTrace()
         }
     }
 }

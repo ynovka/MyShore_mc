@@ -9,6 +9,8 @@ import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
 import ru.ynovka.myShore.game.GameManager
 import ru.ynovka.myShore.text.actionBar.ActionBar
 import ru.ynovka.myShore.utils.canMove
+import ru.ynovka.myShore.utils.restrictToBlock
+import ru.ynovka.myShore.utils.restrictToBlockCenter
 
 
 object Hub {
@@ -25,7 +27,8 @@ object Hub {
             GameManager.leave(this.uniqueId)
             clearTeams()
             ActionBar.clear(this)
-            canMove(true)
+            restrictToBlock(false)
+            restrictToBlockCenter(false)
             gameMode = GameMode.ADVENTURE
             saturation = 20f
             health = 20.0

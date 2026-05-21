@@ -25,8 +25,8 @@ dependencies {
     compileOnly("su.plo.voice.server:paper:2.1.8")
     compileOnly("net.thenextlvl:worlds:4.2.2")
 
-    implementation("dev.jorel:commandapi-paper-shade:11.1.0")
-    implementation("dev.jorel:commandapi-kotlin-paper:11.1.0")
+    implementation("dev.jorel:commandapi-paper-shade:11.2.0")
+    implementation("dev.jorel:commandapi-kotlin-paper:11.2.0")
 
     compileOnly(kotlin("stdlib"))
 }

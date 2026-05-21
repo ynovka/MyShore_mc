@@ -63,7 +63,7 @@ object ActionbarTimer {
             .repeatEvery(20L, Clock.TICKS)
 
         task.completion().thenRun {
-            if (!task.isCancelled && onCompletion != null) {
+            if (game.fsm.current === state && onCompletion != null) {
                 scheduler.schedule {
                     onCompletion(game, state)
                 }.global().once()

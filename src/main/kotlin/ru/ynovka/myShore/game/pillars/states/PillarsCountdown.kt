@@ -9,6 +9,7 @@ import ru.ynovka.myShore.game.pillars.PillarsGame
 import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.utils.canMove
 import org.bukkit.GameMode
+import ru.ynovka.myShore.utils.restrictToBlock
 
 
 /**
@@ -29,14 +30,15 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
         game.spectatorPlayers.clear()
 
         // Очищаем мир
-        game.gameWorld.countdownPrepare()
-        // Спавн колб, столбов и площадки + телепорт игроков
-        game.gameWorld.spawnPlayers(game)
+        game.gameWorld.countdownPrepare().thenRun {
+            // Спавн колб, столбов и площадки + телепорт игроков
+            game.gameWorld.spawnPlayers(game)
+        }
 
         // Отключаем передвищение игрокам
         game.gamePlayers.asPlayers().forEach { player ->
             scheduler.schedule {
-                player.canMove(false)
+                player.restrictToBlock(true)
                 player.gameMode = GameMode.ADVENTURE
             }.entity(player).once()
         }
@@ -56,7 +58,12 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
 
     override fun onPlayerJoin(gamePlayer: PillarsPlayer) {
         // todo
-        game.gameWorld.spawnPlayer(game, gamePlayer)
+        game.gameWorld.spawnPlayer(game, gamePlayer).thenRun {
+            val player = gamePlayer.player
+            scheduler.schedule {
+                player.restrictToBlock(true)
+            }.entity(player).once()
+        }
     }
 
     override fun onPlayerLeave(gamePlayer: PillarsPlayer) {

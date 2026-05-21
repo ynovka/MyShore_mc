@@ -1,14 +1,16 @@
 package ru.ynovka.myShore.game.pillars.states
 
 import ru.ynovka.myShore.game.gameUtils.ActionbarWaitingFor
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.pillars.PillarsPlayer
 import ru.ynovka.myShore.game.pillars.PillarsWorld
 import ru.ynovka.myShore.game.pillars.PillarsGame
 import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.hub.HubItems
+import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Sound
+import ru.ynovka.myShore.utils.restrictToBlock
 
 
 class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
@@ -21,30 +23,38 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
         )
 
         game.gamePlayers.forEach { pPlayer ->
-            pPlayer.setupForWaiting(game)
-            game.gameWorld.spawnPlayer(game, pPlayer)
-            pPlayer.player.playSound(pPlayer.player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
+            val player = pPlayer.player
+            scheduler.schedule {
+                setupForWaiting(player, pPlayer, game)
+                player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
+            }.entity(player).once()
         }
     }
 
     override fun onPlayerJoin(gamePlayer: PillarsPlayer) {
-        gamePlayer.setupForWaiting(game)
-        game.gameWorld.spawnPlayer(game, gamePlayer)
-
         if (game.gamePlayers.size >= 2) {
             game.fsm.transitionTo(PillarsCountdown(game))
+            return
         }
+
+        val player = gamePlayer.player
+        scheduler.schedule {
+            setupForWaiting(player, gamePlayer, game)
+        }.entity(player).once()
     }
 
-    companion object {
-        fun PillarsPlayer.setupForWaiting(game: PillarsGame) {
-            val player = this.player
-            game.gameWorld.spawnPlayer(game, this)
-            player.gameMode = GameMode.ADVENTURE
-            player.clearActivePotionEffects()
-            player.canMove(false)
-            player.inventory.clear()
-            player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
+    private fun setupForWaiting(
+        player: Player,
+        pPlayer: PillarsPlayer,
+        game: PillarsGame
+    ) {
+        println("setupForWaiting")
+        game.gameWorld.spawnPlayer(game, pPlayer).thenRun {
+            player.restrictToBlock(true)
         }
+        player.gameMode = GameMode.ADVENTURE
+        player.clearActivePotionEffects()
+        player.inventory.clear()
+        player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
     }
 }

@@ -35,7 +35,7 @@ object ActionbarWaitingFor {
             if (frame == frames.size) frame = 0
 
             game.gamePlayers.asPlayers().forEach { player ->
-                player.sendPermanentActionBar(
+                player.sendActionBar(
                     ComponentDecorator.addBackground(
                         Component.translatable(componentKey)
                             .append(Component.text(frames[frame])),

@@ -17,7 +17,6 @@ object PillarsEvents : Listener {
         inst.server.pluginManager.registerEvents(this, inst)
     }
 
-    // todo listeners: onMove -> y<=0 - player to spec ; onDeath -> player to spec
     @EventHandler
     fun onPlayerFall(e: PlayerMoveEvent) {
         if (!e.player.isInPillarsWorld()) return

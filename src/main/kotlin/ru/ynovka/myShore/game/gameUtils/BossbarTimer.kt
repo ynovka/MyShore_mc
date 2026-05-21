@@ -150,14 +150,24 @@ object BossbarTimer {
             }
             .repeatEvery(20L, Clock.TICKS)
 
-        task.completion().thenRun {
-            hideAllBars()
+        task.completion().whenComplete { _, throwable ->
+            scheduler.schedule {
+                hideAllBars()
 
-            if (!task.isCancelled && !cancelled.get() && onCompletion != null) {
-                scheduler.schedule {
+                if (throwable != null) {
+                    throwable.printStackTrace()
+                    return@schedule
+                }
+
+                if (
+                    game.fsm.current === state &&
+                    timeLeft.get() <= 0 &&
+                    !cancelled.get() &&
+                    onCompletion != null
+                ) {
                     onCompletion(game, state)
-                }.global().once()
-            }
+                }
+            }.global().once()
         }
 
         return handle

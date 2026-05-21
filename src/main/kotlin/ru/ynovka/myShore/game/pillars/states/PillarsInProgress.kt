@@ -16,6 +16,7 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.Material
 import org.bukkit.GameMode
 import org.bukkit.Location
+import ru.ynovka.myShore.utils.restrictToBlock
 
 
 class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
@@ -25,11 +26,19 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
         val world = game.gameWorld.getOrCreate().get()
         game.gameWorld.pillars.forEach { pillar ->
             val blockLoc = Location(world, pillar.x.toDouble(), TELEPORT_Y - 1, pillar.z.toDouble())
-            // todo обход всей колбы а не 1 блока
+
             scheduler.schedule {
-                val block = world.getBlockAt(blockLoc)
-                block.type = Material.AIR
-            }.region(blockLoc)
+                val centerX = blockLoc.blockX
+                val centerZ = blockLoc.blockZ
+
+                for (x in centerX - 2..centerX + 2) {
+                    for (z in centerZ - 2..centerZ + 2) {
+                        for (y in 105..125) {
+                            world.getBlockAt(x, y, z).type = Material.AIR
+                        }
+                    }
+                }
+            }.region(blockLoc).once()
         }
 
         // даём эффект плавного падения
@@ -38,7 +47,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
                 player.addPotionEffect(
                     PotionEffect(
                         PotionEffectType.SLOW_FALLING,
-                        60,
+                        50,
                         0,
                         false,
                         false,
@@ -52,7 +61,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
         scheduler.schedule {
             game.gamePlayers.asPlayers().forEach { player ->
                 scheduler.schedule {
-                    player.canMove(true)
+                    player.restrictToBlock(false)
                     player.gameMode = GameMode.SURVIVAL
                 }.entity(player).once()
             }
@@ -70,6 +79,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
 
         // todo Победитель !!
         val winner = game.gamePlayers.firstOrNull() ?: return
+        game.fsm.transitionTo(PillarsFinishing(game))
     }
 
     override fun onPlayerLeave(gamePlayer: PillarsPlayer) {
@@ -77,6 +87,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
 
         // todo Победитель !!
         val winner = game.gamePlayers.firstOrNull() ?: return
+        game.fsm.transitionTo(PillarsFinishing(game))
     }
 
     private fun startGiveRandomItemsTimer() {
