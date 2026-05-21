@@ -22,8 +22,7 @@ object Hub {
     fun Player.toHub() {
         ru.ynovka.myShore.MyShore.scheduler.schedule {
             hubVisibilityGroup.addViewer(uniqueId)
-            // TODO teleportAsync(spawn)
-            PillarsGame.hubWorld.teleportToSpawn(this) // todo tmp
+            teleportAsync(spawn)
             clearActivePotionEffects()
             applyHubInventory()
             GameManager.leave(this.uniqueId)
