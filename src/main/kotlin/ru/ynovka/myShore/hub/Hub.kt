@@ -7,6 +7,7 @@ import org.bukkit.GameMode
 import org.bukkit.Bukkit
 import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
 import ru.ynovka.myShore.game.GameManager
+import ru.ynovka.myShore.game.pillars.PillarsGame
 import ru.ynovka.myShore.text.actionBar.ActionBar
 import ru.ynovka.myShore.utils.canMove
 import ru.ynovka.myShore.utils.restrictToBlock
@@ -21,7 +22,8 @@ object Hub {
     fun Player.toHub() {
         ru.ynovka.myShore.MyShore.scheduler.schedule {
             hubVisibilityGroup.addViewer(uniqueId)
-            teleportAsync(spawn)
+            // TODO teleportAsync(spawn)
+            PillarsGame.hubWorld.teleportToSpawn(this) // todo tmp
             clearActivePotionEffects()
             applyHubInventory()
             GameManager.leave(this.uniqueId)
@@ -39,6 +41,6 @@ object Hub {
 
     private fun Player.applyHubInventory() {
         inventory.clear()
-        inventory.setItem(0, HubItems.playMenu.getStack(null))
+        // TODO inventory.setItem(0, HubItems.playMenu.getStack(null))
     }
 }

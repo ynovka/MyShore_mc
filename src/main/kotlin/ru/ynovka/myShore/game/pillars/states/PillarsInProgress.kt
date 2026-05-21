@@ -1,5 +1,6 @@
 package ru.ynovka.myShore.game.pillars.states
 
+import com.github.darksoulq.abyssallib.common.color.ColorFilter.saturation
 import ru.ynovka.myShore.game.pillars.Pillar.Companion.TELEPORT_Y
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
@@ -63,6 +64,8 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
                 scheduler.schedule {
                     player.restrictToBlock(false)
                     player.gameMode = GameMode.SURVIVAL
+                    player.saturation = 20f
+                    player.health = 20.0
                 }.entity(player).once()
             }
         }.after(60L, Clock.TICKS).once()

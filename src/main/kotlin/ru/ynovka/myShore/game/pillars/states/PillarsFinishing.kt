@@ -23,4 +23,6 @@ class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
             }
         )
     }
+
+    override fun canPlayerJoin(gamePlayer: PillarsPlayer) = false
 }
