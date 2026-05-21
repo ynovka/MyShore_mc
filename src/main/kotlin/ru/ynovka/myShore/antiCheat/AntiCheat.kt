@@ -22,7 +22,6 @@ object AntiCheat {
                 if (Bukkit.getCurrentTick() - tick > 60) {
                     if (player.location.block.getRelative(BlockFace.DOWN).type == Material.AIR) {
                         player.kick(Component.text("Packet timeout"))
-                        true
                     }
                     false
                 } else false

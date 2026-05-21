@@ -39,7 +39,7 @@ class MyShore : JavaPlugin() {
         dataFolder.mkdirs()
         CommandAPI.onEnable()
 
-        AntiCheat.register()
+        //AntiCheat.register()
         Database.register(inst)
         Commands.register()
         Events.register()
