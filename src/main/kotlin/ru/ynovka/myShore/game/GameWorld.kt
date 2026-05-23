@@ -46,7 +46,7 @@ abstract class GameWorld {
 
         return access.create(level).thenApply { world ->
             access.worldRegistry.register(level, true)
-            world
+            configureWorld(world)
         }
     }
 
@@ -76,6 +76,8 @@ abstract class GameWorld {
         world.setStorm(false)
         world.isThundering = false
         world.setGameRule(GameRules.ADVANCE_WEATHER, false)
+
+        world.setGameRule(GameRules.SPECTATORS_GENERATE_CHUNKS, false)
 
         world.difficulty = Difficulty.EASY
 

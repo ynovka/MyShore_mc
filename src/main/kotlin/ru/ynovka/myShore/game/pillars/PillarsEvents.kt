@@ -1,31 +1,39 @@
 package ru.ynovka.myShore.game.pillars
 
-import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.pillars.PillarsGame.Companion.currentPillarsGame
+import ru.ynovka.myShore.game.pillars.Pillar.Companion.TOP_BLOCK
+import ru.ynovka.myShore.game.pillars.states.PillarsInProgress
+import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
+import ru.ynovka.myShore.MyShore.Companion.scheduler
+import io.papermc.paper.event.entity.EntityMoveEvent
 import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import ru.ynovka.myShore.game.SpectatorReason
+import net.kyori.adventure.text.Component
+import org.bukkit.event.EventPriority
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.entity.Player
+import org.bukkit.util.Vector
 import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.World
-import org.bukkit.event.EventPriority
-import org.bukkit.util.Vector
-import ru.ynovka.myShore.MyShore.Companion.scheduler
-import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
-import ru.ynovka.myShore.game.pillars.Pillar.Companion.TELEPORT_Y
-import ru.ynovka.myShore.game.pillars.Pillar.Companion.TOP_BLOCK
-import ru.ynovka.myShore.game.pillars.states.PillarsFinishing
-import ru.ynovka.myShore.game.pillars.states.PillarsInProgress
 
 
 object PillarsEvents : Listener {
 
     fun register() {
         inst.server.pluginManager.registerEvents(this, inst)
+    }
+
+    @EventHandler
+    fun onEntityMove(e: EntityMoveEvent) {
+        val entity = e.entity
+        if (entity is Player) return
+        scheduler.schedule {
+            if (entity.location.y < 0.0) entity.remove()
+        }.entity(entity).once()
     }
 
     @EventHandler
@@ -92,12 +100,6 @@ object PillarsEvents : Listener {
                         it.sendMessage(msg)
                     }.entity(it).once()
                 }
-            }
-            else -> {
-                game.gameWorld.spawnPlayer(
-                    game,
-                    game.getOrCreatePlayer(e.player.uniqueId)
-                )
             }
         }
     }

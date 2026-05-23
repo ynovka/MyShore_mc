@@ -12,7 +12,7 @@ import java.util.UUID
 class PillarsGame : Game<PillarsPlayer, PillarsWorld>() {
 
     override val initialState = PillarsWaitingForPlayers(this)
-    override val maxPlayers: Int = 200
+    override val maxPlayers: Int = 500
     override val gamePlayers: MutableSet<PillarsPlayer> = mutableSetOf()
 
     var nextRoundPillar = PillarGenerator.DEFAULT
