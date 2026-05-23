@@ -47,10 +47,12 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
 
     override fun onPlayerJoin(gamePlayer: PillarsPlayer) {
         game.gameWorld.spawnPlayer(game, gamePlayer).thenRun {
-            val player = gamePlayer.player
-            scheduler.schedule {
-                player.restrictToBlock(true)
-            }.entity(player).once()
+            val player = gamePlayer.playerOrNull
+            player?.let {
+                scheduler.schedule {
+                    player.restrictToBlock(true)
+                }.entity(player).once()
+            }
         }
     }
 

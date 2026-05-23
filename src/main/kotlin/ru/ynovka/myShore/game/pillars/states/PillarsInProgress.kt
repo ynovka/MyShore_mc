@@ -74,33 +74,47 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
         startGiveRandomItemsTimer()
 
         // Барьер
-        val time = (world.worldBorder.size / 0.25).toLong()
-        world.worldBorder.changeSize(0.0, time * 20L)
-        BossbarTimer.startCountdownTimer(
-            time = time.toInt(),
-            game = game,
-            state = this,
-            onCompletion = { game, _ ->
-                game.fsm.transitionTo(PillarsFinishing(game))
-            }
-        )
+        scheduler.schedule {
+            val time = (world.worldBorder.size / 0.25).toLong()
+            world.worldBorder.changeSize(2.0, time * 20L)
+            BossbarTimer.startCountdownTimer(
+                time = time.toInt(),
+                game = game,
+                state = this,
+                onCompletion = { game, _ ->
+                    game.fsm.transitionTo(PillarsFinishing(game))
+                }
+            )
+        }.global().once()
     }
 
     // todo короче если под игроком нету блоков (getHighest) даём левитацию + фейрверки
-    override fun onPlayerBecomeSpectator(gamePlayer: PillarsPlayer, reason: SpectatorReason) = hasWinner(gamePlayer)
+    override fun onPlayerBecomeSpectator(gamePlayer: PillarsPlayer, reason: SpectatorReason) {
+        hasWinner(gamePlayer)
+        val player = gamePlayer.playerOrNull
+        val world = game.gameWorld.getOrCreate().get()
+        player?.let {
+            scheduler.schedule {
+                player.gameMode = GameMode.SPECTATOR
+                player.teleportAsync(world.spawnLocation)
+            }.entity(player).once()
+        }
+    }
 
     override fun onPlayerLeave(gamePlayer: PillarsPlayer) = hasWinner(gamePlayer)
 
     private fun hasWinner(gamePlayer: PillarsPlayer) {
         if (game.gamePlayers.size != 1) return
-        val player = gamePlayer.player
-        scheduler.schedule {
-            val pillar = game.gameWorld.pillars.firstOrNull { it.owner == player.uniqueId } ?: return@schedule
-            val world = game.gameWorld.get() ?: return@schedule
-            player.teleportAsync(Location(
-                world, pillar.x + 0.5, TELEPORT_Y, pillar.z + 0.5
-            ))
-        }.entity(player).once()
+        val player = gamePlayer.playerOrNull
+        player?.let {
+            scheduler.schedule {
+                val pillar = game.gameWorld.pillars.firstOrNull { it.owner == player.uniqueId } ?: return@schedule
+                val world = game.gameWorld.get() ?: return@schedule
+                player.teleportAsync(Location(
+                    world, pillar.x + 0.5, TELEPORT_Y, pillar.z + 0.5
+                ))
+            }.entity(player).once()
+        }
 
 
         val winner = game.gamePlayers.firstOrNull() ?: return

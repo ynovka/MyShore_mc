@@ -94,20 +94,22 @@ class PillarsWorld(
                 pillar.z + 0.5
             )
 
-            pPlayer.player.teleportAsync(teleportLocation).thenAccept { success ->
+            pPlayer.playerOrNull?.teleportAsync(teleportLocation)?.thenAccept { success ->
                 if (!success) return@thenAccept
 
-                val player = pPlayer.player
+                val player = pPlayer.playerOrNull
 
-                scheduler.schedule {
-                    player.restrictToBlock(true)
-                    player.gameMode = GameMode.ADVENTURE
-                    player.foodLevel = 20
-                    player.saturation = 10f
-                    player.health = 20.0
-                    player.inventory.clear()
-                    player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
-                }.entity(player).once()
+                player?.let {
+                    scheduler.schedule {
+                        player.restrictToBlock(true)
+                        player.gameMode = GameMode.ADVENTURE
+                        player.foodLevel = 20
+                        player.saturation = 10f
+                        player.health = 20.0
+                        player.inventory.clear()
+                        player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
+                    }.entity(player).once()
+                }
             }
         }.whenComplete { _, throwable ->
             if (throwable != null) throwable.printStackTrace()

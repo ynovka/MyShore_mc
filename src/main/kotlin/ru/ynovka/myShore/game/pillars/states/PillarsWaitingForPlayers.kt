@@ -23,8 +23,10 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
         )
 
         game.gamePlayers.forEach { pPlayer ->
-            val player = pPlayer.player
-            setupForWaiting(player, pPlayer, game)
+            val player = pPlayer.playerOrNull
+            player?.let {
+                setupForWaiting(player, pPlayer, game)
+            }
         }
     }
 
@@ -34,8 +36,10 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
             return
         }
 
-        val player = gamePlayer.player
-        setupForWaiting(player, gamePlayer, game)
+        val player = gamePlayer.playerOrNull
+        player?.let {
+            setupForWaiting(player, gamePlayer, game)
+        }
     }
 
     private fun setupForWaiting(
