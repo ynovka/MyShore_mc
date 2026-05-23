@@ -5,6 +5,7 @@ import net.minecraft.network.protocol.game.ServerboundClientTickEndPacket
 import com.github.darksoulq.abyssallib.server.event.SubscribeEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
+
 object AntiCheatEvents {
     @SubscribeEvent
     fun onPacket(e: PacketReceiveEvent) {

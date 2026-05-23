@@ -1,14 +1,16 @@
 package ru.ynovka.myShore.utils
 
-import io.papermc.paper.threadedregions.scheduler.ScheduledTask
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
+import com.github.darksoulq.abyssallib.server.scheduler.ScheduledTask
+import com.github.darksoulq.abyssallib.server.scheduler.TimeUnit
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.text.ComponentDecorator
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
@@ -84,12 +86,7 @@ class BossBarTimer(
         totalMs.set(durationMs)
         running.set(true)
 
-        task = inst.server.asyncScheduler.runAtFixedRate(inst, { scheduledTask ->
-            if (!running.get()) {
-                scheduledTask.cancel()
-                return@runAtFixedRate
-            }
-
+        task = scheduler.schedule {
             val currentEndMs = endMs.get()
             val currentTotalMs = totalMs.get()
 
@@ -104,15 +101,14 @@ class BossBarTimer(
                     .coerceIn(0f, 1f)
             }
 
-            inst.server.scheduler.runTask(inst, Runnable {
-                if (!running.get()) return@Runnable
+            scheduler.schedule {
+                if (!running.get()) return@schedule
 
                 if (!isActive()) {
                     running.set(false)
-                    scheduledTask.cancel()
                     hideBars()
                     onCancel()
-                    return@Runnable
+                    return@schedule
                 }
 
                 barTimer.name(
@@ -125,20 +121,22 @@ class BossBarTimer(
 
                 if (remainingMs <= 0L) {
                     running.set(false)
-                    scheduledTask.cancel()
                     hideBars()
                     onFinish()
                 }
-            })
-        }, 0L, 1L, TimeUnit.SECONDS)
+            }.once()
+        }
+            .async()
+            .repeatWhile { running.get() }
+            .repeatEvery(1L, TimeUnit.SECONDS, Clock.REALTIME)
     }
 
     fun stop() {
         cancelTaskOnly()
 
-        inst.server.scheduler.runTask(inst, Runnable {
+        scheduler.schedule {
             hideBars()
-        })
+        }.once()
     }
 
     private fun hideBars() {

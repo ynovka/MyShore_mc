@@ -10,10 +10,10 @@ import ru.ynovka.myShore.texturepack.GuiTextures
 import net.kyori.adventure.text.Component
 import org.bukkit.inventory.MenuType
 import org.bukkit.entity.Player
-import ru.ynovka.myShore.games.GameManager
-import ru.ynovka.myShore.games.pillars.PillarsGame
-import ru.ynovka.myShore.games.tag.TagGame
-import ru.ynovka.myShore.games.worldDomination.WDGame
+import ru.ynovka.myShore.game.GameManager
+import ru.ynovka.myShore.game.pillars.PillarsGame
+import ru.ynovka.myShore.game.tag.TagGame
+import ru.ynovka.myShore.game.worldDomination.WDGame
 import ru.ynovka.myShore.hub.HubItems.playPillarsItem
 import ru.ynovka.myShore.hub.HubItems.playTagItem
 import ru.ynovka.myShore.hub.HubItems.playWDItem
@@ -37,17 +37,19 @@ object PlayMenu {
             }
         )
         set(
+            SlotPosition.top(4),
+            GuiButton.of(playPillarsItem.getStack(null)) { ctx ->
+                val player = ctx.view.inventoryView.player as Player
+                PillarsGame.hubWorld.teleportToSpawn(player)
+                // todo GameManager.join(player, ::PillarsGame)
+                // нужно вынести на NPS хабе / меню
+            }
+        )
+        set(
             SlotPosition.top(11),
             GuiButton.of(playWDItem.getStack(null)) { ctx ->
                 val player = ctx.view.inventoryView.player as Player
                 GameManager.join(player, ::WDGame)
-            }
-        )
-        set(
-            SlotPosition.top(4),
-            GuiButton.of(playPillarsItem.getStack(null)) { ctx ->
-                val player = ctx.view.inventoryView.player as Player
-                GameManager.join(player, ::PillarsGame)
             }
         )
     }

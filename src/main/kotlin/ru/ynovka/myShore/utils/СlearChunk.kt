@@ -1,6 +1,7 @@
 package ru.ynovka.myShore.utils
 
 import com.github.darksoulq.abyssallib.common.reflection.Reflect
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import net.minecraft.world.level.chunk.status.ChunkStatus
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.level.chunk.ChunkAccess
@@ -9,19 +10,27 @@ import net.minecraft.world.ticks.LevelChunkTicks
 import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.craftbukkit.CraftChunk
 import net.minecraft.core.SectionPos
+import net.minecraft.world.level.gameevent.GameEventListenerRegistry
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 
 
 object InstantChunkClear {
 
     fun clearChunk(chunk: Chunk) {
-        check(Bukkit.isPrimaryThread()) { "clearChunk must be called only on the main server thread" }
+        check(Bukkit.isOwnedByCurrentRegion(chunk.world, chunk.x, chunk.z)) {
+            "clearChunk must be called only on the owning region thread"
+        }
 
         val nmsChunk = (chunk as CraftChunk).getHandle(ChunkStatus.FULL) as LevelChunk
 
-        chunk.entities.forEach { if (it !is Player) it.remove() }
+        chunk.entities.filter { it !is Player }.forEach {
+            scheduler.schedule {
+                it.remove()
+            }.entity(it).once()
+        }
 
         nmsChunk.clearAllBlockEntities()
         clearPendingBlockEntities(nmsChunk)
@@ -41,11 +50,6 @@ object InstantChunkClear {
         for ((type, heightmap) in emptyChunk.heightmaps) {
             nmsChunk.setHeightmap(type, heightmap.rawData)
         }
-        for (type in Heightmap.Types.entries) {
-            if (!nmsChunk.heightmaps.containsKey(type)) {
-                nmsChunk.setHeightmap(type, LongArray(256))
-            }
-        }
 
         Reflect.of(LevelChunk::class.java)
             .method<Void>("initializeLightSources")
@@ -63,10 +67,16 @@ object InstantChunkClear {
 
     private fun clearGameEventRegistries(chunk: LevelChunk) {
         Reflect.of(LevelChunk::class.java)
-            .field<Array<Any?>>("gameEventListenerRegistrySections")
-            .ifSuccess { it.get(chunk).ifSuccess { arr -> arr.fill(null) } }
+            .field<Int2ObjectMap<GameEventListenerRegistry>>("gameEventListenerRegistrySections")
+            .ifSuccess { field ->
+                field.get(chunk)
+                    .ifSuccess { registries -> registries.clear() }
+                    .ifFailure {
+                        inst.logger.warning("[InstantChunkClear] gameEventListenerRegistrySections get: ${it.message}")
+                    }
+            }
             .ifFailure {
-                inst.logger.warning("[InstantChunkClear] gameEventListenerRegistrySections: ${it.message}")
+                inst.logger.warning("[InstantChunkClear] gameEventListenerRegistrySections field: ${it.message}")
             }
     }
 

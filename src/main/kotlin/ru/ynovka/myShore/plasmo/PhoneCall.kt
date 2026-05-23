@@ -1,8 +1,8 @@
 package ru.ynovka.myShore.plasmo
 
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import ru.ynovka.myShore.MyShore
 import ru.ynovka.myShore.text.actionBar.clearActionBar
@@ -95,7 +95,7 @@ object PhoneCall {
 
         PhoneCallVoice.startCallAudio(MyShore.plasmo, activeCall)
 
-        Bukkit.getScheduler().runTaskLater(MyShore.inst, Runnable {
+        MyShore.scheduler.schedule {
             if (calls.contains(activeCall)) {
                 terminateCall(activeCall)
                 activeCall.from.asPlayer()?.sendTimedActionBar(
@@ -105,7 +105,9 @@ object PhoneCall {
                     Component.translatable("bar.myshore.wd.call_timeout"), 3
                 )
             }
-        }, CALL_DURATION_TICKS)
+        }
+            .after(CALL_DURATION_TICKS, Clock.TICKS)
+            .once()
     }
 
     fun endCall(player: Player) {

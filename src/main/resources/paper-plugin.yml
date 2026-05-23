@@ -1,6 +1,7 @@
 name: MyShore
 version: '0.0.1'
 main: ru.ynovka.myShore.MyShore
+canvas-supported: true
 api-version: '1.21'
 prefix: [ MYSHORE ]
 authors: [ Ynovka ]
@@ -13,6 +14,10 @@ dependencies:
     PlasmoVoice:
       required: true
       load: BEFORE
+    Worlds:
+      required: true
+      load: BEFORE
+      join-classpath: true
   bootstrap:
     AbyssalLib:
       required: true

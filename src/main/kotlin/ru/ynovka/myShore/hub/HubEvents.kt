@@ -1,13 +1,15 @@
 package ru.ynovka.myShore.hub
 
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import ru.ynovka.myShore.text.actionBar.ActionBar
 import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import ru.ynovka.myShore.party.PartyManager
-import ru.ynovka.myShore.games.GameManager
+import ru.ynovka.myShore.game.GameManager
 import org.bukkit.potion.PotionEffectType
 import ru.ynovka.myShore.party.LeftReason
 import ru.ynovka.myShore.hub.Hub.toHub
@@ -25,15 +27,15 @@ import org.bukkit.Bukkit
 object HubEvents : Listener {
     fun register() {
         inst.server.pluginManager.registerEvents(this, inst)
-        inst.server.scheduler.runTaskTimer(inst, Runnable {
+        scheduler.schedule {
             Hub.world.players.forEach { player ->
-                if (player.gameMode == GameMode.CREATIVE) return@Runnable
+                if (player.gameMode == GameMode.CREATIVE) return@schedule
                 val l = player.location.clone().apply { y = Hub.spawn.y }
                 val distance = Hub.spawn.distance(l)
 
                 if (player.y < 87) {
                     player.toHub()
-                    return@Runnable
+                    return@schedule
                 }
 
                 val t = l.world.getHighestBlockAt(l).type
@@ -53,7 +55,8 @@ object HubEvents : Listener {
                     player.velocity = player.velocity.add(vec)
                 }
             }
-        }, 0L, 2L)
+        }
+            .repeatEvery(2L, Clock.TICKS)
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -65,14 +68,16 @@ object HubEvents : Listener {
             other.hidePlayer(inst, player)
         }
 
-        inst.server.scheduler.runTaskLater(inst, Runnable {
+        scheduler.schedule {
             val isConnected = MyShore.plasmo.isPlayerConnected(player)
             if (!isConnected) {
                 player.sendMessage("Похоже у вас не установлен мод PlasmoVoice")
                 player.sendMessage("Без него вы не сможете поиграть в некоторые из игр")
                 player.sendMessage("Если считаете что произошла ошибка, попробуйте /vrc")
             }
-        }, 6*20L)
+        }
+            .after(6 * 20L, Clock.TICKS)
+            .once()
 
         player.toHub()
 
@@ -81,15 +86,14 @@ object HubEvents : Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerLeave(e: PlayerQuitEvent) {
-
         ActionBar.clear(e.player)
-        GameManager.leave(e.player)
+        GameManager.leave(e.player.uniqueId)
         PartyManager.leave(e.player, LeftReason.QUIT)
-        inst.server.scheduler.runTaskLater(
-            inst,
-            Runnable { TabController.updateAll() },
-            5
-        )
+        scheduler.schedule {
+            TabController.updateAll()
+        }
+            .after(5L, Clock.TICKS)
+            .once()
     }
 
     @EventHandler

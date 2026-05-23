@@ -5,11 +5,13 @@ import org.bukkit.entity.Player
 import org.bukkit.Location
 import org.bukkit.GameMode
 import org.bukkit.Bukkit
-import org.bukkit.GameRule
 import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
-import ru.ynovka.myShore.games.GameManager
+import ru.ynovka.myShore.game.GameManager
+import ru.ynovka.myShore.game.pillars.PillarsGame
 import ru.ynovka.myShore.text.actionBar.ActionBar
 import ru.ynovka.myShore.utils.canMove
+import ru.ynovka.myShore.utils.restrictToBlock
+import ru.ynovka.myShore.utils.restrictToBlockCenter
 
 
 object Hub {
@@ -18,21 +20,26 @@ object Hub {
     val hubVisibilityGroup = VisibilityGroup()
 
     fun Player.toHub() {
-        hubVisibilityGroup.addViewer(uniqueId)
-        teleportAsync(spawn)
-        clearActivePotionEffects()
-        applyHubInventory()
-        GameManager.leave(this)
-        clearTeams()
-        ActionBar.clear(this)
-        canMove(true)
-        gameMode = GameMode.ADVENTURE
-        saturation = 20f
-        health = 20.0
+        ru.ynovka.myShore.MyShore.scheduler.schedule {
+            hubVisibilityGroup.addViewer(uniqueId)
+            teleportAsync(spawn)
+            clearActivePotionEffects()
+            applyHubInventory()
+            GameManager.leave(this.uniqueId)
+            clearTeams()
+            ActionBar.clear(this)
+            restrictToBlock(false)
+            restrictToBlockCenter(false)
+            gameMode = GameMode.ADVENTURE
+            saturation = 20f
+            health = 20.0
+        }
+            .entity(this)
+            .once()
     }
 
     private fun Player.applyHubInventory() {
         inventory.clear()
-        inventory.setItem(0, HubItems.playMenu.getStack(null))
+        // TODO inventory.setItem(0, HubItems.playMenu.getStack(null))
     }
 }

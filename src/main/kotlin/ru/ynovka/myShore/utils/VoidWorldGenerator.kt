@@ -57,7 +57,6 @@ class VoidWorldGenerator : ChunkGenerator() {
 
     override fun shouldGenerateNoise(): Boolean = false
     override fun shouldGenerateSurface(): Boolean = false
-    override fun shouldGenerateBedrock(): Boolean = false
     override fun shouldGenerateCaves(): Boolean = false
     override fun shouldGenerateDecorations(): Boolean = false
     override fun shouldGenerateMobs(): Boolean = false
