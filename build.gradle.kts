@@ -14,16 +14,17 @@ repositories {
     maven("https://maven.canvasmc.io/releases")
     maven("https://repo.thenextlvl.net/releases")
     maven("https://repo.plasmoverse.com/releases")
+    maven("https://repo.fancyinnovations.com/releases")
 }
 
 dependencies {
     paperweight.devBundle("io.canvasmc.canvas", "26.1.2.build.+")
 
-
-    compileOnly("com.github.darksoulq:AbyssalLib:v2.2.2-mc.26.1.2")
+    compileOnly("com.github.darksoulq:AbyssalLib:v2.3.0-mc.26.1.2")
     //compileOnly("com.github.darksoulq:AbyssalLib")
     compileOnly("su.plo.voice.server:paper:2.1.8")
     compileOnly("net.thenextlvl:worlds:4.2.2")
+    compileOnly("de.oliver:FancyNpcs:2.9.2")
 
     implementation("dev.jorel:commandapi-paper-shade:11.2.0")
     implementation("dev.jorel:commandapi-kotlin-paper:11.2.0")

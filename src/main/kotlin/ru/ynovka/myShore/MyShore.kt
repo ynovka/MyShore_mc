@@ -4,15 +4,15 @@ import com.github.darksoulq.abyssallib.server.registry.DeferredRegistry
 import com.github.darksoulq.abyssallib.server.registry.Registries
 import com.github.darksoulq.abyssallib.server.scheduler.Scheduler
 import com.github.darksoulq.abyssallib.world.data.statistic.StatisticType
-import com.github.darksoulq.abyssallib.world.item.Item
-import dev.jorel.commandapi.CommandAPI
-import dev.jorel.commandapi.CommandAPIPaperConfig
 import net.kyori.adventure.text.minimessage.MiniMessage
-import org.bukkit.plugin.java.JavaPlugin
-import ru.ynovka.myShore.antiCheat.AntiCheat
-import ru.ynovka.myShore.plasmo.PlasmoAddon
+import com.github.darksoulq.abyssallib.world.item.Item
+import dev.jorel.commandapi.CommandAPIPaperConfig
 import ru.ynovka.myShore.texturepack.TexturePack
 import su.plo.voice.api.server.PlasmoVoiceServer
+import ru.ynovka.myShore.antiCheat.AntiCheat
+import ru.ynovka.myShore.plasmo.PlasmoAddon
+import org.bukkit.plugin.java.JavaPlugin
+import dev.jorel.commandapi.CommandAPI
 
 
 class MyShore : JavaPlugin() {
@@ -40,6 +40,7 @@ class MyShore : JavaPlugin() {
         CommandAPI.onEnable()
 
         //AntiCheat.register()
+        NPCs.register()
         Database.register(inst)
         Commands.register()
         Events.register()

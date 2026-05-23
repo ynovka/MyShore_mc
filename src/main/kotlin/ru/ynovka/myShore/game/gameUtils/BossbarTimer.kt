@@ -46,7 +46,7 @@ object BossbarTimer {
         state: S,
         onCompletion: ((game: G, state: S) -> Unit)? = null
     ): BossbarTimerHandle {
-        val timeLeft = AtomicInteger(time + 1)
+        val timeLeft = AtomicInteger(time)
         val maxTime = AtomicInteger(time.coerceAtLeast(1))
         val cancelled = AtomicBoolean(false)
 

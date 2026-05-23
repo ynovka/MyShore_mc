@@ -2,7 +2,6 @@ package ru.ynovka.myShore.game.tag.maps.impl
 
 import ru.ynovka.myShore.game.tag.TagGame.Companion.currentTagGame
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
-import io.papermc.paper.datacomponent.item.MapId.mapId
 import ru.ynovka.myShore.game.tag.states.TagFinishing
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.tag.TagPlayerRoles
@@ -18,7 +17,6 @@ import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.Bukkit
 import ru.ynovka.myShore.game.tag.states.TagInProgressState
-import kotlin.concurrent.timer
 import kotlin.math.sqrt
 
 
@@ -77,7 +75,7 @@ object TagMountainTrackMap : TagMap() {
                                 tagPlayer.role = TagPlayerRoles.SPECTATOR_VICTIM
 
                                 val msg = Component.translatable(
-                                    "msg.myshore.tag.player.fall_death",
+                                    "msg.myshore.player.fall_death",
                                     Component.text(player.name)
                                 )
                                 game.gamePlayers.forEach { it.player.sendMessage(msg) }

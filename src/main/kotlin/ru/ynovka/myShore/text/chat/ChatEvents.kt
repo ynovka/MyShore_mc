@@ -24,7 +24,7 @@ object ChatEvents : Listener {
         e.joinMessage(Component.empty())
         e.player.getVisiblePlayers(true).asPlayers().forEach { t ->
             t.sendMessage(
-                MyShore.Companion.mm.deserialize("<#7bed47>⏵ <white>${e.player.name}")
+                MyShore.mm.deserialize("<#7bed47>⏵ <white>${e.player.name}")
             )
         }
     }

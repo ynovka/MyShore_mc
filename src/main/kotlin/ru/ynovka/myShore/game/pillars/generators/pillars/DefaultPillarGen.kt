@@ -17,4 +17,14 @@ object DefaultPillarGen : PillarGen {
             }
         }.region(origin).once()
     }
+
+    override fun remove(world: World, pillar: Pillar) {
+        val origin = Location(world, pillar.x.toDouble(), Pillar.TOP_BLOCK.toDouble(), pillar.z.toDouble())
+
+        scheduler.schedule {
+            for (y in (Pillar.TOP_BLOCK - 64)..Pillar.TOP_BLOCK) {
+                world.getBlockAt(pillar.x, y, pillar.z).type = Material.AIR
+            }
+        }.region(origin).once()
+    }
 }

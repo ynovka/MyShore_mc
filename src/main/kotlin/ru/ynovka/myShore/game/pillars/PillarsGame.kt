@@ -12,14 +12,12 @@ import java.util.UUID
 class PillarsGame : Game<PillarsPlayer, PillarsWorld>() {
 
     override val initialState = PillarsWaitingForPlayers(this)
-    override val maxPlayers: Int = 50
+    override val maxPlayers: Int = 200
     override val gamePlayers: MutableSet<PillarsPlayer> = mutableSetOf()
 
-    var pillar = PillarGenerator.DEFAULT
-    var allocator = AllocatorGenerator.HONEY
-    var nextRoundPillar = pillar
-    var nextRoundAllocator = allocator
-    override val gameWorld = PillarsWorld()
+    var nextRoundPillar = PillarGenerator.DEFAULT
+    var nextRoundAllocator = AllocatorGenerator.HONEY
+    override val gameWorld = PillarsWorld(nextRoundPillar, nextRoundAllocator)
 
     override fun getOrCreatePlayer(playerId: UUID): PillarsPlayer =
         gamePlayers.firstOrNull { it.player.uniqueId == playerId }

@@ -22,41 +22,12 @@ import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.Bukkit
+import org.bukkit.event.entity.PlayerDeathEvent
 
 
 object HubEvents : Listener {
     fun register() {
         inst.server.pluginManager.registerEvents(this, inst)
-        scheduler.schedule {
-            Hub.world.players.forEach { player ->
-                if (player.gameMode == GameMode.CREATIVE) return@schedule
-                val l = player.location.clone().apply { y = Hub.spawn.y }
-                val distance = Hub.spawn.distance(l)
-
-                if (player.y < 87) {
-                    player.toHub()
-                    return@schedule
-                }
-
-                val t = l.world.getHighestBlockAt(l).type
-                if (player.location.y < 99 &&
-                    t in listOf(Material.VOID_AIR,
-                        Material.BLUE_STAINED_GLASS_PANE,
-                        Material.CYAN_STAINED_GLASS_PANE)
-                    ) {
-                    player.addPotionEffect(PotionEffect(
-                        PotionEffectType.LEVITATION, 8, 2, false, false, false,
-                    ))
-                }
-
-                if (distance > 20) {
-                    val vec = Hub.spawn.clone().add(0.0, 15.0, 0.0).toVector()
-                        .subtract(player.location.toVector()).normalize().multiply(2.5)
-                    player.velocity = player.velocity.add(vec)
-                }
-            }
-        }
-            .repeatEvery(2L, Clock.TICKS)
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -94,6 +65,15 @@ object HubEvents : Listener {
         }
             .after(5L, Clock.TICKS)
             .once()
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPlayerDeath(e: PlayerDeathEvent) {
+        println("onPlayerDeath 2")
+        if (e.isCancelled) return
+        println("onPlayerDeath 22")
+        e.isCancelled = true
+        e.player.toHub()
     }
 
     @EventHandler

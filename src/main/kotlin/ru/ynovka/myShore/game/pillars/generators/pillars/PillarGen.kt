@@ -6,12 +6,12 @@ import org.bukkit.World
 
 interface PillarGen {
     fun generate(world: World, pillar: Pillar)
+    fun remove(world: World, pillar: Pillar)
 }
 
 enum class PillarGenerator(
     val gen: PillarGen
 ) {
     DEFAULT(DefaultPillarGen),
-    VOID(VoidPillarGen),
-    SLIME(SlimePillarGen)
+    VOID(VoidPillarGen)
 }
