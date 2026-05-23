@@ -11,14 +11,14 @@ version = "0.0.1"
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
-    maven("https://maven.canvasmc.io/releases")
+    maven("https://repo.menthamc.org/repository/maven-public/")
     maven("https://repo.thenextlvl.net/releases")
     maven("https://repo.plasmoverse.com/releases")
     maven("https://repo.fancyinnovations.com/releases")
 }
 
 dependencies {
-    paperweight.devBundle("io.canvasmc.canvas", "26.1.2.build.+")
+    paperweight.devBundle("me.earthme.luminol", "26.1.2.build.+")
 
     compileOnly("com.github.darksoulq:AbyssalLib:v2.3.0-mc.26.1.2")
     //compileOnly("com.github.darksoulq:AbyssalLib")
