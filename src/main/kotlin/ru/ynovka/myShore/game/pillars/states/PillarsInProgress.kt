@@ -17,8 +17,8 @@ import ru.ynovka.myShore.game.GameState
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.Location
-import org.bukkit.Material
 import org.bukkit.GameMode
+import org.bukkit.Material
 
 
 class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
