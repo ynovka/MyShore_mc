@@ -39,9 +39,10 @@ object ActionbarTimer {
         game: G,
         state: S,
         componentKey: String = "bar.myshore.start_in",
+        playSound: Boolean = true,
         onCompletion: ((game: G, state: S) -> Unit)? = null,
     ) {
-        var timeLeft = time + 1
+        var timeLeft = time
 
         val task = scheduler.schedule {
             val currentTime = timeLeft--
@@ -54,7 +55,7 @@ object ActionbarTimer {
                             player
                         )
                     )
-                    player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_ON, 0.5f, 2f)
+                    if (playSound) player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_ON, 0.5f, 2f)
                 }.entity(player).once()
             }
         }

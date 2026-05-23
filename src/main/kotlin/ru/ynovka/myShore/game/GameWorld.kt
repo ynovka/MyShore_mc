@@ -8,6 +8,9 @@ import net.thenextlvl.worlds.WorldsAccess
 import net.thenextlvl.worlds.Dimension
 import net.kyori.adventure.key.Key
 import net.thenextlvl.worlds.Level
+import org.bukkit.Difficulty
+import org.bukkit.GameRule
+import org.bukkit.GameRules
 import org.bukkit.entity.Player
 import org.bukkit.Location
 import org.bukkit.World
@@ -64,6 +67,19 @@ abstract class GameWorld {
         }.whenComplete { _, throwable ->
             if (throwable != null) throwable.printStackTrace()
         }
+    }
+
+    private fun configureWorld(world: World): World {
+        world.time = 6000L
+        world.setGameRule(GameRules.ADVANCE_TIME, false)
+
+        world.setStorm(false)
+        world.isThundering = false
+        world.setGameRule(GameRules.ADVANCE_WEATHER, false)
+
+        world.difficulty = Difficulty.EASY
+
+        return world
     }
 }
 

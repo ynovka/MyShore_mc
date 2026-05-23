@@ -23,7 +23,7 @@ object Events {
         MovementController.register()
         VisibilityGroupEvents.register()
 
-        val bus = EventBus(inst)
-        bus.register(AntiCheatEvents)
+        //val bus = EventBus(inst)
+        //bus.register(AntiCheatEvents)
     }
 }

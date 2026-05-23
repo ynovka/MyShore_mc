@@ -2,6 +2,7 @@ name: MyShore
 version: '0.0.1'
 main: ru.ynovka.myShore.MyShore
 canvas-supported: true
+folia-supported: true
 api-version: '1.21'
 prefix: [ MYSHORE ]
 authors: [ Ynovka ]

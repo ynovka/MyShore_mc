@@ -5,21 +5,21 @@ import ru.ynovka.myShore.game.pillars.PillarsWorld
 import ru.ynovka.myShore.game.pillars.PillarsGame
 import ru.ynovka.myShore.game.pillars.Pillar
 import org.bukkit.Location
-import kotlin.math.abs
 import java.util.UUID
+import kotlin.math.*
 
 
-object HoneyAllocatorGen : AllocatorGen {
+object RingAllocatorGen : AllocatorGen {
 
-    private const val STEP_X = 9
-    private const val STEP_Z = 8
-    private const val OFFSET_X = 4
+    private const val MIN_DISTANCE = 8.5
+    private const val START_RADIUS = 8.5
+    private const val RADIUS_STEP = 8.5
 
     override fun generate(pGame: PillarsGame, playerId: UUID): Pillar {
         val origin = pGame.gameWorld.getOrCreate().get().spawnLocation
         val occupied = pGame.gameWorld.pillars
 
-        val point = honeycombPoints(origin)
+        val point = ringPoints(origin)
             .first { point ->
                 occupied.none { pillar ->
                     pillar.x == point.x && pillar.z == point.z
@@ -51,44 +51,40 @@ object HoneyAllocatorGen : AllocatorGen {
         return maxDistance * 2.0 + BORDER_PADDING * 2.0
     }
 
-    private fun honeycombPoints(origin: Location): Sequence<IntPoint> = sequence {
-        var radius = 1
+
+    private fun ringPoints(origin: Location): Sequence<IntPoint> = sequence {
+        var radius = START_RADIUS
 
         while (true) {
-            for (cell in hexRing(radius)) {
-                yield(
+            for (point in pointsOnRing(origin, radius)) {
+                yield(point)
+            }
+
+            radius += RADIUS_STEP
+        }
+    }
+
+    private fun pointsOnRing(origin: Location, radius: Double): List<IntPoint> {
+        val circumference = 2.0 * PI * radius
+
+        val pointsCount = max(
+            1,
+            floor(circumference / MIN_DISTANCE).toInt()
+        )
+
+        return buildList {
+            for (i in 0 until pointsCount) {
+                val angle = 2.0 * PI * i / pointsCount
+
+                add(
                     IntPoint(
-                        x = origin.blockX + cell.q * STEP_X + cell.r * OFFSET_X,
-                        z = origin.blockZ + cell.r * STEP_Z
+                        x = origin.blockX + (cos(angle) * radius).roundToInt(),
+                        z = origin.blockZ + (sin(angle) * radius).roundToInt()
                     )
                 )
             }
-
-            radius++
-        }
+        }.distinct()
     }
-
-    private fun hexRing(radius: Int): List<HexCell> {
-        return buildList {
-            for (q in -radius..radius) {
-                for (r in -radius..radius) {
-                    if (hexDistance(q, r) == radius) {
-                        add(HexCell(q, r))
-                    }
-                }
-            }
-        }
-    }
-
-    private fun hexDistance(q: Int, r: Int): Int {
-        val s = -q - r
-        return maxOf(abs(q), abs(r), abs(s))
-    }
-
-    private data class HexCell(
-        val q: Int,
-        val r: Int
-    )
 
     private data class IntPoint(
         val x: Int,

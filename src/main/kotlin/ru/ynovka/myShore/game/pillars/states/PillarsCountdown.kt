@@ -25,22 +25,11 @@ import ru.ynovka.myShore.utils.restrictToBlock
  */
 class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
     override fun onEnterState() {
-        // Переводим спеков в игроков
-        game.gamePlayers += game.spectatorPlayers
-        game.spectatorPlayers.clear()
-
+        println("PillarsCountdown 1")
         // Очищаем мир
         game.gameWorld.countdownPrepare().thenRun {
-            // Спавн колб, столбов и площадки + телепорт игроков
+            // Спавн колб, столбов и площадки + телепорт игроков + Отключаем передвищение игрокам + режим игры adv
             game.gameWorld.spawnPlayers(game)
-        }
-
-        // Отключаем передвищение игрокам
-        game.gamePlayers.asPlayers().forEach { player ->
-            scheduler.schedule {
-                player.restrictToBlock(true)
-                player.gameMode = GameMode.ADVENTURE
-            }.entity(player).once()
         }
 
         // Начинаем игру
@@ -57,7 +46,6 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
     }
 
     override fun onPlayerJoin(gamePlayer: PillarsPlayer) {
-        // todo
         game.gameWorld.spawnPlayer(game, gamePlayer).thenRun {
             val player = gamePlayer.player
             scheduler.schedule {
@@ -67,6 +55,7 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
     }
 
     override fun onPlayerLeave(gamePlayer: PillarsPlayer) {
-        // todo
+        val world = game.gameWorld.get() ?: return
+        game.gameWorld.removePlayerPillar(gamePlayer.playerId, world)
     }
 }

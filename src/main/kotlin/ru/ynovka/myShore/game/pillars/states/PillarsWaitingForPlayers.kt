@@ -24,10 +24,7 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
 
         game.gamePlayers.forEach { pPlayer ->
             val player = pPlayer.player
-            scheduler.schedule {
-                setupForWaiting(player, pPlayer, game)
-                player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
-            }.entity(player).once()
+            setupForWaiting(player, pPlayer, game)
         }
     }
 
@@ -38,9 +35,7 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
         }
 
         val player = gamePlayer.player
-        scheduler.schedule {
-            setupForWaiting(player, gamePlayer, game)
-        }.entity(player).once()
+        setupForWaiting(player, gamePlayer, game)
     }
 
     private fun setupForWaiting(
@@ -48,13 +43,15 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
         pPlayer: PillarsPlayer,
         game: PillarsGame
     ) {
-        println("setupForWaiting")
         game.gameWorld.spawnPlayer(game, pPlayer).thenRun {
             player.restrictToBlock(true)
         }
-        player.gameMode = GameMode.ADVENTURE
-        player.clearActivePotionEffects()
-        player.inventory.clear()
-        player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
+        scheduler.schedule {
+            player.gameMode = GameMode.ADVENTURE
+            player.clearActivePotionEffects()
+            player.inventory.clear()
+            player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
+            player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
+        }.entity(player).once()
     }
 }

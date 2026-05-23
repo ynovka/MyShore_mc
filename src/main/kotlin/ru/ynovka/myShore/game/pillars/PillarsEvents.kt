@@ -1,5 +1,6 @@
 package ru.ynovka.myShore.game.pillars
 
+import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.pillars.PillarsGame.Companion.currentPillarsGame
 import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.event.entity.PlayerDeathEvent
@@ -9,7 +10,15 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
+import org.bukkit.Location
 import org.bukkit.World
+import org.bukkit.event.EventPriority
+import org.bukkit.util.Vector
+import ru.ynovka.myShore.MyShore.Companion.scheduler
+import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
+import ru.ynovka.myShore.game.pillars.Pillar.Companion.TELEPORT_Y
+import ru.ynovka.myShore.game.pillars.Pillar.Companion.TOP_BLOCK
+import ru.ynovka.myShore.game.pillars.states.PillarsFinishing
 import ru.ynovka.myShore.game.pillars.states.PillarsInProgress
 
 
@@ -21,31 +30,76 @@ object PillarsEvents : Listener {
 
     @EventHandler
     fun onPlayerFall(e: PlayerMoveEvent) {
-        println(e.player.world.name)
         if (!e.player.world.isPillarsWorld()) return
-        println("onPlayerFall 2")
         if (e.player.gameMode != GameMode.SURVIVAL) return
-        println("onPlayerFall 3")
         if (e.to.y > 0.0) return
-        println("onPlayerFall 4")
 
         val game = e.player.uniqueId.currentPillarsGame() ?: return
-        println("onPlayerFall 5")
-        if (game.fsm.current !is PillarsInProgress) return
-        println("onPlayerFall 6")
-        game.movePlayerToSpectator(e.player, SpectatorReason.ELIMINATED)
 
-        // todo сообщение о вылете
+        val player = e.player
+        when (game.fsm.current) {
+            is PillarsInProgress -> {
+                game.movePlayerToSpectator(player, SpectatorReason.ELIMINATED)
+
+                val msg = Component.translatable(
+                    "msg.myshore.player.fall_death",
+                    Component.text(player.name)
+                )
+                val toAnon = game.gamePlayers + game.spectatorPlayers
+                toAnon.asPlayers().forEach {
+                    scheduler.schedule {
+                        it.sendMessage(msg)
+                    }.entity(it).once()
+                }
+            }
+            else -> {
+                scheduler.schedule {
+                    val pillar = game.gameWorld.pillars.firstOrNull { it.owner == player.uniqueId } ?: return@schedule
+                    val world = game.gameWorld.get() ?: return@schedule
+                    player.velocity = Vector()
+                    player.fallDistance = 0f
+                    player.teleportAsync(Location(
+                        world, pillar.x + 0.5, TOP_BLOCK + 1.0, pillar.z + 0.5
+                    ))
+                }.entity(player).once()
+            }
+        }
     }
 
-    @EventHandler
+
+    @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerDeath(e: PlayerDeathEvent) {
+        println("onPlayerDeath 1")
         if (!e.player.world.isPillarsWorld()) return
 
         val game = e.player.uniqueId.currentPillarsGame() ?: return
-        game.movePlayerToSpectator(e.player, SpectatorReason.ELIMINATED)
+        e.isCancelled = true
 
-        // todo сообщение о вылете
+        when (game.fsm.current) {
+            is PillarsInProgress -> {
+                game.movePlayerToSpectator(e.player, SpectatorReason.ELIMINATED)
+
+                val killer = e.damageSource.causingEntity?.name ?: return
+
+                val msg = Component.translatable(
+                    "msg.myshore.player.kill",
+                    Component.text(killer),
+                    Component.text(e.player.name)
+                )
+                val toAnon = game.gamePlayers + game.spectatorPlayers
+                toAnon.asPlayers().forEach {
+                    scheduler.schedule {
+                        it.sendMessage(msg)
+                    }.entity(it).once()
+                }
+            }
+            else -> {
+                game.gameWorld.spawnPlayer(
+                    game,
+                    game.getOrCreatePlayer(e.player.uniqueId)
+                )
+            }
+        }
     }
 
     private fun World.isPillarsWorld() = name.startsWith("myshore_pillars_")

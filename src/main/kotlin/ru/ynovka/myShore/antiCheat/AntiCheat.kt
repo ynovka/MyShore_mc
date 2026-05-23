@@ -27,6 +27,7 @@ object AntiCheat {
                 } else false
             }
         }
+            .global()
             .after(60L, Clock.TICKS)
             .repeatEvery(60L, Clock.TICKS)
     }
