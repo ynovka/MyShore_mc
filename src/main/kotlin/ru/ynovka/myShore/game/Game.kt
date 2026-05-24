@@ -1,114 +1,179 @@
 package ru.ynovka.myShore.game
 
-import ru.ynovka.myShore.game.gameUtils.VisibilityGroup
 import ru.ynovka.myShore.MyShore.Companion.scheduler
+import ru.ynovka.myShore.game.gameUtils.VisibilityGroup
 import ru.ynovka.myShore.party.PartyManager.Party
-import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import java.util.UUID
 
-
 abstract class Game<P : GamePlayer, W : GameWorld>(
-    val party: Party? = null  /** null  → публичная игра */
+    val party: Party? = null // null -> публичная игра
 ) {
     abstract val initialState: GameState<P, W, *>
     val fsm: GameFSM<P, W> by lazy { GameFSM(initialState).also { it.start() } }
-    abstract val maxPlayers: Int
-    abstract val gamePlayers: MutableSet<P>
+
     abstract val gameWorld: W
+    abstract val maxPlayers: Int
+
     val gameVisibilityGroup = VisibilityGroup()
+
+    /**
+     * Все игроки, которые когда-либо были созданы для этой игры.
+     */
+    val gamePlayers: MutableSet<P> = mutableSetOf()
+
+    /**
+     * Игроки, которые сейчас играют.
+     */
+    val activePlayers: MutableSet<P> = mutableSetOf()
+
+    /**
+     * Игроки, которые вышли из игры, но могут вернуться.
+     */
     val exitedPlayers: MutableSet<P> = mutableSetOf()
+
+    /**
+     * Игроки, которые сейчас являются зрителями.
+     */
     val spectatorPlayers: MutableSet<P> = mutableSetOf()
 
-    val isPrivate: Boolean get() = party != null
-    fun isEmpty(): Boolean = gamePlayers.isEmpty()
-    fun isFull(): Boolean = gamePlayers.size >= maxPlayers
+    /**
+     * Основной индекс игроков.
+     *
+     * Нужен, чтобы не делать activePlayers.find { it.playerId == uuid }
+     * и не создавать дубликаты GamePlayer с одним UUID.
+     */
+    private val playersById: MutableMap<UUID, P> = mutableMapOf()
 
-    fun hasActivePlayer(uuid: UUID): Boolean =
-        gamePlayers.any { it.playerId == uuid }
+    val isPrivate: Boolean
+        get() = party != null
 
-    fun hasSpectator(uuid: UUID): Boolean =
-        spectatorPlayers.any { it.playerId == uuid }
+    fun isEmpty(): Boolean =
+        activePlayers.isEmpty()
 
-    fun hasExitedPlayer(uuid: UUID): Boolean =
-        exitedPlayers.any { it.playerId == uuid }
+    fun isFull(): Boolean =
+        activePlayers.size >= maxPlayers
 
-    fun hasParticipant(uuid: UUID): Boolean =
-        hasActivePlayer(uuid) || hasSpectator(uuid)
+    fun hasPlayer(playerId: UUID): Boolean =
+        playersById.containsKey(playerId)
+
+    fun hasActivePlayer(playerId: UUID): Boolean {
+        val player = playersById[playerId] ?: return false
+        return player in activePlayers
+    }
+
+    fun hasSpectator(playerId: UUID): Boolean {
+        val player = playersById[playerId] ?: return false
+        return player in spectatorPlayers
+    }
+
+    fun hasExitedPlayer(playerId: UUID): Boolean {
+        val player = playersById[playerId] ?: return false
+        return player in exitedPlayers
+    }
+
+    fun getPlayer(playerId: UUID): P? =
+        playersById[playerId]
+
+    fun getOrCreatePlayer(playerId: UUID): P {
+        playersById[playerId]?.let { return it }
+
+        val player = createPlayer(playerId)
+
+        playersById[playerId] = player
+        gamePlayers.add(player)
+
+        return player
+    }
+
+    abstract fun createPlayer(playerId: UUID): P
 
     fun onPlayerJoin(playerId: UUID) {
+        val gamePlayer = getOrCreatePlayer(playerId)
+
+        if (gamePlayer in activePlayers || gamePlayer in spectatorPlayers) return
+
         gameVisibilityGroup.addViewer(playerId)
+        val canJoin = !isFull() && fsm.canPlayerJoin(gamePlayer)
 
-        val p = getOrCreatePlayer(playerId)
-
-        val canJoin = !isFull() && fsm.canPlayerJoin(p)
         if (!canJoin) {
-            spectatorPlayers.add(p)
-            fsm.spectatorJoin(p)
+            movePlayerStateToSpectator(gamePlayer)
+            fsm.spectatorJoin(gamePlayer)
             return
         }
 
-        if (hasExitedPlayer(p.playerId)) {
-            exitedPlayers.removeIf { it.playerId == p.playerId }
-            gamePlayers.add(p)
+        if (exitedPlayers.remove(gamePlayer)) {
+            activePlayers.add(gamePlayer)
 
-            fsm.playerReconnect(p)
-            handlePlayerReconnect(p)
+            fsm.playerReconnect(gamePlayer)
+            handlePlayerReconnect(gamePlayer)
             return
         }
 
-        gamePlayers.add(p)
+        activePlayers.add(gamePlayer)
 
-        fsm.playerJoin(p)
-        handlePlayerJoin(p)
+        fsm.playerJoin(gamePlayer)
+        handlePlayerJoin(gamePlayer)
     }
 
     fun onPlayerLeave(playerId: UUID) {
         gameVisibilityGroup.removeViewer(playerId)
 
-        val fromGame = gamePlayers.find { it.playerId == playerId }
-        val fromSpec = spectatorPlayers.find { it.playerId == playerId }
-        val p = fromGame ?: fromSpec ?: return
+        val player = playersById[playerId] ?: return
 
-        gamePlayers.removeIf { it.playerId == playerId }
-        spectatorPlayers.removeIf { it.playerId == playerId }
+        val wasActive = activePlayers.remove(player)
+        val wasSpectator = spectatorPlayers.remove(player)
 
-        if (fromGame != null) {
-            exitedPlayers.add(p)
-            fsm.playerLeave(p)
-            handlePlayerLeave(p)
+        if (!wasActive && !wasSpectator) return
+
+        if (wasActive) {
+            exitedPlayers.add(player)
+
+            fsm.playerLeave(player)
+            handlePlayerLeave(player)
         }
     }
 
     fun movePlayerToSpectator(
-        player: Player,
+        gamePlayer: P,
         reason: SpectatorReason = SpectatorReason.UNKNOWN
     ): Boolean {
-        if (spectatorPlayers.any { it.playerId == player.uniqueId }) return false
-
-        val p = gamePlayers.find { it.playerId == player.uniqueId } ?: return false
-
-        if (!fsm.canPlayerBecomeSpectator(p, reason)) {
-            return false
+        val player = playersById[gamePlayer.playerId] ?: gamePlayer.also {
+            playersById[it.playerId] = it
+            gamePlayers.add(it)
         }
 
-        gamePlayers.removeIf { it.playerId == player.uniqueId }
-        exitedPlayers.removeIf { it.playerId == player.uniqueId }
-        spectatorPlayers.add(p)
+        if (player in spectatorPlayers) return false
+        if (!fsm.canPlayerBecomeSpectator(player, reason)) return false
 
-        scheduler.schedule {
-            player.gameMode = GameMode.SPECTATOR
-        }.entity(player).once()
-        fsm.playerBecomeSpectator(p, reason)
-        handlePlayerBecomeSpectator(p, reason)
+        movePlayerStateToSpectator(player)
+
+        player.withOnlinePlayer { bukkitPlayer ->
+            scheduler.schedule {
+                bukkitPlayer.gameMode = GameMode.SPECTATOR
+            }.entity(bukkitPlayer).once()
+        }
+
+        fsm.playerBecomeSpectator(player, reason)
+        handlePlayerBecomeSpectator(player, reason)
 
         return true
     }
 
-    protected open fun handlePlayerJoin(gamePlayer: P)  {}
-    protected open fun handlePlayerReconnect(gamePlayer: P)  {}
-    protected open fun handlePlayerLeave(gamePlayer: P) {}
-    protected open fun handlePlayerBecomeSpectator(gamePlayer: P, reason: SpectatorReason) {}
+    private fun movePlayerStateToSpectator(player: P) {
+        activePlayers.remove(player)
+        exitedPlayers.remove(player)
+        spectatorPlayers.add(player)
+    }
 
-    abstract fun getOrCreatePlayer(playerId: UUID): P
+    protected open fun handlePlayerJoin(gamePlayer: P) {}
+
+    protected open fun handlePlayerReconnect(gamePlayer: P) {}
+
+    protected open fun handlePlayerLeave(gamePlayer: P) {}
+
+    protected open fun handlePlayerBecomeSpectator(
+        gamePlayer: P,
+        reason: SpectatorReason
+    ) {}
 }

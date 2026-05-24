@@ -1,7 +1,8 @@
 package ru.ynovka.myShore.game.gameUtils
 
+import ru.ynovka.myShore.game.GamePlayer.Companion.forEachOnlinePlayer
+import ru.ynovka.myShore.game.GamePlayer.Companion.withOnlinePlayers
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
-import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.text.ComponentDecorator
 import java.util.concurrent.atomic.AtomicBoolean
@@ -90,22 +91,30 @@ object BossbarTimer {
         }
 
         fun syncViewers() {
-            val currentPlayers = game.gamePlayers.asPlayers()
-            val currentIds = currentPlayers.mapTo(mutableSetOf()) { it.uniqueId }
+            game.activePlayers.withOnlinePlayers { currentPlayers ->
+                val currentIds = currentPlayers.mapTo(mutableSetOf()) { it.uniqueId }
 
-            viewers
-                .filter { it !in currentIds }
-                .forEach { uuid ->
+                val removedViewers = viewers
+                    .filterNot { it in currentIds }
+                    .toSet()
+
+                removedViewers.forEach { uuid ->
                     hideBars(uuid)
-                    viewers.remove(uuid)
                 }
 
-            currentPlayers.forEach { player ->
-                if (viewers.add(player.uniqueId)) {
-                    scheduler.schedule {
-                        player.showBossBar(bar)
-                        player.showBossBar(barTimer)
-                    }.entity(player).once()
+                viewers.removeAll(removedViewers)
+
+                currentPlayers.forEach { player ->
+                    val uuid = player.uniqueId
+
+                    if (viewers.add(uuid)) {
+                        scheduler.schedule {
+                            if (uuid !in viewers) return@schedule
+
+                            player.showBossBar(bar)
+                            player.showBossBar(barTimer)
+                        }.entity(player).once()
+                    }
                 }
             }
         }
@@ -121,7 +130,7 @@ object BossbarTimer {
 
             syncViewers()
 
-            game.gamePlayers.asPlayers().forEach { player ->
+            game.activePlayers.forEachOnlinePlayer { player ->
                 scheduler.schedule {
                     if (player.uniqueId !in viewers) return@schedule
 

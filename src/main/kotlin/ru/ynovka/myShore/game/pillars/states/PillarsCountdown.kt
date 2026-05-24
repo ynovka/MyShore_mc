@@ -22,7 +22,6 @@ import ru.ynovka.myShore.game.GameState
  */
 class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
     override fun onEnterState() {
-        println("PillarsCountdown 1")
         // Очищаем мир
         game.gameWorld.countdownPrepare().thenRun {
             // Спавн колб, столбов и площадки + телепорт игроков + Отключаем передвищение игрокам + режим игры adv
@@ -44,8 +43,7 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
 
     override fun onPlayerJoin(gamePlayer: PillarsPlayer) {
         game.gameWorld.spawnPlayer(game, gamePlayer).thenRun {
-            val player = gamePlayer.playerOrNull
-            player?.let {
+            gamePlayer.withOnlinePlayer { player ->
                 scheduler.schedule {
                     player.restrictToBlock(true)
                 }.entity(player).once()

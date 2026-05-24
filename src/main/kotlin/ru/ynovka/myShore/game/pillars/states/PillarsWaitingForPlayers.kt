@@ -22,9 +22,8 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
             componentKey = "bar.myshore.waiting_for_players"
         )
 
-        game.gamePlayers.forEach { pPlayer ->
-            val player = pPlayer.playerOrNull
-            player?.let {
+        game.activePlayers.forEach { pPlayer ->
+            pPlayer.withOnlinePlayer { player ->
                 setupForWaiting(player, pPlayer, game)
             }
         }
@@ -36,8 +35,7 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
             return
         }
 
-        val player = gamePlayer.playerOrNull
-        player?.let {
+        gamePlayer.withOnlinePlayer { player ->
             setupForWaiting(player, gamePlayer, game)
         }
     }

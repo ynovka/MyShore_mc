@@ -1,8 +1,8 @@
 package ru.ynovka.myShore.game.pillars.states
 
+import ru.ynovka.myShore.game.GamePlayer.Companion.forEachOnlinePlayer
 import ru.ynovka.myShore.game.pillars.Pillar.Companion.TELEPORT_Y
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
-import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.game.gameUtils.ActionbarTimer
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.gameUtils.BossbarTimer
@@ -44,7 +44,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
         }
 
         // даём эффект плавного падения и меняем режим на выживание
-        game.gamePlayers.asPlayers().forEach { player ->
+        game.activePlayers.forEachOnlinePlayer { player ->
             scheduler.schedule {
                 player.gameMode = GameMode.SURVIVAL
                 player.inventory.clear()
@@ -63,7 +63,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
 
         // даём возможность двигаться по приземлению
         scheduler.schedule {
-            game.gamePlayers.asPlayers().forEach { player ->
+            game.activePlayers.forEachOnlinePlayer { player ->
                 scheduler.schedule {
                     player.restrictToBlock(false)
                 }.entity(player).once()
@@ -90,12 +90,11 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
 
     // todo короче если под игроком нету блоков (getHighest) даём левитацию + фейрверки
     override fun onPlayerBecomeSpectator(gamePlayer: PillarsPlayer, reason: SpectatorReason) {
+        println("onPlayerBecomeSpectator")
         hasWinner(gamePlayer)
-        val player = gamePlayer.playerOrNull
         val world = game.gameWorld.getOrCreate().get()
-        player?.let {
+        gamePlayer.withOnlinePlayer { player ->
             scheduler.schedule {
-                player.gameMode = GameMode.SPECTATOR
                 player.teleportAsync(world.spawnLocation)
             }.entity(player).once()
         }
@@ -104,9 +103,8 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
     override fun onPlayerLeave(gamePlayer: PillarsPlayer) = hasWinner(gamePlayer)
 
     private fun hasWinner(gamePlayer: PillarsPlayer) {
-        if (game.gamePlayers.size != 1) return
-        val player = gamePlayer.playerOrNull
-        player?.let {
+        if (game.activePlayers.size != 1) return
+        gamePlayer.withOnlinePlayer { player ->
             scheduler.schedule {
                 val pillar = game.gameWorld.pillars.firstOrNull { it.owner == player.uniqueId } ?: return@schedule
                 val world = game.gameWorld.get() ?: return@schedule
@@ -117,18 +115,18 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
         }
 
 
-        val winner = game.gamePlayers.firstOrNull() ?: return
-        val winnerPlayer = winner.player
-
-        val msg = Component.translatable(
-            "msg.myshore.player.win",
-            Component.text(winnerPlayer.name)
-        )
-        val toAnon = game.gamePlayers + game.spectatorPlayers
-        toAnon.asPlayers().forEach {
-            scheduler.schedule {
-                it.sendMessage(msg)
-            }.entity(it).once()
+        val winner = game.activePlayers.firstOrNull() ?: return
+        winner.withOnlinePlayer { winnerPlayer ->
+            val msg = Component.translatable(
+                "msg.myshore.player.win",
+                Component.text(winnerPlayer.name)
+            )
+            val toAnon = game.activePlayers + game.spectatorPlayers
+            toAnon.forEachOnlinePlayer {
+                scheduler.schedule {
+                    it.sendMessage(msg)
+                }.entity(it).once()
+            }
         }
 
         game.fsm.transitionTo(PillarsFinishing(game))
@@ -143,7 +141,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
             playSound = false,
             onCompletion = { game, _ ->
                 if (game.fsm.current !is PillarsInProgress) return@startCountdownTimer
-                game.gamePlayers.asPlayers().forEach { player ->
+                game.activePlayers.forEachOnlinePlayer { player ->
                     scheduler.schedule {
                         player.inventory.addItem(ItemStack.of(items.random()))
                     }.entity(player).once()

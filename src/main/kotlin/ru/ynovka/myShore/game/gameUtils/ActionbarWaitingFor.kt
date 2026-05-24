@@ -1,7 +1,7 @@
 package ru.ynovka.myShore.game.gameUtils
 
+import ru.ynovka.myShore.game.GamePlayer.Companion.forEachOnlinePlayer
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
-import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.text.ComponentDecorator
 import net.kyori.adventure.text.Component
@@ -33,7 +33,7 @@ object ActionbarWaitingFor {
             frame++
             if (frame == frames.size) frame = 0
 
-            game.gamePlayers.asPlayers().forEach { player ->
+            game.activePlayers.forEachOnlinePlayer { player ->
                 player.sendActionBar(
                     ComponentDecorator.addBackground(
                         Component.translatable(componentKey)

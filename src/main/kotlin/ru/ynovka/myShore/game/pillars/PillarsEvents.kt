@@ -1,9 +1,9 @@
 package ru.ynovka.myShore.game.pillars
 
 import ru.ynovka.myShore.game.pillars.PillarsGame.Companion.currentPillarsGame
+import ru.ynovka.myShore.game.GamePlayer.Companion.forEachOnlinePlayer
 import ru.ynovka.myShore.game.pillars.Pillar.Companion.TOP_BLOCK
 import ru.ynovka.myShore.game.pillars.states.PillarsInProgress
-import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.game.gameUtils.PlayerDeathMessages
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import io.papermc.paper.event.entity.EntityMoveEvent
@@ -44,23 +44,30 @@ object PillarsEvents : Listener {
         if (e.to.y > 0.0) return
 
         val game = e.player.uniqueId.currentPillarsGame() ?: return
-
-        val player = e.player
+        val pPlayer = game.getOrCreatePlayer(e.player.uniqueId)
         when (game.fsm.current) {
             is PillarsInProgress -> {
-                game.movePlayerToSpectator(player, SpectatorReason.ELIMINATED)
-                game.broadcast(PlayerDeathMessages.voidFall(player))
+                game.movePlayerToSpectator(pPlayer, SpectatorReason.ELIMINATED)
+                pPlayer.withOnlinePlayer { player ->
+                    player.gameMode = GameMode.SPECTATOR
+                    game.gameWorld.get()?.let { world ->
+                        player.teleportAsync(Location(world, 8.0, 100.0, 8.0))
+                    }
+                    game.broadcast(PlayerDeathMessages.voidFall(player))
+                }
             }
             else -> {
-                scheduler.schedule {
-                    val pillar = game.gameWorld.pillars.firstOrNull { it.owner == player.uniqueId } ?: return@schedule
-                    val world = game.gameWorld.get() ?: return@schedule
-                    player.velocity = Vector()
-                    player.fallDistance = 0f
-                    player.teleportAsync(Location(
-                        world, pillar.x + 0.5, TOP_BLOCK + 1.0, pillar.z + 0.5
-                    ))
-                }.entity(player).once()
+                val pillar = game.gameWorld.pillars.firstOrNull { it.owner == pPlayer.playerId } ?: return
+                val world = game.gameWorld.get() ?: return
+                pPlayer.withOnlinePlayer { player ->
+                    scheduler.schedule {
+                        player.velocity = Vector()
+                        player.fallDistance = 0f
+                        player.teleportAsync(Location(
+                            world, pillar.x + 0.5, TOP_BLOCK + 1.0, pillar.z + 0.5
+                        ))
+                    }.entity(player).once()
+                }
             }
         }
     }
@@ -71,19 +78,20 @@ object PillarsEvents : Listener {
         if (!e.player.world.isPillarsWorld()) return
 
         val game = e.player.uniqueId.currentPillarsGame() ?: return
+        val pPlayer = game.getOrCreatePlayer(e.player.uniqueId)
         e.isCancelled = true
 
         when (game.fsm.current) {
             is PillarsInProgress -> {
-                game.movePlayerToSpectator(e.player, SpectatorReason.ELIMINATED)
+                game.movePlayerToSpectator(pPlayer, SpectatorReason.ELIMINATED)
                 game.broadcast(PlayerDeathMessages.from(e))
             }
         }
     }
 
     private fun PillarsGame.broadcast(message: Component) {
-        val viewers = gamePlayers + spectatorPlayers
-        viewers.asPlayers().forEach { player ->
+        val viewers = activePlayers + spectatorPlayers
+        viewers.forEachOnlinePlayer { player ->
             scheduler.schedule {
                 player.sendMessage(message)
             }.entity(player).once()

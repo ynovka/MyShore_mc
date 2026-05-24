@@ -6,6 +6,7 @@ import ru.ynovka.myShore.game.pillars.states.PillarsWaitingForPlayers
 import ru.ynovka.myShore.game.HubGameWorld
 import ru.ynovka.myShore.game.GameManager
 import ru.ynovka.myShore.game.Game
+import ru.ynovka.myShore.game.SpectatorReason
 import java.util.UUID
 
 
@@ -13,15 +14,11 @@ class PillarsGame : Game<PillarsPlayer, PillarsWorld>() {
 
     override val initialState = PillarsWaitingForPlayers(this)
     override val maxPlayers: Int = 500
-    override val gamePlayers: MutableSet<PillarsPlayer> = mutableSetOf()
+    override fun createPlayer(playerId: UUID) = PillarsPlayer(playerId)
 
     var nextRoundPillar = PillarGenerator.DEFAULT
     var nextRoundAllocator = AllocatorGenerator.HONEY
     override val gameWorld = PillarsWorld(nextRoundPillar, nextRoundAllocator)
-
-    override fun getOrCreatePlayer(playerId: UUID): PillarsPlayer =
-        gamePlayers.firstOrNull { it.player.uniqueId == playerId }
-            ?: PillarsPlayer(playerId)
 
     companion object {
         val hubWorld = HubGameWorld("pillars")
