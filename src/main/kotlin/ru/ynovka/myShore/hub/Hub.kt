@@ -1,6 +1,6 @@
 package ru.ynovka.myShore.hub
 
-import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
+import ru.ynovka.myShore.game.gameUtils.VisibilityGroup
 import ru.ynovka.myShore.utils.restrictToBlockCenter
 import ru.ynovka.myShore.text.actionBar.ActionBar
 import ru.ynovka.myShore.utils.Utils.clearTeams

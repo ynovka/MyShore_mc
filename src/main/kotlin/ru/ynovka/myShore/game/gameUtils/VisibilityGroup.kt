@@ -1,9 +1,14 @@
-package ru.ynovka.myShore.visibilityGroup
+package ru.ynovka.myShore.game.gameUtils
 
 import java.util.concurrent.ConcurrentHashMap
 import ru.ynovka.myShore.MyShore
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
+import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerQuitEvent
+import ru.ynovka.myShore.MyShore.Companion.inst
 import java.util.UUID
 
 
@@ -113,7 +118,7 @@ class VisibilityGroup {
             val currentViewer = Bukkit.getPlayer(viewerId) ?: return@schedule
             val target = Bukkit.getPlayer(targetId) ?: return@schedule
 
-            currentViewer.showPlayer(MyShore.inst, target)
+            currentViewer.showPlayer(inst, target)
         }.entity(viewer).once()
     }
 
@@ -124,7 +129,20 @@ class VisibilityGroup {
             val currentViewer = Bukkit.getPlayer(viewerId) ?: return@schedule
             val target = Bukkit.getPlayer(targetId) ?: return@schedule
 
-            currentViewer.hidePlayer(MyShore.inst, target)
+            currentViewer.hidePlayer(inst, target)
         }.entity(viewer).once()
     }
+}
+
+object VisibilityGroupEvents : Listener {
+
+    fun register() {
+        inst.server.pluginManager.registerEvents(this, inst)
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPlayerQuit(e: PlayerQuitEvent) {
+        VisibilityGroup.onPlayerQuit(e.player.uniqueId)
+    }
+
 }

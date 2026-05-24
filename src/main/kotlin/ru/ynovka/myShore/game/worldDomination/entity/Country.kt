@@ -13,7 +13,7 @@ import ru.ynovka.myShore.game.worldDomination.WDGame
 import ru.ynovka.myShore.game.worldDomination.WDPlayer
 import ru.ynovka.myShore.game.worldDomination.WDPlayerRole
 import ru.ynovka.myShore.texturepack.Glyphs
-import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
+import ru.ynovka.myShore.game.gameUtils.VisibilityGroup
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.ceil
 

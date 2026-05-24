@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 import ru.ynovka.myShore.MyShore
 import ru.ynovka.myShore.party.getParty
 import ru.ynovka.myShore.utils.Utils.asPlayers
-import ru.ynovka.myShore.visibilityGroup.VisibilityGroup.Companion.getVisiblePlayers
+import ru.ynovka.myShore.game.gameUtils.VisibilityGroup.Companion.getVisiblePlayers
 
 object ChatEvents : Listener {
 

@@ -1,28 +1,25 @@
 package ru.ynovka.myShore.hub
 
-import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import org.bukkit.event.player.PlayerInteractEvent
 import ru.ynovka.myShore.text.actionBar.ActionBar
+import org.bukkit.event.entity.PlayerDeathEvent
 import ru.ynovka.myShore.MyShore.Companion.inst
-import ru.ynovka.myShore.MyShore.Companion.scheduler
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import ru.ynovka.myShore.party.PartyManager
 import ru.ynovka.myShore.game.GameManager
-import org.bukkit.potion.PotionEffectType
 import ru.ynovka.myShore.party.LeftReason
 import ru.ynovka.myShore.hub.Hub.toHub
-import org.bukkit.potion.PotionEffect
 import org.bukkit.event.EventPriority
 import org.bukkit.event.EventHandler
 import ru.ynovka.myShore.MyShore
 import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
-import org.bukkit.Material
 import org.bukkit.Bukkit
-import org.bukkit.event.entity.PlayerDeathEvent
 
 
 object HubEvents : Listener {
@@ -69,9 +66,7 @@ object HubEvents : Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerDeath(e: PlayerDeathEvent) {
-        println("onPlayerDeath 2")
         if (e.isCancelled) return
-        println("onPlayerDeath 22")
         e.isCancelled = true
         e.player.toHub()
     }

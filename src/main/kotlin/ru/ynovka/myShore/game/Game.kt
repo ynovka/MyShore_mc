@@ -1,6 +1,6 @@
 package ru.ynovka.myShore.game
 
-import ru.ynovka.myShore.visibilityGroup.VisibilityGroup
+import ru.ynovka.myShore.game.gameUtils.VisibilityGroup
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.party.PartyManager.Party
 import org.bukkit.entity.Player

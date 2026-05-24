@@ -1,6 +1,6 @@
 package ru.ynovka.myShore
 
-import ru.ynovka.myShore.visibilityGroup.VisibilityGroupEvents
+import ru.ynovka.myShore.game.gameUtils.VisibilityGroupEvents
 import ru.ynovka.myShore.game.worldDomination.WDEvents
 import ru.ynovka.myShore.game.pillars.PillarsEvents
 import ru.ynovka.myShore.utils.MovementController

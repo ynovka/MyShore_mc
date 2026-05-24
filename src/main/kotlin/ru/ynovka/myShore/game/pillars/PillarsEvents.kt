@@ -4,6 +4,7 @@ import ru.ynovka.myShore.game.pillars.PillarsGame.Companion.currentPillarsGame
 import ru.ynovka.myShore.game.pillars.Pillar.Companion.TOP_BLOCK
 import ru.ynovka.myShore.game.pillars.states.PillarsInProgress
 import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
+import ru.ynovka.myShore.game.gameUtils.PlayerDeathMessages
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import io.papermc.paper.event.entity.EntityMoveEvent
 import ru.ynovka.myShore.MyShore.Companion.inst
@@ -48,17 +49,7 @@ object PillarsEvents : Listener {
         when (game.fsm.current) {
             is PillarsInProgress -> {
                 game.movePlayerToSpectator(player, SpectatorReason.ELIMINATED)
-
-                val msg = Component.translatable(
-                    "msg.myshore.player.fall_death",
-                    Component.text(player.name)
-                )
-                val toAnon = game.gamePlayers + game.spectatorPlayers
-                toAnon.asPlayers().forEach {
-                    scheduler.schedule {
-                        it.sendMessage(msg)
-                    }.entity(it).once()
-                }
+                game.broadcast(PlayerDeathMessages.voidFall(player))
             }
             else -> {
                 scheduler.schedule {
@@ -77,7 +68,6 @@ object PillarsEvents : Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerDeath(e: PlayerDeathEvent) {
-        println("onPlayerDeath 1")
         if (!e.player.world.isPillarsWorld()) return
 
         val game = e.player.uniqueId.currentPillarsGame() ?: return
@@ -86,21 +76,17 @@ object PillarsEvents : Listener {
         when (game.fsm.current) {
             is PillarsInProgress -> {
                 game.movePlayerToSpectator(e.player, SpectatorReason.ELIMINATED)
-
-                val killer = e.damageSource.causingEntity?.name ?: return
-
-                val msg = Component.translatable(
-                    "msg.myshore.player.kill",
-                    Component.text(killer),
-                    Component.text(e.player.name)
-                )
-                val toAnon = game.gamePlayers + game.spectatorPlayers
-                toAnon.asPlayers().forEach {
-                    scheduler.schedule {
-                        it.sendMessage(msg)
-                    }.entity(it).once()
-                }
+                game.broadcast(PlayerDeathMessages.from(e))
             }
+        }
+    }
+
+    private fun PillarsGame.broadcast(message: Component) {
+        val viewers = gamePlayers + spectatorPlayers
+        viewers.asPlayers().forEach { player ->
+            scheduler.schedule {
+                player.sendMessage(message)
+            }.entity(player).once()
         }
     }
 
