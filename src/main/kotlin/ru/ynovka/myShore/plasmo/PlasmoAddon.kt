@@ -28,14 +28,9 @@ class PlasmoAddon : AddonInitializer {
     fun isPlayerConnected(player: Player): Boolean = connected.contains(player.uniqueId)
 
     override fun onAddonInitialize() {
-        StageVoice.init(this)
-        PhoneCallVoice.init(this)
-        voiceServer.eventBus.register(this, StageVoice)
-        voiceServer.eventBus.register(this, PhoneCallVoice)
     }
 
     override fun onAddonShutdown() {
-        voiceServer.eventBus.unregister(this, PhoneCallVoice)
     }
 
     @EventSubscribe

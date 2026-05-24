@@ -1,20 +1,19 @@
 package ru.ynovka.myShore.utils
 
+import net.minecraft.world.level.gameevent.GameEventListenerRegistry
 import com.github.darksoulq.abyssallib.common.reflection.Reflect
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import net.minecraft.world.level.chunk.status.ChunkStatus
-import net.minecraft.world.level.levelgen.Heightmap
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import net.minecraft.world.level.chunk.ChunkAccess
 import net.minecraft.world.level.chunk.LevelChunk
 import net.minecraft.world.ticks.LevelChunkTicks
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap
 import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.craftbukkit.CraftChunk
 import net.minecraft.core.SectionPos
-import net.minecraft.world.level.gameevent.GameEventListenerRegistry
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
-import ru.ynovka.myShore.MyShore.Companion.scheduler
 
 
 object InstantChunkClear {

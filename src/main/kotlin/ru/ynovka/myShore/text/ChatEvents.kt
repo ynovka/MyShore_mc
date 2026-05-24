@@ -1,4 +1,4 @@
-package ru.ynovka.myShore.text.chat
+package ru.ynovka.myShore.text
 
 import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.Component
@@ -9,14 +9,14 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import ru.ynovka.myShore.MyShore
+import ru.ynovka.myShore.game.gameUtils.VisibilityGroup.Companion.getVisiblePlayers
 import ru.ynovka.myShore.party.getParty
 import ru.ynovka.myShore.utils.Utils.asPlayers
-import ru.ynovka.myShore.game.gameUtils.VisibilityGroup.Companion.getVisiblePlayers
 
 object ChatEvents : Listener {
 
     fun register() {
-        MyShore.Companion.inst.server.pluginManager.registerEvents(this, MyShore.Companion.inst)
+        MyShore.inst.server.pluginManager.registerEvents(this, MyShore.Companion.inst)
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -34,7 +34,7 @@ object ChatEvents : Listener {
         e.quitMessage(Component.empty())
         e.player.getVisiblePlayers(true).asPlayers().forEach { t ->
             t.sendMessage(
-                MyShore.Companion.mm.deserialize("<#dc424e>⏴ <white>${e.player.name}")
+                MyShore.mm.deserialize("<#dc424e>⏴ <white>${e.player.name}")
             )
         }
     }

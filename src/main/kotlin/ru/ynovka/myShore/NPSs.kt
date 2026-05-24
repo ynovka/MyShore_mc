@@ -1,13 +1,13 @@
 package ru.ynovka.myShore
 
-import com.github.darksoulq.abyssallib.server.scheduler.Clock
-import de.oliver.fancynpcs.api.FancyNpcsPlugin
-import de.oliver.fancynpcs.api.actions.ActionTrigger
-import de.oliver.fancynpcs.api.actions.NpcAction
 import de.oliver.fancynpcs.api.actions.executor.ActionExecutionContext
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.MyShore.Companion.scheduler
-import ru.ynovka.myShore.game.GameManager
+import de.oliver.fancynpcs.api.actions.ActionTrigger
 import ru.ynovka.myShore.game.pillars.PillarsGame
+import de.oliver.fancynpcs.api.actions.NpcAction
+import de.oliver.fancynpcs.api.FancyNpcsPlugin
+import ru.ynovka.myShore.game.GameManager
 
 object NPCs {
     fun register() {

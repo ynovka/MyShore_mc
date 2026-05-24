@@ -4,7 +4,6 @@ import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import org.bukkit.event.player.PlayerInteractEvent
-import ru.ynovka.myShore.text.actionBar.ActionBar
 import org.bukkit.event.entity.PlayerDeathEvent
 import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.event.player.PlayerJoinEvent
@@ -54,7 +53,6 @@ object HubEvents : Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerLeave(e: PlayerQuitEvent) {
-        ActionBar.clear(e.player)
         GameManager.leave(e.player.uniqueId)
         PartyManager.leave(e.player, LeftReason.QUIT)
         scheduler.schedule {

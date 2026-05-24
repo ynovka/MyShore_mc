@@ -8,10 +8,9 @@ import net.thenextlvl.worlds.WorldsAccess
 import net.thenextlvl.worlds.Dimension
 import net.kyori.adventure.key.Key
 import net.thenextlvl.worlds.Level
-import org.bukkit.Difficulty
-import org.bukkit.GameRule
-import org.bukkit.GameRules
 import org.bukkit.entity.Player
+import org.bukkit.Difficulty
+import org.bukkit.GameRules
 import org.bukkit.Location
 import org.bukkit.World
 

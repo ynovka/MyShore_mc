@@ -2,7 +2,6 @@ package ru.ynovka.myShore.hub
 
 import ru.ynovka.myShore.game.gameUtils.VisibilityGroup
 import ru.ynovka.myShore.utils.restrictToBlockCenter
-import ru.ynovka.myShore.text.actionBar.ActionBar
 import ru.ynovka.myShore.utils.Utils.clearTeams
 import ru.ynovka.myShore.utils.restrictToBlock
 import ru.ynovka.myShore.game.GameManager
@@ -28,7 +27,6 @@ object Hub {
             applyHubInventory()
             clearTeams()
 
-            ActionBar.clear(this)
             restrictToBlock(false)
             restrictToBlockCenter(false)
             GameManager.leave(this.uniqueId)

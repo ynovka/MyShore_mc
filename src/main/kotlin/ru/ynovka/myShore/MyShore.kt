@@ -39,11 +39,9 @@ class MyShore : JavaPlugin() {
         CommandAPI.onEnable()
 
         NPCs.register()
-        Database.register(inst)
         Commands.register()
         Events.register()
         Items.register()
-        Stats.register()
 
         ITEMS.apply()
         STATISTIC_TYPES.apply()
@@ -52,6 +50,5 @@ class MyShore : JavaPlugin() {
 
     override fun onDisable() {
         CommandAPI.onDisable()
-        Database.db.disconnect()
     }
 }

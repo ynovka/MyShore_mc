@@ -1,6 +1,5 @@
 package ru.ynovka.myShore.game.gameUtils
 
-import ru.ynovka.myShore.text.actionBar.sendPermanentActionBar
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.MyShore.Companion.scheduler

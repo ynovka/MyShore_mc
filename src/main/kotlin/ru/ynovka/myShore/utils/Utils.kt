@@ -3,11 +3,11 @@ package ru.ynovka.myShore.utils
 import com.github.darksoulq.abyssallib.world.gui.GuiBuilder
 import com.github.darksoulq.abyssallib.world.gui.GuiElement
 import com.github.darksoulq.abyssallib.world.gui.SlotPosition
-import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
-import org.bukkit.entity.Player
-import org.bukkit.scoreboard.Team
 import ru.ynovka.myShore.MyShore.Companion.mm
+import net.kyori.adventure.text.Component
+import org.bukkit.scoreboard.Team
+import org.bukkit.entity.Player
+import org.bukkit.Bukkit
 import java.util.*
 
 

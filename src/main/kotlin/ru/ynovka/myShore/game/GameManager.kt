@@ -1,12 +1,12 @@
 package ru.ynovka.myShore.game
 
+import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.party.PartyManager.Party
 import java.util.concurrent.CopyOnWriteArrayList
 import ru.ynovka.myShore.party.PartyManager
 import org.bukkit.entity.Player
-import ru.ynovka.myShore.MyShore.Companion.scheduler
-import ru.ynovka.myShore.utils.Utils.asPlayers
 import java.util.UUID
+
 
 object GameManager {
     val games: MutableList<Game<*, *>> = CopyOnWriteArrayList()

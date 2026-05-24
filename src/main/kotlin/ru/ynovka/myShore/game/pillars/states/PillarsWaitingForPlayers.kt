@@ -5,12 +5,12 @@ import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.pillars.PillarsPlayer
 import ru.ynovka.myShore.game.pillars.PillarsWorld
 import ru.ynovka.myShore.game.pillars.PillarsGame
+import ru.ynovka.myShore.utils.restrictToBlock
 import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.hub.HubItems
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Sound
-import ru.ynovka.myShore.utils.restrictToBlock
 
 
 class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {

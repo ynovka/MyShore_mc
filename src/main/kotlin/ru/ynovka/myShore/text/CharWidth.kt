@@ -1,4 +1,4 @@
-package ru.ynovka.myShore.text.actionBar
+package ru.ynovka.myShore.text
 
 /**
  * Таблица ширин символов в пикселях для кастомного шрифта ресурспака.

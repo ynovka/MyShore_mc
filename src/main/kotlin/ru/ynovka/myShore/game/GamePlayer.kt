@@ -1,8 +1,9 @@
 package ru.ynovka.myShore.game
 
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.Bukkit
 import java.util.UUID
+
 
 abstract class GamePlayer(
     val playerId: UUID

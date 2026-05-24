@@ -1,14 +1,14 @@
 package ru.ynovka.myShore.game.gameUtils
 
+import ru.ynovka.myShore.MyShore.Companion.inst
+import org.bukkit.event.player.PlayerQuitEvent
 import java.util.concurrent.ConcurrentHashMap
+import org.bukkit.event.EventPriority
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
 import ru.ynovka.myShore.MyShore
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
-import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
-import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerQuitEvent
-import ru.ynovka.myShore.MyShore.Companion.inst
 import java.util.UUID
 
 

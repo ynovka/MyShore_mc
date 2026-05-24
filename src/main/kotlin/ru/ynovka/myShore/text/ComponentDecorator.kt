@@ -3,7 +3,6 @@ package ru.ynovka.myShore.text
 import com.github.darksoulq.abyssallib.server.translation.ServerTranslator
 import com.github.darksoulq.abyssallib.server.resource.util.TextOffset
 import net.kyori.adventure.text.TranslatableComponent
-import ru.ynovka.myShore.text.actionBar.CharWidth
 import net.kyori.adventure.text.TextComponent
 import ru.ynovka.myShore.texturepack.Glyphs
 import net.kyori.adventure.text.Component

@@ -1,13 +1,13 @@
 package ru.ynovka.myShore.game.pillars
 
 import com.github.darksoulq.abyssallib.world.structure.StructureLoader
+import ru.ynovka.myShore.game.pillars.Pillar.Companion.TELEPORT_Y
 import com.github.darksoulq.abyssallib.world.structure.Structure
 import org.bukkit.block.structure.StructureRotation
 import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.block.structure.Mirror
 import org.bukkit.Location
 import org.bukkit.World
-import ru.ynovka.myShore.game.pillars.Pillar.Companion.TELEPORT_Y
 
 
 enum class PillarsPlayerBox(

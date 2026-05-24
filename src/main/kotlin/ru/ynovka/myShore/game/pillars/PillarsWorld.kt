@@ -11,9 +11,9 @@ import java.util.concurrent.CompletableFuture
 import ru.ynovka.myShore.game.GameWorld
 import ru.ynovka.myShore.hub.HubItems
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.GameMode
 import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.World
 import java.util.UUID
 

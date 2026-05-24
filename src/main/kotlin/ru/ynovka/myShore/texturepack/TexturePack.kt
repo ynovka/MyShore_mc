@@ -13,14 +13,11 @@ object TexturePack {
     val pack = ResourcePack(inst, PLUGIN_ID)
     val ns = pack.namespace(PLUGIN_ID)
 
-    val sounds = ns.sounds()
     val fontGlyphs = ns.font("glyphs", true)
 
     fun register() {
         ServerTranslator.loadResource(inst, "lang/en_us.properties")
 
-        GuiTextures.register()
-        SoundsPack.register()
         Glyphs.register()
 
         pack.register(true)
@@ -35,7 +32,7 @@ object TexturePack {
     }
 
     private fun createItemDef(name: String) {
-        val tex: Texture? = ns.texture("item/$name")
+        val tex: Texture = ns.texture("item/$name")
         val model = ns.model(name, false)
         model.parent("minecraft:item/generated")
         model.texture("layer0", tex)

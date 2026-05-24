@@ -1,11 +1,12 @@
 package ru.ynovka.myShore.party
 
-import dev.jorel.commandapi.CommandAPICommand
+import dev.jorel.commandapi.kotlindsl.entitySelectorArgumentOnePlayer
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.commandAPICommand
-import dev.jorel.commandapi.kotlindsl.entitySelectorArgumentOnePlayer
 import dev.jorel.commandapi.kotlindsl.playerExecutor
+import dev.jorel.commandapi.CommandAPICommand
 import org.bukkit.entity.Player
+
 
 object PartyCommands {
     fun register() {

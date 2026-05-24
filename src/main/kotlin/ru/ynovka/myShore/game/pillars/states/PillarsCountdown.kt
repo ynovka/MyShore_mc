@@ -1,15 +1,12 @@
 package ru.ynovka.myShore.game.pillars.states
 
-import ru.ynovka.myShore.game.GamePlayer.Companion.asPlayers
 import ru.ynovka.myShore.game.gameUtils.ActionbarTimer
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.pillars.PillarsPlayer
 import ru.ynovka.myShore.game.pillars.PillarsWorld
 import ru.ynovka.myShore.game.pillars.PillarsGame
-import ru.ynovka.myShore.game.GameState
-import ru.ynovka.myShore.utils.canMove
-import org.bukkit.GameMode
 import ru.ynovka.myShore.utils.restrictToBlock
+import ru.ynovka.myShore.game.GameState
 
 
 /**
