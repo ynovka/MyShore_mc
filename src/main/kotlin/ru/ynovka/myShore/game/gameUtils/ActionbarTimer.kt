@@ -3,6 +3,7 @@ package ru.ynovka.myShore.game.gameUtils
 import ru.ynovka.myShore.game.GamePlayer.Companion.forEachOnlinePlayer
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.MyShore.Companion.scheduler
+import java.util.concurrent.atomic.AtomicBoolean
 import ru.ynovka.myShore.text.ComponentDecorator
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.GamePlayer
@@ -34,15 +35,16 @@ object ActionbarTimer {
             W : GameWorld,
             G : Game<P, W>,
             S : GameState<P, W, G>
-    > startCountdownTimer(
+            > startCountdownTimer(
         time: Int,
         game: G,
         state: S,
         componentKey: String = "bar.myshore.start_in",
         playSound: Boolean = true,
         onCompletion: ((game: G, state: S) -> Unit)? = null,
-    ) {
+    ): ActionbarTimerHandler {
         var timeLeft = time
+        val handler = ActionbarTimerHandler()
 
         val task = scheduler.schedule {
             val currentTime = timeLeft--
@@ -55,21 +57,35 @@ object ActionbarTimer {
                             player
                         )
                     )
-                    if (playSound) player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_ON, 0.5f, 2f)
+                    if (playSound) {
+                        player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_ON, 0.5f, 2f)
+                    }
                 }.entity(player).once()
             }
         }
             .global()
-            .repeatWhile { game.fsm.current === state && timeLeft > 0 }
+            .repeatWhile { game.fsm.current === state && timeLeft > 0 && !handler.isCancelled }
             .repeatEvery(20L, Clock.TICKS)
 
         task.completion().thenRun {
-            if (game.fsm.current === state && onCompletion != null) {
+            if (game.fsm.current === state && !handler.isCancelled && onCompletion != null) {
                 scheduler.schedule {
                     onCompletion(game, state)
                 }.global().once()
             }
         }
+
+        return handler
     }
 
+    data class ActionbarTimerHandler(
+        private val cancelled: AtomicBoolean = AtomicBoolean(false)
+    ) {
+        val isCancelled: Boolean
+            get() = cancelled.get()
+
+        fun cancel() {
+            cancelled.set(true)
+        }
+    }
 }

@@ -134,28 +134,15 @@ object BossbarTimer {
                 scheduler.schedule {
                     if (player.uniqueId !in viewers) return@schedule
 
-                    barTimer.name(
-                        ComponentDecorator.addBackground(
-                            Component.text(currentTime)
-                        )
-                    )
+                    barTimer.name(ComponentDecorator.addBackground(Component.text(currentTime)))
 
                     barTimer.progress(progress)
-
-                    player.playSound(
-                        player.location,
-                        Sound.BLOCK_COPPER_BULB_TURN_ON,
-                        0.5f,
-                        2f
-                    )
                 }.entity(player).once()
             }
         }
             .global()
             .repeatWhile {
-                game.fsm.current === state &&
-                        timeLeft.get() > 0 &&
-                        !cancelled.get()
+                game.fsm.current === state && timeLeft.get() > 0 && !cancelled.get()
             }
             .repeatEvery(20L, Clock.TICKS)
 

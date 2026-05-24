@@ -21,6 +21,8 @@ import ru.ynovka.myShore.game.GameState
  *   - батут (сандартная + основание из шума блоков слизи и изумрудов + слизни)
  */
 class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
+    var timer: ActionbarTimer.ActionbarTimerHandler? = null
+
     override fun onEnterState() {
         // Очищаем мир
         game.gameWorld.countdownPrepare().thenRun {
@@ -29,7 +31,7 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
         }
 
         // Начинаем игру
-        ActionbarTimer.startCountdownTimer(
+        timer = ActionbarTimer.startCountdownTimer(
             time = 10,
             game = game,
             state = this,
@@ -52,6 +54,11 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
     }
 
     override fun onPlayerLeave(gamePlayer: PillarsPlayer) {
+        if (game.activePlayers.size <= 1) {
+            timer?.cancel()
+            timer = null
+            game.fsm.transitionTo(PillarsWaitingForPlayers(game))
+        }
         val world = game.gameWorld.get() ?: return
         game.gameWorld.removePlayerPillar(gamePlayer.playerId, world)
     }

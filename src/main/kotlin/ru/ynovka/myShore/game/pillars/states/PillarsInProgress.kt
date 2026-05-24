@@ -90,13 +90,13 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
 
     // todo короче если под игроком нету блоков (getHighest) даём левитацию + фейрверки
     override fun onPlayerBecomeSpectator(gamePlayer: PillarsPlayer, reason: SpectatorReason) {
-        println("onPlayerBecomeSpectator")
         hasWinner(gamePlayer)
-        val world = game.gameWorld.getOrCreate().get()
-        gamePlayer.withOnlinePlayer { player ->
-            scheduler.schedule {
-                player.teleportAsync(world.spawnLocation)
-            }.entity(player).once()
+        game.gameWorld.get()?.let { world ->
+            gamePlayer.withOnlinePlayer { player ->
+                scheduler.schedule {
+                    player.teleportAsync(world.spawnLocation)
+                }.entity(player).once()
+            }
         }
     }
 
