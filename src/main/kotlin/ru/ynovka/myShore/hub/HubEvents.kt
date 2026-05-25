@@ -19,11 +19,101 @@ import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Bukkit
+import org.bukkit.Sound
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 
 object HubEvents : Listener {
+    private val waterTicks = ConcurrentHashMap<UUID, Int>()
+
+    private fun removeWaterTick(player: Player) {
+        waterTicks.remove(player.uniqueId)
+
+        scheduler.schedule {
+            player.removePotionEffect(PotionEffectType.DARKNESS)
+        }.entity(player).once()
+    }
+
     fun register() {
         inst.server.pluginManager.registerEvents(this, inst)
+
+        scheduler.schedule {
+            val players = Bukkit.getOnlinePlayers()
+
+            players.forEach { player ->
+                scheduler.schedule {
+                    val playerLoc = player.location
+
+                    scheduler.schedule {
+                        val blockLoc = playerLoc.clone()
+                            .toHighestLocation()
+                            .add(0.0, -12.0, 0.0)
+
+                        val block = playerLoc.world.getBlockAt(blockLoc)
+
+                        if (block.isLiquid && playerLoc.y <= 101.0) {
+                            scheduler.schedule {
+                                player.addPotionEffect(
+                                    PotionEffect(
+                                        PotionEffectType.DARKNESS,
+                                        -1,
+                                        0,
+                                        false,
+                                        false,
+                                        false
+                                    )
+                                )
+
+                                val waterSeconds = waterTicks.merge(
+                                    player.uniqueId,
+                                    1,
+                                    Int::plus
+                                ) ?: 1
+
+                                if (waterSeconds >= 6) {
+                                    player.playSound(
+                                        player.location,
+                                        Sound.ENTITY_ELDER_GUARDIAN_CURSE,
+                                        1.0f,
+                                        0.6f
+                                    )
+
+                                    scheduler.schedule {
+                                        player.toHub()
+                                        removeWaterTick(player)
+                                        player.addPotionEffect(
+                                            PotionEffect(
+                                                PotionEffectType.BLINDNESS,
+                                                40,
+                                                0,
+                                                false,
+                                                false,
+                                                false
+                                            )
+                                        )
+                                    }.entity(player).after(10L, Clock.TICKS).once()
+                                }
+                            }.entity(player).once()
+                        } else {
+                            val currentTicks = waterTicks[player.uniqueId] ?: return@schedule
+
+                            val newTicks = currentTicks - 1
+
+                            if (newTicks > 0) {
+                                waterTicks[player.uniqueId] = newTicks
+                            } else {
+                                removeWaterTick(player)
+                            }
+                        }
+                    }.region(playerLoc).once()
+                }.entity(player).once()
+            }
+        }
+            .global()
+            .repeatEvery(20L, Clock.TICKS)
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -53,6 +143,7 @@ object HubEvents : Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerLeave(e: PlayerQuitEvent) {
+        removeWaterTick(e.player)
         GameManager.leave(e.player.uniqueId)
         PartyManager.leave(e.player, LeftReason.QUIT)
         scheduler.schedule {
