@@ -117,7 +117,7 @@ class PillarsWorld(
     }
 
     fun spawnPlayers(pGame: PillarsGame) {
-        pGame.gamePlayers.forEach { spawnPlayer(pGame, it) }
+        pGame.activePlayers.forEach { spawnPlayer(pGame, it) }
     }
 
     private fun removePPillar(
@@ -160,7 +160,7 @@ class PillarsWorld(
 
         return getOrCreate().thenAccept { world ->
             world.worldBorder.size = allocatorGen.gen.borderSize(this)
-            world.worldBorder.center = Location(world, 8.0001, 0.0, 8.0001)
+            world.worldBorder.center = Location(world, 0.0001, 0.0, 0.0001)
         }
     }
 }

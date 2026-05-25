@@ -4,10 +4,8 @@ import ru.ynovka.myShore.game.pillars.Pillar.Companion.BORDER_PADDING
 import ru.ynovka.myShore.game.pillars.PillarsWorld
 import ru.ynovka.myShore.game.pillars.PillarsGame
 import ru.ynovka.myShore.game.pillars.Pillar
-import org.bukkit.Location
 import kotlin.math.abs
 import java.util.UUID
-
 
 object HoneyAllocatorGen : AllocatorGen {
 
@@ -15,11 +13,13 @@ object HoneyAllocatorGen : AllocatorGen {
     private const val STEP_Z = 8
     private const val OFFSET_X = 4
 
+    private const val CENTER_X = 0
+    private const val CENTER_Z = 0
+
     override fun generate(pGame: PillarsGame, playerId: UUID): Pillar {
-        val origin = pGame.gameWorld.getOrCreate().get().spawnLocation
         val occupied = pGame.gameWorld.pillars
 
-        val point = honeycombPoints(origin)
+        val point = honeycombPoints()
             .first { point ->
                 occupied.none { pillar ->
                     pillar.x == point.x && pillar.z == point.z
@@ -34,7 +34,6 @@ object HoneyAllocatorGen : AllocatorGen {
     }
 
     override fun borderSize(pWorld: PillarsWorld): Double {
-        val origin = pWorld.getOrCreate().get().spawnLocation
         val pillars = pWorld.pillars
 
         if (pillars.isEmpty()) {
@@ -43,29 +42,52 @@ object HoneyAllocatorGen : AllocatorGen {
 
         val maxDistance = pillars.maxOf { pillar ->
             maxOf(
-                abs(pillar.x - origin.blockX),
-                abs(pillar.z - origin.blockZ)
+                abs(pillar.x - CENTER_X),
+                abs(pillar.z - CENTER_Z)
             )
         }
 
         return maxDistance * 2.0 + BORDER_PADDING * 2.0
     }
 
-    private fun honeycombPoints(origin: Location): Sequence<IntPoint> = sequence {
+    private fun honeycombPoints(): Sequence<IntPoint> = sequence {
         var radius = 1
 
         while (true) {
-            for (cell in hexRing(radius)) {
+            for (cell in hexRingSymmetric(radius)) {
                 yield(
                     IntPoint(
-                        x = origin.blockX + cell.q * STEP_X + cell.r * OFFSET_X,
-                        z = origin.blockZ + cell.r * STEP_Z
+                        x = CENTER_X + cell.q * STEP_X + cell.r * OFFSET_X,
+                        z = CENTER_Z + cell.r * STEP_Z
                     )
                 )
             }
 
             radius++
         }
+    }
+
+    private fun hexRingSymmetric(radius: Int): List<HexCell> {
+        val ring = hexRing(radius)
+        val used = HashSet<HexCell>()
+        val result = ArrayList<HexCell>(ring.size)
+
+        for (cell in ring) {
+            if (!used.add(cell)) continue
+
+            result += cell
+
+            val opposite = HexCell(
+                q = -cell.q,
+                r = -cell.r
+            )
+
+            if (used.add(opposite)) {
+                result += opposite
+            }
+        }
+
+        return result
     }
 
     private fun hexRing(radius: Int): List<HexCell> {

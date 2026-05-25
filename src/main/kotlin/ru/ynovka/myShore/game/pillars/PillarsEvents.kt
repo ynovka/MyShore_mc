@@ -51,7 +51,7 @@ object PillarsEvents : Listener {
                 pPlayer.withOnlinePlayer { player ->
                     player.gameMode = GameMode.SPECTATOR
                     game.gameWorld.get()?.let { world ->
-                        player.teleportAsync(Location(world, 8.0, 100.0, 8.0))
+                        player.teleportAsync(Location(world, 0.0, 110.0, 0.0))
                     }
                     game.broadcast(PlayerDeathMessages.voidFall(player))
                 }

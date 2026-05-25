@@ -3,6 +3,7 @@ package ru.ynovka.myShore.game.pillars.states
 import ru.ynovka.myShore.game.GamePlayer.Companion.forEachOnlinePlayer
 import ru.ynovka.myShore.game.pillars.Pillar.Companion.TELEPORT_Y
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
+import ru.ynovka.myShore.game.gameUtils.spawnFireworksAround
 import ru.ynovka.myShore.game.gameUtils.ActionbarTimer
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.gameUtils.BossbarTimer
@@ -94,7 +95,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
         game.gameWorld.get()?.let { world ->
             gamePlayer.withOnlinePlayer { player ->
                 scheduler.schedule {
-                    player.teleportAsync(world.spawnLocation)
+                    player.teleportAsync(Location(world, 0.0, 110.0, 0.0))
                 }.entity(player).once()
             }
         }
@@ -127,6 +128,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
                     it.sendMessage(msg)
                 }.entity(it).once()
             }
+            spawnFireworksAround(winnerPlayer)
         }
 
         game.fsm.transitionTo(PillarsFinishing(game))
@@ -134,7 +136,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
 
     private fun startGiveRandomItemsTimer() {
         ActionbarTimer.startCountdownTimer(
-            time = 7,
+            time = 4,
             game = game,
             state = this,
             componentKey = "bar.myshore.new_item_in",

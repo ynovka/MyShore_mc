@@ -97,7 +97,7 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
         val canJoin = !isFull() && fsm.canPlayerJoin(gamePlayer)
 
         if (!canJoin) {
-            movePlayerStateToSpectator(gamePlayer)
+            movePlayerToSpectator(gamePlayer, SpectatorReason.GAME_FULL)
             fsm.spectatorJoin(gamePlayer)
             return
         }
@@ -121,6 +121,7 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
 
         val player = playersById[playerId] ?: return
 
+        playersById.remove(playerId)
         val wasActive = activePlayers.remove(player)
         val wasSpectator = spectatorPlayers.remove(player)
 

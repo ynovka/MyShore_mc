@@ -12,7 +12,7 @@ object GameManager {
     val games: MutableList<Game<*, *>> = CopyOnWriteArrayList()
 
     inline fun <reified G : Game<*, *>> UUID.currentGame(): G? =
-        games.firstOrNull { it is G && it.hasActivePlayer(this) } as? G
+        games.firstOrNull { it is G && it.hasPlayer(this) } as? G
 
     fun UUID.inGame(): Boolean = currentGame<Game<*, *>>() != null
 
