@@ -12,10 +12,11 @@ object HubCommands {
         commandAPICommand("hub") {
             playerExecutor { player, _ ->
                 player.toHub()
-        }
-        commandAPICommand("joinpillars") {
-            playerExecutor { player, _ ->
-                GameManager.join(player, ::PillarsGame)
+            }
+            commandAPICommand("joinpillars") {
+                playerExecutor { player, _ ->
+                    GameManager.join(player, ::PillarsGame)
+                }
             }
         }
     }
