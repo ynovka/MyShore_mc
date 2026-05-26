@@ -38,6 +38,5 @@ object Hub {
 
     private fun Player.applyHubInventory() {
         inventory.clear()
-        // TODO inventory.setItem(0, HubItems.playMenu.getStack(null))
     }
 }

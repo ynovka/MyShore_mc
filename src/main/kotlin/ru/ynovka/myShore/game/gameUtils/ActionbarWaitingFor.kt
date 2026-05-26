@@ -33,7 +33,7 @@ object ActionbarWaitingFor {
             frame++
             if (frame == frames.size) frame = 0
 
-            game.activePlayers.forEachOnlinePlayer { player ->
+            game.gamePlayers.forEachOnlinePlayer { player ->
                 player.sendActionBar(
                     ComponentDecorator.addBackground(
                         Component.translatable(componentKey)

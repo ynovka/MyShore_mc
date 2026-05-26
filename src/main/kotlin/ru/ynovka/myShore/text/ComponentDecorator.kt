@@ -12,13 +12,9 @@ import org.bukkit.entity.Player
 
 object ComponentDecorator {
 
-    // ── Публичное API ────────────────────────────────────────────────────────
-
-    /** Добавляет фон к TranslatableComponent (переводится на русский перед обработкой). */
     fun addBackground(component: TranslatableComponent, player: Player): Component =
         addBackground(ServerTranslator.translate(component, player))
 
-    /** Добавляет фон к произвольному Adventure-компоненту. */
     fun addBackground(component: Component): Component {
         return Component.text()
             .append(buildLeft())
@@ -26,7 +22,6 @@ object ComponentDecorator {
             .append(buildRight())
             .build()
     }
-    // ── Внутренняя логика ────────────────────────────────────────────────────
 
     private fun decorate(component: Component): Component = when {
         component == Component.newline() -> Component.text()
@@ -64,18 +59,14 @@ object ComponentDecorator {
     }
 
     private fun buildLeft(): Component =
-        MyShore.Companion.mm.deserialize("<white><shadow:#00000000>${Glyphs.BACKGROUND_LEFT}</shadow></white>")
+        MyShore.mm.deserialize("<white><shadow:#00000000>${Glyphs.BACKGROUND_LEFT}</shadow></white>")
 
     private fun buildRight(): Component =
-        MyShore.Companion.mm.deserialize("<white><shadow:#00000000>${Glyphs.BACKGROUND_RIGHT}</shadow></white>")
+        MyShore.mm.deserialize("<white><shadow:#00000000>${Glyphs.BACKGROUND_RIGHT}</shadow></white>")
 
-    /**
-     * Возвращает: BACKGROUND_CENTER[w] + returnShift, цвет принудительно белый.
-     * Белый нужен, чтобы глиф не тонировался цветом родителя.
-     */
     private fun buildBgEntry(w: Int): Component {
         val bgStr = Glyphs.BACKGROUND_CENTER[w] ?: Glyphs.BACKGROUND_CENTER[6]!!
         val shift = TextOffset.getOffsetMinimessage(-(w - 1))
-        return MyShore.Companion.mm.deserialize("<white><shadow:#00000000>$bgStr$shift</shadow></white>")
+        return MyShore.mm.deserialize("<white><shadow:#00000000>$bgStr$shift</shadow></white>")
     }
 }

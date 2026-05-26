@@ -4,8 +4,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import org.bukkit.event.EventHandler
 import org.bukkit.entity.Firework
-import org.bukkit.event.Listener
+import ru.ynovka.myShore.MyShore
 import org.bukkit.FireworkEffect
+import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import kotlin.random.Random
@@ -98,7 +99,11 @@ private fun randomColor(): Color {
     ).random()
 }
 
-class CosmeticFireworkListener : Listener {
+object CosmeticFireworkListener : Listener {
+
+    fun register() {
+        MyShore.inst.server.pluginManager.registerEvents(this, MyShore.Companion.inst)
+    }
 
     @EventHandler(ignoreCancelled = true)
     fun onDamage(event: EntityDamageByEntityEvent) {

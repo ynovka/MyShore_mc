@@ -10,6 +10,7 @@ import dev.jorel.commandapi.CommandAPIPaperConfig
 import ru.ynovka.myShore.texturepack.TexturePack
 import su.plo.voice.api.server.PlasmoVoiceServer
 import ru.ynovka.myShore.plasmo.PlasmoAddon
+import net.thenextlvl.worlds.WorldsAccess
 import org.bukkit.plugin.java.JavaPlugin
 import dev.jorel.commandapi.CommandAPI
 
@@ -38,7 +39,6 @@ class MyShore : JavaPlugin() {
         dataFolder.mkdirs()
         CommandAPI.onEnable()
 
-        NPCs.register()
         Commands.register()
         Events.register()
         Items.register()
@@ -50,5 +50,10 @@ class MyShore : JavaPlugin() {
 
     override fun onDisable() {
         CommandAPI.onDisable()
+        WorldsAccess.access().worldRegistry.worlds().forEach { world ->
+            println("world key = ${world.key()}")
+            println("world value = ${world.value()}")
+            println("=============================================")
+        }
     }
 }

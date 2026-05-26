@@ -6,7 +6,6 @@ import ru.ynovka.myShore.game.pillars.states.PillarsWaitingForPlayers
 import ru.ynovka.myShore.game.HubGameWorld
 import ru.ynovka.myShore.game.GameManager
 import ru.ynovka.myShore.game.Game
-import ru.ynovka.myShore.game.SpectatorReason
 import java.util.UUID
 
 

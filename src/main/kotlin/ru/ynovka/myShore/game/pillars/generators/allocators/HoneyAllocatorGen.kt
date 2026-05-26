@@ -7,6 +7,7 @@ import ru.ynovka.myShore.game.pillars.Pillar
 import kotlin.math.abs
 import java.util.UUID
 
+
 object HoneyAllocatorGen : AllocatorGen {
 
     private const val STEP_X = 9

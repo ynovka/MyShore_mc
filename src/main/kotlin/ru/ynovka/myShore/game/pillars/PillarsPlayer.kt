@@ -6,4 +6,16 @@ import java.util.UUID
 
 class PillarsPlayer(
     playerId: UUID
-) : GamePlayer(playerId)
+) : GamePlayer(playerId) {
+
+    var kills: Int = 0
+        private set
+
+    fun addKill() {
+        kills++
+    }
+
+    fun resetKills() {
+        kills = 0
+    }
+}

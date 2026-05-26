@@ -6,6 +6,7 @@ import ru.ynovka.myShore.party.PartyManager.Party
 import org.bukkit.GameMode
 import java.util.UUID
 
+
 abstract class Game<P : GamePlayer, W : GameWorld>(
     val party: Party? = null // null -> публичная игра
 ) {
@@ -113,7 +114,6 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
         activePlayers.add(gamePlayer)
 
         fsm.playerJoin(gamePlayer)
-        handlePlayerJoin(gamePlayer)
     }
 
     fun onPlayerLeave(playerId: UUID) {
@@ -147,11 +147,15 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
         if (player in spectatorPlayers) return false
         if (!fsm.canPlayerBecomeSpectator(player, reason)) return false
 
-        movePlayerStateToSpectator(player)
+        activePlayers.remove(player)
+        exitedPlayers.remove(player)
+        spectatorPlayers.add(player)
 
         player.withOnlinePlayer { bukkitPlayer ->
             scheduler.schedule {
                 bukkitPlayer.gameMode = GameMode.SPECTATOR
+                bukkitPlayer.activePotionEffects.clear()
+                bukkitPlayer.inventory.clear()
             }.entity(bukkitPlayer).once()
         }
 
@@ -159,12 +163,6 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
         handlePlayerBecomeSpectator(player, reason)
 
         return true
-    }
-
-    private fun movePlayerStateToSpectator(player: P) {
-        activePlayers.remove(player)
-        exitedPlayers.remove(player)
-        spectatorPlayers.add(player)
     }
 
     protected open fun handlePlayerJoin(gamePlayer: P) {}

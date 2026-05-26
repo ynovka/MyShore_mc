@@ -27,10 +27,6 @@ object TexturePack {
         createItemDef(item.id.value())
     }
 
-    fun createItemTexture(item: String) {
-        createItemDef(item)
-    }
-
     private fun createItemDef(name: String) {
         val tex: Texture = ns.texture("item/$name")
         val model = ns.model(name, false)

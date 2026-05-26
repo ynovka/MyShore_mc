@@ -3,6 +3,7 @@ package ru.ynovka.myShore.game.pillars
 import ru.ynovka.myShore.game.pillars.generators.allocators.AllocatorGenerator
 import ru.ynovka.myShore.game.pillars.generators.pillars.PillarGenerator
 import ru.ynovka.myShore.game.pillars.Pillar.Companion.TELEPORT_Y
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.utils.InstantChunkClear
 import ru.ynovka.myShore.MyShore.Companion.inst
@@ -106,7 +107,8 @@ class PillarsWorld(
                         player.health = 20.0
                         player.inventory.clear()
                         player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
-                    }.entity(player).once()
+                        player.activePotionEffects.clear()
+                    }.entity(player).after(20, Clock.TICKS).once()
                 }
             }
 

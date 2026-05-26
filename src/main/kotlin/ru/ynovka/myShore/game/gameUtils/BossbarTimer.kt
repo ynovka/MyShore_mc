@@ -15,7 +15,6 @@ import ru.ynovka.myShore.game.GamePlayer
 import ru.ynovka.myShore.game.GameWorld
 import ru.ynovka.myShore.game.GameState
 import ru.ynovka.myShore.game.Game
-import org.bukkit.Sound
 import java.util.UUID
 
 
@@ -91,7 +90,7 @@ object BossbarTimer {
         }
 
         fun syncViewers() {
-            game.activePlayers.withOnlinePlayers { currentPlayers ->
+            game.gamePlayers.withOnlinePlayers { currentPlayers ->
                 val currentIds = currentPlayers.mapTo(mutableSetOf()) { it.uniqueId }
 
                 val removedViewers = viewers
@@ -130,7 +129,7 @@ object BossbarTimer {
 
             syncViewers()
 
-            game.activePlayers.forEachOnlinePlayer { player ->
+            game.gamePlayers.forEachOnlinePlayer { player ->
                 scheduler.schedule {
                     if (player.uniqueId !in viewers) return@schedule
 

@@ -1,17 +1,18 @@
 package ru.ynovka.myShore.text
 
-import io.papermc.paper.event.player.AsyncChatEvent
-import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.game.gameUtils.VisibilityGroup.Companion.getVisiblePlayers
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
-import org.bukkit.event.EventHandler
-import org.bukkit.event.EventPriority
-import org.bukkit.event.Listener
+import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import ru.ynovka.myShore.MyShore
-import ru.ynovka.myShore.game.gameUtils.VisibilityGroup.Companion.getVisiblePlayers
-import ru.ynovka.myShore.party.getParty
 import ru.ynovka.myShore.utils.Utils.asPlayers
+import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.party.getParty
+import org.bukkit.event.EventPriority
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import ru.ynovka.myShore.MyShore
+
 
 object ChatEvents : Listener {
 

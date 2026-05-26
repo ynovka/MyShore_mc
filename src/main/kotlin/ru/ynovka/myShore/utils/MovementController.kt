@@ -168,8 +168,6 @@ object MovementController : Listener {
     )
 }
 
-fun Player.canMove(value: Boolean) = restrictToBlockCenter(!value)
-
 fun Player.restrictToBlockCenter(value: Boolean) {
     if (value) {
         MovementController.anchorPlayerToCurrentBlock(this)

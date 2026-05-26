@@ -3,7 +3,6 @@ package ru.ynovka.myShore.game.pillars.states
 import ru.ynovka.myShore.game.GamePlayer.Companion.forEachOnlinePlayer
 import ru.ynovka.myShore.game.pillars.Pillar.Companion.TELEPORT_Y
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
-import ru.ynovka.myShore.game.gameUtils.spawnFireworksAround
 import ru.ynovka.myShore.game.gameUtils.ActionbarTimer
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.gameUtils.BossbarTimer
@@ -12,7 +11,6 @@ import ru.ynovka.myShore.game.pillars.PillarsWorld
 import ru.ynovka.myShore.game.pillars.PillarsGame
 import ru.ynovka.myShore.utils.restrictToBlock
 import ru.ynovka.myShore.game.SpectatorReason
-import net.kyori.adventure.text.Component
 import org.bukkit.potion.PotionEffectType
 import ru.ynovka.myShore.game.GameState
 import org.bukkit.inventory.ItemStack
@@ -43,6 +41,8 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
                 }
             }.region(blockLoc).once()
         }
+
+        game.gamePlayers.forEach { it.resetKills() }
 
         // даём эффект плавного падения и меняем режим на выживание
         game.activePlayers.forEachOnlinePlayer { player ->
@@ -89,9 +89,9 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
         }.global().once()
     }
 
-    // todo короче если под игроком нету блоков (getHighest) даём левитацию + фейрверки
     override fun onPlayerBecomeSpectator(gamePlayer: PillarsPlayer, reason: SpectatorReason) {
-        hasWinner(gamePlayer)
+        tryFinishRound()
+
         game.gameWorld.get()?.let { world ->
             gamePlayer.withOnlinePlayer { player ->
                 scheduler.schedule {
@@ -101,37 +101,16 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
         }
     }
 
-    override fun onPlayerLeave(gamePlayer: PillarsPlayer) = hasWinner(gamePlayer)
+    override fun onSpectatorJoin(gameSpectator: PillarsPlayer) {
+        gameSpectator.resetKills()
+    }
 
-    private fun hasWinner(gamePlayer: PillarsPlayer) {
-        if (game.activePlayers.size != 1) return
-        gamePlayer.withOnlinePlayer { player ->
-            scheduler.schedule {
-                val pillar = game.gameWorld.pillars.firstOrNull { it.owner == player.uniqueId } ?: return@schedule
-                val world = game.gameWorld.get() ?: return@schedule
-                player.teleportAsync(Location(
-                    world, pillar.x + 0.5, TELEPORT_Y, pillar.z + 0.5
-                ))
-            }.entity(player).once()
+    override fun onPlayerLeave(gamePlayer: PillarsPlayer) = tryFinishRound()
+
+    private fun tryFinishRound() {
+        if (game.activePlayers.size <= 1) {
+            game.fsm.transitionTo(PillarsFinishing(game))
         }
-
-
-        val winner = game.activePlayers.firstOrNull() ?: return
-        winner.withOnlinePlayer { winnerPlayer ->
-            val msg = Component.translatable(
-                "msg.myshore.player.win",
-                Component.text(winnerPlayer.name)
-            )
-            val toAnon = game.activePlayers + game.spectatorPlayers
-            toAnon.forEachOnlinePlayer {
-                scheduler.schedule {
-                    it.sendMessage(msg)
-                }.entity(it).once()
-            }
-            spawnFireworksAround(winnerPlayer)
-        }
-
-        game.fsm.transitionTo(PillarsFinishing(game))
     }
 
     private fun startGiveRandomItemsTimer() {

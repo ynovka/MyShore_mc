@@ -8,11 +8,14 @@ import org.bukkit.event.entity.PlayerDeathEvent
 import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import java.util.concurrent.ConcurrentHashMap
 import ru.ynovka.myShore.party.PartyManager
 import ru.ynovka.myShore.game.GameManager
 import ru.ynovka.myShore.party.LeftReason
+import org.bukkit.potion.PotionEffectType
 import ru.ynovka.myShore.hub.Hub.toHub
 import org.bukkit.event.EventPriority
+import org.bukkit.potion.PotionEffect
 import org.bukkit.event.EventHandler
 import ru.ynovka.myShore.MyShore
 import org.bukkit.event.Listener
@@ -20,10 +23,7 @@ import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Bukkit
 import org.bukkit.Sound
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 
 
 object HubEvents : Listener {
@@ -45,6 +45,7 @@ object HubEvents : Listener {
 
             players.forEach { player ->
                 scheduler.schedule {
+                    if (!player.isSwimming || player.world.name != "hub") return@schedule
                     val playerLoc = player.location
 
                     scheduler.schedule {

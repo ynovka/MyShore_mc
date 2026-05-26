@@ -12,7 +12,7 @@ import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import ru.ynovka.myShore.game.SpectatorReason
 import net.kyori.adventure.text.Component
-import org.bukkit.event.EventPriority
+import org.bukkit.inventory.ItemStack
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.entity.Player
@@ -73,20 +73,71 @@ object PillarsEvents : Listener {
     }
 
 
-    @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerDeath(e: PlayerDeathEvent) {
-        if (!e.player.world.isPillarsWorld()) return
+        val player = e.player
 
-        val game = e.player.uniqueId.currentPillarsGame() ?: return
-        val pPlayer = game.getOrCreatePlayer(e.player.uniqueId)
+        if (!player.world.isPillarsWorld()) return
+
+        val game = player.uniqueId.currentPillarsGame() ?: return
+        val pPlayer = game.getOrCreatePlayer(player.uniqueId)
+
+        val drops = e.drops
+            .filter { !it.type.isAir && it.amount > 0 }
+            .map { it.clone() }
+
         e.isCancelled = true
+
+        e.drops.clear()
+        e.droppedExp = 0
 
         when (game.fsm.current) {
             is PillarsInProgress -> {
+                dropDeathItems(player, drops)
+
                 game.movePlayerToSpectator(pPlayer, SpectatorReason.ELIMINATED)
                 game.broadcast(PlayerDeathMessages.from(e))
             }
         }
+    }
+
+    private fun dropDeathItems(player: Player, drops: List<ItemStack>) {
+        val world = player.world
+
+        val dropLocation = player.location.clone()
+            .add(0.0, player.eyeHeight - 0.3, 0.0)
+
+        for (stack in drops) {
+            if (stack.type.isAir || stack.amount <= 0) continue
+
+            world.dropItem(dropLocation, stack.clone()) { item ->
+                item.pickupDelay = 10
+                item.velocity = randomDeathDropVelocity()
+            }
+        }
+    }
+
+    private fun randomDeathDropVelocity(): Vector {
+        val angle = kotlin.random.Random.nextDouble() * Math.PI * 2.0
+        val speed = kotlin.random.Random.nextDouble() * 0.5
+
+        return Vector(
+            -kotlin.math.sin(angle) * speed,
+            0.2,
+            kotlin.math.cos(angle) * speed
+        )
+    }
+
+    @EventHandler
+    fun onPlayerKill(e: PlayerDeathEvent) {
+        if (!e.player.world.isPillarsWorld()) return
+
+        val game = e.player.uniqueId.currentPillarsGame() ?: return
+        if (game.fsm.current !is PillarsInProgress) return
+
+        val killerId = e.entity.killer?.uniqueId ?: return
+        val killer = game.getOrCreatePlayer(killerId)
+
+        killer.addKill()
     }
 
     private fun PillarsGame.broadcast(message: Component) {

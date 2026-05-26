@@ -1,5 +1,6 @@
 package ru.ynovka.myShore
 
+import ru.ynovka.myShore.game.gameUtils.CosmeticFireworkListener
 import ru.ynovka.myShore.game.gameUtils.VisibilityGroupEvents
 import ru.ynovka.myShore.game.pillars.PillarsEvents
 import ru.ynovka.myShore.utils.MovementController
@@ -15,5 +16,6 @@ object Events {
         PillarsEvents.register()
         MovementController.register()
         VisibilityGroupEvents.register()
+        CosmeticFireworkListener.register()
     }
 }
