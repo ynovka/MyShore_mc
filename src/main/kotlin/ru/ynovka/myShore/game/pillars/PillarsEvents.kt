@@ -42,6 +42,7 @@ object PillarsEvents : Listener {
         if (!e.player.world.isPillarsWorld()) return
         if (e.player.gameMode != GameMode.SURVIVAL) return
         if (e.to.y > 0.0) return
+        if (e.from.y <= 0.0) return
 
         val game = e.player.uniqueId.currentPillarsGame() ?: return
         val pPlayer = game.getOrCreatePlayer(e.player.uniqueId)
@@ -72,7 +73,7 @@ object PillarsEvents : Listener {
         }
     }
 
-
+    @EventHandler
     fun onPlayerDeath(e: PlayerDeathEvent) {
         val player = e.player
 

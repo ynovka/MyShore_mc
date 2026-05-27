@@ -115,7 +115,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
 
     private fun startGiveRandomItemsTimer() {
         ActionbarTimer.startCountdownTimer(
-            time = 4,
+            time = 5,
             game = game,
             state = this,
             componentKey = "bar.myshore.new_item_in",

@@ -15,7 +15,7 @@ object HubCommands {
             }
             commandAPICommand("joinpillars") {
                 playerExecutor { player, _ ->
-                    GameManager.join(player, ::PillarsGame)
+                    GameManager.join<PillarsGame>(player, { PillarsGame() })
                 }
             }
         }

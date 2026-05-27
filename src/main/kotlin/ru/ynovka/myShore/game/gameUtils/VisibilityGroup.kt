@@ -91,6 +91,28 @@ class VisibilityGroup {
         }
     }
 
+    fun clear() {
+        val oldMembers: Set<UUID>
+
+        synchronized(membershipLock) {
+            if (members.isEmpty()) return
+
+            oldMembers = members.toSet()
+
+            oldMembers.forEach { uuid ->
+                playerGroupIndex.remove(uuid, this)
+            }
+
+            members.clear()
+        }
+
+        oldMembers.forEach { a ->
+            oldMembers.forEach { b ->
+                if (a != b) hideOneWay(a, b)
+            }
+        }
+    }
+
     fun hasViewer(uuid: UUID): Boolean = uuid in members
 
     fun getViewers(): Set<UUID> = members.toSet()

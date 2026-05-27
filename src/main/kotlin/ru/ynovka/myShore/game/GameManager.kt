@@ -5,6 +5,7 @@ import ru.ynovka.myShore.party.PartyManager.Party
 import java.util.concurrent.CopyOnWriteArrayList
 import ru.ynovka.myShore.party.PartyManager
 import org.bukkit.entity.Player
+import kotlin.reflect.KClass
 import java.util.UUID
 
 
@@ -16,31 +17,34 @@ object GameManager {
 
     fun UUID.inGame(): Boolean = currentGame<Game<*, *>>() != null
 
-    fun <G : Game<*, *>> join(
+    inline fun <reified G : Game<*, *>> join(
         player: Player,
-        factory: () -> G,
-        partyFactory: (Party) -> G = { factory() },
+        noinline factory: () -> G,
+        noinline partyFactory: (Party) -> G = { factory() },
     ): Result<G> {
         if (player.uniqueId.inGame())
             return Result.failure(IllegalStateException("Player ${player.name} is already in a game"))
 
         scheduler.schedule {
             player.inventory.clear()
-            player.activePotionEffects.clear()
+            player.clearActivePotionEffects()
         }.entity(player).once()
 
         val party = PartyManager.getParty(player)
         return if (party != null)
-            joinPrivate(party, factory, partyFactory)
+            joinPrivate<G>(party, partyFactory)
         else
-            joinPublic(player.uniqueId, factory)
+            joinPublic<G>(player.uniqueId, factory)
     }
 
-    private fun <G : Game<*, *>> joinPublic(playerId: UUID, factory: () -> G): Result<G> {
-        val templateClass = factory().javaClass
+    @PublishedApi
+    internal inline fun <reified G : Game<*, *>> joinPublic(
+        playerId: UUID,
+        noinline factory: () -> G
+    ): Result<G> {
         @Suppress("UNCHECKED_CAST")
         val existing = games.firstOrNull { g ->
-            g.javaClass == templateClass && !g.isPrivate && !g.isFull()
+            g is G && !g.isPrivate && !g.isFull()
         } as? G
 
         val game = existing ?: factory().also { newGame ->
@@ -51,15 +55,14 @@ object GameManager {
         return Result.success(game)
     }
 
-    private fun <G : Game<*, *>> joinPrivate(
+    @PublishedApi
+    internal inline fun <reified G : Game<*, *>> joinPrivate(
         party: Party,
-        factory: () -> G,
-        partyFactory: (Party) -> G,
+        noinline partyFactory: (Party) -> G,
     ): Result<G> {
-        val templateClass = factory().javaClass
         @Suppress("UNCHECKED_CAST")
         val existing = games.firstOrNull { g ->
-            g.javaClass == templateClass && g.party == party
+            g is G && g.party == party
         } as? G
 
         val game = existing ?: partyFactory(party).also { newGame ->
@@ -75,7 +78,17 @@ object GameManager {
 
     fun leave(playerId: UUID) {
         val game = playerId.currentGame<Game<*, *>>() ?: return
+
         game.onPlayerLeave(playerId)
-        if (game.isEmpty()) games.remove(game)
+
+        if (game.isEmpty()) {
+            destroy(game)
+        }
+    }
+
+    fun destroy(game: Game<*, *>) {
+        if (games.remove(game)) {
+            game.destroy()
+        }
     }
 }

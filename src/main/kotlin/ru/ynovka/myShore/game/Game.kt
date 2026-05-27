@@ -8,8 +8,12 @@ import java.util.UUID
 
 
 abstract class Game<P : GamePlayer, W : GameWorld>(
-    val party: Party? = null // null -> публичная игра
+    val party: Party? = null
 ) {
+    private var destroyed = false
+    val isDestroyed: Boolean
+        get() = destroyed
+
     abstract val initialState: GameState<P, W, *>
     val fsm: GameFSM<P, W> by lazy { GameFSM(initialState).also { it.start() } }
 
@@ -18,39 +22,18 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
 
     val gameVisibilityGroup = VisibilityGroup()
 
-    /**
-     * Все игроки, которые когда-либо были созданы для этой игры.
-     */
     val gamePlayers: MutableSet<P> = mutableSetOf()
-
-    /**
-     * Игроки, которые сейчас играют.
-     */
     val activePlayers: MutableSet<P> = mutableSetOf()
-
-    /**
-     * Игроки, которые вышли из игры, но могут вернуться.
-     */
     val exitedPlayers: MutableSet<P> = mutableSetOf()
-
-    /**
-     * Игроки, которые сейчас являются зрителями.
-     */
     val spectatorPlayers: MutableSet<P> = mutableSetOf()
 
-    /**
-     * Основной индекс игроков.
-     *
-     * Нужен, чтобы не делать activePlayers.find { it.playerId == uuid }
-     * и не создавать дубликаты GamePlayer с одним UUID.
-     */
     private val playersById: MutableMap<UUID, P> = mutableMapOf()
 
     val isPrivate: Boolean
         get() = party != null
 
     fun isEmpty(): Boolean =
-        activePlayers.isEmpty()
+        activePlayers.isEmpty() && spectatorPlayers.isEmpty()
 
     fun isFull(): Boolean =
         activePlayers.size >= maxPlayers
@@ -77,6 +60,8 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
         playersById[playerId]
 
     fun getOrCreatePlayer(playerId: UUID): P {
+        check(!destroyed) { "Game is already destroyed" }
+
         playersById[playerId]?.let { return it }
 
         val player = createPlayer(playerId)
@@ -90,11 +75,14 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
     abstract fun createPlayer(playerId: UUID): P
 
     fun onPlayerJoin(playerId: UUID) {
+        if (destroyed) return
+
         val gamePlayer = getOrCreatePlayer(playerId)
 
         if (gamePlayer in activePlayers || gamePlayer in spectatorPlayers) return
 
         gameVisibilityGroup.addViewer(playerId)
+
         val canJoin = !isFull() && fsm.canPlayerJoin(gamePlayer)
 
         if (!canJoin) {
@@ -114,14 +102,16 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
         activePlayers.add(gamePlayer)
 
         fsm.playerJoin(gamePlayer)
+        handlePlayerJoin(gamePlayer)
     }
 
     fun onPlayerLeave(playerId: UUID) {
+        if (destroyed) return
+
         gameVisibilityGroup.removeViewer(playerId)
 
         val player = playersById[playerId] ?: return
 
-        playersById.remove(playerId)
         val wasActive = activePlayers.remove(player)
         val wasSpectator = spectatorPlayers.remove(player)
 
@@ -139,6 +129,8 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
         gamePlayer: P,
         reason: SpectatorReason = SpectatorReason.UNKNOWN
     ): Boolean {
+        if (destroyed) return false
+
         val player = playersById[gamePlayer.playerId] ?: gamePlayer.also {
             playersById[it.playerId] = it
             gamePlayers.add(it)
@@ -154,7 +146,7 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
         player.withOnlinePlayer { bukkitPlayer ->
             scheduler.schedule {
                 bukkitPlayer.gameMode = GameMode.SPECTATOR
-                bukkitPlayer.activePotionEffects.clear()
+                bukkitPlayer.clearActivePotionEffects()
                 bukkitPlayer.inventory.clear()
             }.entity(bukkitPlayer).once()
         }
@@ -163,6 +155,19 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
         handlePlayerBecomeSpectator(player, reason)
 
         return true
+    }
+
+    fun destroy() {
+        if (destroyed) return
+        destroyed = true
+
+        gameVisibilityGroup.clear()
+
+        activePlayers.clear()
+        exitedPlayers.clear()
+        spectatorPlayers.clear()
+        gamePlayers.clear()
+        playersById.clear()
     }
 
     protected open fun handlePlayerJoin(gamePlayer: P) {}

@@ -13,13 +13,22 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
     var timer: ActionbarTimer.ActionbarTimerHandler? = null
 
     override fun onEnterState() {
-        // Очищаем мир
-        game.gameWorld.countdownPrepare().thenRun {
-            // Спавн колб, столбов и площадки + телепорт игроков + Отключаем передвищение игрокам + режим игры adv
-            game.gameWorld.spawnPlayers(game)
-        }
+        val state = this
 
-        // Начинаем игру
+        game.gameWorld.countdownPrepare()
+            .thenCompose {
+                game.gameWorld.spawnPlayers(game)
+            }
+            .thenRun {
+                scheduler.schedule {
+                    if (game.fsm.current === state) {
+                        startCountdown()
+                    }
+                }.global().once()
+            }
+    }
+
+    private fun startCountdown() {
         timer = ActionbarTimer.startCountdownTimer(
             time = 10,
             game = game,

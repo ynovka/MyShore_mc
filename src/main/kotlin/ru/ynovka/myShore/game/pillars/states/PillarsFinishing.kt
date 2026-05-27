@@ -50,7 +50,7 @@ class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
         var y = Double.NEGATIVE_INFINITY
 
         gamePlayer.withOnlinePlayer { player ->
-            y = player.location.y
+            y = player.y
         }
 
         return y

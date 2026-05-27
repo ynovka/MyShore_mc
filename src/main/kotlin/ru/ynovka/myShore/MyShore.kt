@@ -13,6 +13,7 @@ import ru.ynovka.myShore.plasmo.PlasmoAddon
 import net.thenextlvl.worlds.WorldsAccess
 import org.bukkit.plugin.java.JavaPlugin
 import dev.jorel.commandapi.CommandAPI
+import org.bukkit.Bukkit
 
 
 class MyShore : JavaPlugin() {
@@ -46,14 +47,22 @@ class MyShore : JavaPlugin() {
         ITEMS.apply()
         STATISTIC_TYPES.apply()
         TexturePack.register()
+
+        // todo сделать что бы миры удалялись ещё и по завершению игры
+        val access = WorldsAccess.access()
+        scheduler.schedule {
+            Bukkit.getWorlds().forEach { world ->
+                if (!Regex(
+                        "^myshore_pillars_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+                    ).matches(world.name)
+                ) return@forEach
+                println("delete: ${world.name}")
+                access.delete(world)
+            }
+        }.global().once()
     }
 
     override fun onDisable() {
         CommandAPI.onDisable()
-        WorldsAccess.access().worldRegistry.worlds().forEach { world ->
-            println("world key = ${world.key()}")
-            println("world value = ${world.value()}")
-            println("=============================================")
-        }
     }
 }

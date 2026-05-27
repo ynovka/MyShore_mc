@@ -75,7 +75,11 @@ class PillarsWorld(
             }
     }
 
-    fun spawnPlayer(pGame: PillarsGame, pPlayer: PillarsPlayer): CompletableFuture<Void> {
+    fun spawnPlayer(
+        pGame: PillarsGame,
+        pPlayer: PillarsPlayer,
+        updateBorder: Boolean = true
+    ): CompletableFuture<Void> {
         return getOrCreate().thenCompose { world ->
             removePlayerPillar(pPlayer.playerId, world)
 
@@ -83,6 +87,12 @@ class PillarsWorld(
 
             pillarGen.gen.generate(world, pillar)
             PillarsPlayerBox.create(world, pillar)
+
+            if (updateBorder) {
+                scheduler.schedule {
+                    world.worldBorder.size = allocatorGen.gen.borderSize(this)
+                }.global().once()
+            }
 
             scheduler.schedule {
                 world.worldBorder.size = allocatorGen.gen.borderSize(this)
@@ -96,20 +106,22 @@ class PillarsWorld(
             )
 
             pPlayer.withOnlinePlayer { player ->
-                player.teleportAsync(teleportLocation).thenAccept { success ->
-                    if (!success) return@thenAccept
+                scheduler.schedule {
+                    player.teleportAsync(teleportLocation).thenAccept { success ->
+                        if (!success) return@thenAccept
 
-                    scheduler.schedule {
-                        player.restrictToBlock(true)
-                        player.gameMode = GameMode.ADVENTURE
-                        player.foodLevel = 20
-                        player.saturation = 10f
-                        player.health = 20.0
-                        player.inventory.clear()
-                        player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
-                        player.activePotionEffects.clear()
-                    }.entity(player).after(20, Clock.TICKS).once()
-                }
+                        scheduler.schedule {
+                            player.restrictToBlock(true)
+                            player.gameMode = GameMode.ADVENTURE
+                            player.foodLevel = 20
+                            player.saturation = 10f
+                            player.health = 20.0
+                            player.inventory.clear()
+                            player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
+                            player.clearActivePotionEffects()
+                        }.entity(player).once()
+                    }
+                }.global().after(20, Clock.TICKS).once()
             }
 
             return@thenCompose CompletableFuture.completedFuture<Void>(null)
@@ -118,8 +130,50 @@ class PillarsWorld(
         }
     }
 
-    fun spawnPlayers(pGame: PillarsGame) {
-        pGame.activePlayers.forEach { spawnPlayer(pGame, it) }
+    fun spawnPlayers(pGame: PillarsGame): CompletableFuture<Void> {
+        val players = pGame.activePlayers.toList()
+
+        if (players.isEmpty()) {
+            return CompletableFuture.completedFuture(null)
+        }
+
+        val futures = players.mapIndexed { index, pPlayer ->
+            val future = CompletableFuture<Void>()
+            val delay = index * PLAYER_SPAWN_INTERVAL_TICKS
+
+            val task = scheduler.schedule {
+                if (pPlayer !in pGame.activePlayers) {
+                    future.complete(null)
+                    return@schedule
+                }
+
+                spawnPlayer(pGame, pPlayer, updateBorder = false)
+                    .whenComplete { _, throwable ->
+                        if (throwable != null) {
+                            future.completeExceptionally(throwable)
+                        } else {
+                            future.complete(null)
+                        }
+                    }
+            }.global()
+
+            if (delay > 0L) {
+                task.after(delay, Clock.TICKS).once()
+            } else {
+                task.once()
+            }
+
+            future
+        }
+
+        return CompletableFuture.allOf(*futures.toTypedArray())
+            .thenRun {
+                val world = get() ?: return@thenRun
+
+                scheduler.schedule {
+                    world.worldBorder.size = allocatorGen.gen.borderSize(this)
+                }.global().once()
+            }
     }
 
     private fun removePPillar(
@@ -164,6 +218,10 @@ class PillarsWorld(
             world.worldBorder.size = allocatorGen.gen.borderSize(this)
             world.worldBorder.center = Location(world, 0.0001, 0.0, 0.0001)
         }
+    }
+
+    private companion object {
+        const val PLAYER_SPAWN_INTERVAL_TICKS = 5L
     }
 }
 
