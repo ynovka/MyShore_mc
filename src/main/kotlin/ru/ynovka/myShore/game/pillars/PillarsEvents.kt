@@ -48,7 +48,9 @@ object PillarsEvents : Listener {
         val pPlayer = game.getOrCreatePlayer(e.player.uniqueId)
         when (game.fsm.current) {
             is PillarsInProgress -> {
-                game.movePlayerToSpectator(pPlayer, SpectatorReason.ELIMINATED)
+                if (!pPlayer.markEliminated()) return
+                if (!game.movePlayerToSpectator(pPlayer, SpectatorReason.ELIMINATED)) return
+
                 pPlayer.withOnlinePlayer { player ->
                     player.gameMode = GameMode.SPECTATOR
                     game.gameWorld.get()?.let { world ->
@@ -93,10 +95,13 @@ object PillarsEvents : Listener {
 
         when (game.fsm.current) {
             is PillarsInProgress -> {
+                if (!pPlayer.markEliminated()) return
+
                 dropDeathItems(player, drops)
 
-                game.movePlayerToSpectator(pPlayer, SpectatorReason.ELIMINATED)
-                game.broadcast(PlayerDeathMessages.from(e))
+                if (game.movePlayerToSpectator(pPlayer, SpectatorReason.ELIMINATED)) {
+                    game.broadcast(PlayerDeathMessages.from(e))
+                }
             }
         }
     }

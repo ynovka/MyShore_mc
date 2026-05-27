@@ -42,7 +42,10 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
             }.region(blockLoc).once()
         }
 
-        game.gamePlayers.forEach { it.resetKills() }
+        game.gamePlayers.forEach {
+            it.resetKills()
+            it.resetEliminated()
+        }
 
         // даём эффект плавного падения и меняем режим на выживание
         game.activePlayers.forEachOnlinePlayer { player ->

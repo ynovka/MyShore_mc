@@ -1,5 +1,6 @@
 package ru.ynovka.myShore.utils
 
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.MyShore.Companion.inst
 import org.bukkit.event.player.PlayerQuitEvent
@@ -8,6 +9,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.entity.Player
 import org.bukkit.Location
+import org.bukkit.Bukkit
 import java.util.UUID
 
 
@@ -16,35 +18,70 @@ object MovementController : Listener {
     private const val AREA_HALF_SIZE = 0.2
     private const val SPRING = 0.45
     private const val DAMPING = 0.05
+    private const val UPDATE_INTERVAL_TICKS = 4L
 
-    val blockMovement: MutableMap<UUID, Boolean> = ConcurrentHashMap()
+    private val blockMovement: MutableSet<UUID> = ConcurrentHashMap.newKeySet()
+    private val areaMovement: MutableSet<UUID> = ConcurrentHashMap.newKeySet()
 
     private val blockAnchors: MutableMap<UUID, Anchor> = ConcurrentHashMap()
     private val areaAnchors: MutableMap<UUID, Anchor> = ConcurrentHashMap()
-    private val areaMovement: MutableMap<UUID, Boolean> = ConcurrentHashMap()
+
+    private var tickerStarted = false
 
     fun register() {
         inst.server.pluginManager.registerEvents(this, inst)
+        startTicker()
     }
 
     @EventHandler
     fun onPlayerQuit(e: PlayerQuitEvent) {
-        releaseBlockAnchor(e.player)
-        releaseAreaRestriction(e.player)
+        releaseBlockAnchor(e.player.uniqueId)
+        releaseAreaRestriction(e.player.uniqueId)
+    }
+
+    private fun startTicker() {
+        if (tickerStarted) return
+        tickerStarted = true
+
+        scheduler.schedule {
+            tickMovement()
+        }.global().repeatEvery(UPDATE_INTERVAL_TICKS, Clock.TICKS)
+    }
+
+    private fun tickMovement() {
+        val playerIds = HashSet<UUID>(blockMovement.size + areaMovement.size)
+        playerIds.addAll(blockMovement)
+        playerIds.addAll(areaMovement)
+
+        for (uuid in playerIds) {
+            val player = Bukkit.getPlayer(uuid)
+
+            if (player == null || !player.isOnline || !player.isValid) {
+                releaseBlockAnchor(uuid)
+                releaseAreaRestriction(uuid)
+                continue
+            }
+
+            scheduler.schedule {
+                if (!player.isOnline || !player.isValid) {
+                    releaseBlockAnchor(uuid)
+                    releaseAreaRestriction(uuid)
+                    return@schedule
+                }
+
+                applyBlockAnchorForce(player)
+                applyAreaBoundaryForce(player)
+            }.entity(player).once()
+        }
     }
 
     private fun applyBlockAnchorForce(player: Player) {
         val uuid = player.uniqueId
 
-        if (!player.isOnline || !player.isValid) {
-            releaseBlockAnchor(player)
-            return
-        }
-
-        if (blockMovement[uuid] != true) return
+        if (uuid !in blockMovement) return
 
         val anchor = blockAnchors[uuid] ?: run {
-            releaseBlockAnchor(player)
+            releaseBlockAnchor(uuid)
             return
         }
 
@@ -58,24 +95,15 @@ object MovementController : Listener {
         velocity.z = velocity.z * DAMPING + (centerZ - loc.z) * SPRING
 
         player.velocity = velocity
-
-        scheduler.schedule {
-            applyBlockAnchorForce(player)
-        }.entity(player).once()
     }
 
     private fun applyAreaBoundaryForce(player: Player) {
         val uuid = player.uniqueId
 
-        if (!player.isOnline || !player.isValid) {
-            releaseAreaRestriction(player)
-            return
-        }
-
-        if (areaMovement[uuid] != true) return
+        if (uuid !in areaMovement) return
 
         val anchor = areaAnchors[uuid] ?: run {
-            releaseAreaRestriction(player)
+            releaseAreaRestriction(uuid)
             return
         }
 
@@ -111,10 +139,6 @@ object MovementController : Listener {
         }
 
         if (modified) player.velocity = velocity
-
-        scheduler.schedule {
-            applyAreaBoundaryForce(player)
-        }.entity(player).once()
     }
 
     fun anchorPlayerToCurrentBlock(player: Player) {
@@ -125,16 +149,14 @@ object MovementController : Listener {
             player.location.blockZ
         )
 
-        val alreadyActive = blockMovement.put(uuid, true) == true
-        if (alreadyActive) return
-
-        scheduler.schedule {
-            applyBlockAnchorForce(player)
-        }.entity(player).once()
+        blockMovement.add(uuid)
     }
 
     fun releaseBlockAnchor(player: Player) {
-        val uuid = player.uniqueId
+        releaseBlockAnchor(player.uniqueId)
+    }
+
+    private fun releaseBlockAnchor(uuid: UUID) {
         blockMovement.remove(uuid)
         blockAnchors.remove(uuid)
     }
@@ -148,16 +170,14 @@ object MovementController : Listener {
             source.blockZ
         )
 
-        val alreadyActive = areaMovement.put(uuid, true) == true
-        if (alreadyActive) return
-
-        scheduler.schedule {
-            applyAreaBoundaryForce(player)
-        }.entity(player).once()
+        areaMovement.add(uuid)
     }
 
     fun releaseAreaRestriction(player: Player) {
-        val uuid = player.uniqueId
+        releaseAreaRestriction(player.uniqueId)
+    }
+
+    private fun releaseAreaRestriction(uuid: UUID) {
         areaMovement.remove(uuid)
         areaAnchors.remove(uuid)
     }
