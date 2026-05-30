@@ -10,6 +10,8 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.event.inventory.InventoryOpenEvent
+import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.Vector
@@ -57,7 +59,9 @@ object PillarsEvents : Listener {
                     if (entity is Player) return@entityLoop
                     if (entity.location.y >= 0.0) return@entityLoop
 
-                    entity.remove()
+                    scheduler.schedule {
+                        entity.remove()
+                    }.entity(entity).once()
                 }
             }
         }.global().repeatEvery(100L, Clock.TICKS)
@@ -182,6 +186,13 @@ object PillarsEvents : Listener {
         val killer = game.getOrCreatePlayer(killerId)
 
         killer.addKill()
+    }
+
+    @EventHandler
+    fun onPlayerOpenEnderChest(e: InventoryOpenEvent) {
+        if (!e.player.world.isPillarsWorld()) return
+        if (e.inventory.type != InventoryType.ENDER_CHEST) return
+        e.isCancelled = true
     }
 
     private fun PillarsGame.broadcast(message: Component) {

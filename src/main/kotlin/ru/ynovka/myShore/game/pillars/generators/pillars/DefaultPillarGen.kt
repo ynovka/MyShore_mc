@@ -13,7 +13,7 @@ object DefaultPillarGen : PillarGen {
 
         scheduler.schedule {
             for (y in (Pillar.TOP_BLOCK - 64)..Pillar.TOP_BLOCK) {
-                world.getBlockAt(pillar.x, y, pillar.z).type = Material.BEDROCK
+                world.getBlockAt(pillar.x, y, pillar.z).setType(Material.BEDROCK, false)
             }
         }.region(origin).once()
     }
@@ -23,7 +23,7 @@ object DefaultPillarGen : PillarGen {
 
         scheduler.schedule {
             for (y in (Pillar.TOP_BLOCK - 64)..Pillar.TOP_BLOCK) {
-                world.getBlockAt(pillar.x, y, pillar.z).type = Material.AIR
+                world.getBlockAt(pillar.x, y, pillar.z).setType(Material.AIR, false)
             }
         }.region(origin).once()
     }

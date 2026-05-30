@@ -35,11 +35,7 @@ object ActionbarWaitingFor {
 
             game.activePlayers.forEachOnlinePlayer { player ->
                 player.sendActionBar(
-                    ComponentDecorator.addBackground(
-                        Component.translatable(componentKey)
-                            .append(Component.text(frames[frame])),
-                        player
-                    )
+                        Component.translatable(componentKey).append(Component.text(frames[frame]))
                 )
             }
         }

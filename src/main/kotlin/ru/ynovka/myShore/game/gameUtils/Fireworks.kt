@@ -1,12 +1,15 @@
 package ru.ynovka.myShore.game.gameUtils
 
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import ru.ynovka.myShore.MyShore.Companion.scheduler
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.event.EventHandler
 import org.bukkit.entity.Firework
 import ru.ynovka.myShore.MyShore
 import org.bukkit.FireworkEffect
 import org.bukkit.event.Listener
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import kotlin.random.Random
@@ -36,19 +39,30 @@ fun spawnFireworksAround(player: Player) {
 
             val spawnLocation = center.clone().add(x, 0.0, z)
 
+            val launchDelayTicks = Random.nextLong(0L, 12L)
+
             scheduler.schedule {
                 spawnPrettyFirework(spawnLocation)
-            }.region(spawnLocation).once()
+            }
+                .region(spawnLocation)
+                .after(launchDelayTicks, Clock.TICKS)
+                .once()
         }
     }.entity(player).once()
 }
+
+private val COSMETIC_FIREWORK_KEY = NamespacedKey(MyShore.inst, "cosmetic_firework")
 
 private fun spawnPrettyFirework(location: Location) {
     val world = location.world ?: return
 
     val firework = world.spawn(location, Firework::class.java)
 
-    firework.addScoreboardTag("cosmetic_firework")
+    firework.persistentDataContainer.set(
+        COSMETIC_FIREWORK_KEY,
+        PersistentDataType.BYTE,
+        1
+    )
 
     val meta = firework.fireworkMeta
 
@@ -73,7 +87,7 @@ private fun spawnPrettyFirework(location: Location) {
         Random.nextDouble(-0.08, 0.08)
     )
 
-    firework.ticksToDetonate = Random.nextInt(18, 29)
+    firework.ticksToDetonate = 20
 }
 
 private fun randomFireworkType(): FireworkEffect.Type {
@@ -102,15 +116,19 @@ private fun randomColor(): Color {
 object CosmeticFireworkListener : Listener {
 
     fun register() {
-        MyShore.inst.server.pluginManager.registerEvents(this, MyShore.Companion.inst)
+        MyShore.inst.server.pluginManager.registerEvents(this, MyShore.inst)
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     fun onDamage(event: EntityDamageByEntityEvent) {
+        println("cancel damage: ${event.isCancelled}")
         val firework = event.damager as? Firework ?: return
 
-        if (firework.scoreboardTags.contains("cosmetic_firework")) {
-            event.isCancelled = true
-        }
+        val isCosmetic = firework.persistentDataContainer.has(
+            COSMETIC_FIREWORK_KEY,
+            PersistentDataType.BYTE
+        )
+
+        if (isCosmetic) event.isCancelled = true
     }
 }

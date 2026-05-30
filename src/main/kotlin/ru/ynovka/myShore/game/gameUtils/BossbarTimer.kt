@@ -1,16 +1,16 @@
 package ru.ynovka.myShore.game.gameUtils
 
-import ru.ynovka.myShore.game.GamePlayer.Companion.forEachOnlinePlayer
 import ru.ynovka.myShore.game.GamePlayer.Companion.withOnlinePlayers
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
+import io.papermc.paper.connection.DisconnectionReason.game
 import ru.ynovka.myShore.MyShore.Companion.scheduler
-import ru.ynovka.myShore.text.ComponentDecorator
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import ru.ynovka.myShore.MyShore.Companion.inst
 import java.util.concurrent.ConcurrentHashMap
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
+import net.minecraft.world.level.levelgen.SurfaceRules.state
 import ru.ynovka.myShore.game.GamePlayer
 import ru.ynovka.myShore.game.GameWorld
 import ru.ynovka.myShore.game.GameState
@@ -35,12 +35,11 @@ object BossbarTimer {
      * @param time время таймера в секундах
      * @param onCompletion задача, которая будет выполнена при завершении таймера
      */
-    fun <
-            P : GamePlayer,
+    fun <P : GamePlayer,
             W : GameWorld,
             G : Game<P, W>,
             S : GameState<P, W, G>
-    > startCountdownTimer(
+            > startCountdownTimer(
         time: Int,
         game: G,
         state: S,
@@ -56,32 +55,15 @@ object BossbarTimer {
             cancelled = cancelled
         )
 
-        val color = BossBar.Color.BLUE
-        val overlay = BossBar.Overlay.PROGRESS
-
-        val bar = BossBar.bossBar(
-            Component.empty(),
-            0.0f,
-            color,
-            overlay
-        )
-
-        val barTimer = BossBar.bossBar(
-            Component.empty(),
-            1.0f,
-            color,
-            overlay
-        )
+        val bar = BossBar.bossBar(Component.empty(), 0.0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS)
+        val barTimer = BossBar.bossBar(Component.empty(), 1.0f, BossBar.Color.BLUE, BossBar.Overlay.PROGRESS)
 
         val viewers = ConcurrentHashMap.newKeySet<UUID>()
 
         fun hideBars(playerId: UUID) {
             val player = inst.server.getPlayer(playerId) ?: return
-
-            scheduler.schedule {
-                player.hideBossBar(bar)
-                player.hideBossBar(barTimer)
-            }.entity(player).once()
+            player.hideBossBar(bar)
+            player.hideBossBar(barTimer)
         }
 
         fun hideAllBars() {
@@ -93,26 +75,16 @@ object BossbarTimer {
             game.gamePlayers.withOnlinePlayers { currentPlayers ->
                 val currentIds = currentPlayers.mapTo(mutableSetOf()) { it.uniqueId }
 
-                val removedViewers = viewers
-                    .filterNot { it in currentIds }
-                    .toSet()
-
-                removedViewers.forEach { uuid ->
-                    hideBars(uuid)
+                viewers.filterNot { it in currentIds }.toSet().also { removed ->
+                    removed.forEach(::hideBars)
+                    viewers.removeAll(removed)
                 }
-
-                viewers.removeAll(removedViewers)
 
                 currentPlayers.forEach { player ->
                     val uuid = player.uniqueId
-
                     if (viewers.add(uuid)) {
-                        scheduler.schedule {
-                            if (uuid !in viewers) return@schedule
-
-                            player.showBossBar(bar)
-                            player.showBossBar(barTimer)
-                        }.entity(player).once()
+                        player.showBossBar(bar)
+                        player.showBossBar(barTimer)
                     }
                 }
             }
@@ -120,49 +92,31 @@ object BossbarTimer {
 
         val task = scheduler.schedule {
             val currentTime = timeLeft.getAndDecrement().coerceAtLeast(0)
-
-            val progress = if (maxTime.get() <= 0) {
-                0f
-            } else {
-                (currentTime.toFloat() / maxTime.get().toFloat()).coerceIn(0f, 1f)
-            }
+            val progress = if (maxTime.get() <= 0) 0f
+            else (currentTime.toFloat() / maxTime.get().toFloat()).coerceIn(0f, 1f)
 
             syncViewers()
 
-            game.gamePlayers.forEachOnlinePlayer { player ->
-                scheduler.schedule {
-                    if (player.uniqueId !in viewers) return@schedule
-
-                    barTimer.name(ComponentDecorator.addBackground(Component.text(currentTime)))
-
-                    barTimer.progress(progress)
-                }.entity(player).once()
-            }
+            barTimer.name(Component.text(currentTime))
+            barTimer.progress(progress)
         }
             .global()
-            .repeatWhile {
-                game.fsm.current === state && timeLeft.get() > 0 && !cancelled.get()
-            }
+            .repeatWhile { game.fsm.current === state && timeLeft.get() > 0 && !cancelled.get() }
             .repeatEvery(20L, Clock.TICKS)
 
         task.completion().whenComplete { _, throwable ->
-            scheduler.schedule {
-                hideAllBars()
+            hideAllBars()
 
-                if (throwable != null) {
-                    throwable.printStackTrace()
-                    return@schedule
-                }
+            if (throwable != null) {
+                throwable.printStackTrace()
+                return@whenComplete
+            }
 
-                if (
-                    game.fsm.current === state &&
-                    timeLeft.get() <= 0 &&
-                    !cancelled.get() &&
-                    onCompletion != null
-                ) {
+            if (game.fsm.current === state && timeLeft.get() <= 0 && !cancelled.get() && onCompletion != null) {
+                scheduler.schedule {
                     onCompletion(game, state)
-                }
-            }.global().once()
+                }.global().once()
+            }
         }
 
         return handle
@@ -175,30 +129,23 @@ object BossbarTimer {
     ) {
         fun addTime(seconds: Int) {
             if (seconds <= 0) return
-
             timeLeft.addAndGet(seconds)
             maxTime.addAndGet(seconds)
         }
 
         fun removeTime(seconds: Int) {
             if (seconds <= 0) return
-
             val newTime = timeLeft.addAndGet(-seconds)
-            if (newTime < 0) {
-                timeLeft.set(0)
-            }
+            if (newTime < 0) timeLeft.set(0)
         }
 
         fun setTime(seconds: Int) {
             val safeSeconds = seconds.coerceAtLeast(0)
-
             timeLeft.set(safeSeconds)
             maxTime.set(safeSeconds.coerceAtLeast(1))
         }
 
-        fun remaining(): Int {
-            return timeLeft.get().coerceAtLeast(0)
-        }
+        fun remaining(): Int = timeLeft.get().coerceAtLeast(0)
 
         fun cancel() {
             cancelled.set(true)

@@ -50,17 +50,13 @@ object ActionbarTimer {
             val currentTime = timeLeft--
 
             game.gamePlayers.forEachOnlinePlayer { player ->
-                scheduler.schedule {
-                    player.sendActionBar(
-                        ComponentDecorator.addBackground(
-                            Component.translatable(componentKey, Component.text(currentTime)),
-                            player
-                        )
-                    )
-                    if (playSound) {
-                        player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_ON, 0.5f, 2f)
-                    }
-                }.entity(player).once()
+                player.sendActionBar(
+                    Component.translatable(componentKey, Component.text(currentTime))
+                )
+
+                if (playSound) {
+                    player.playSound(player, Sound.BLOCK_COPPER_BULB_TURN_ON, 0.5f, 2f)
+                }
             }
         }
             .global()

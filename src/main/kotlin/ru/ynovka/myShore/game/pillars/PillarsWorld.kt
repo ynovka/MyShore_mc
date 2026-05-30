@@ -16,6 +16,7 @@ import org.bukkit.Material
 import org.bukkit.GameMode
 import org.bukkit.Bukkit
 import org.bukkit.World
+import org.leavesmc.leaves.lithium.common.hopper.LithiumDoubleStackList.getOrCreate
 import java.util.UUID
 
 
@@ -94,10 +95,6 @@ class PillarsWorld(
                 }.global().once()
             }
 
-            scheduler.schedule {
-                world.worldBorder.size = allocatorGen.gen.borderSize(this)
-            }.global().once()
-
             val teleportLocation = Location(
                 world,
                 pillar.x + 0.5,
@@ -105,12 +102,12 @@ class PillarsWorld(
                 pillar.z + 0.5
             )
 
-            pPlayer.withOnlinePlayer { player ->
-                scheduler.schedule {
-                    player.teleportAsync(teleportLocation).thenAccept { success ->
+            scheduler.schedule {
+                pPlayer.asPlayer()?.let {
+                    it.teleportAsync(teleportLocation).thenAccept { success ->
                         if (!success) return@thenAccept
 
-                        scheduler.schedule {
+                        pPlayer.withOnlinePlayer { player ->
                             player.restrictToBlock(true)
                             player.gameMode = GameMode.ADVENTURE
                             player.foodLevel = 20
@@ -119,10 +116,10 @@ class PillarsWorld(
                             player.inventory.clear()
                             player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
                             player.clearActivePotionEffects()
-                        }.entity(player).once()
+                        }
                     }
-                }.global().after(20, Clock.TICKS).once()
-            }
+                }
+            }.async().after(20L, Clock.TICKS).once()
 
             return@thenCompose CompletableFuture.completedFuture<Void>(null)
         }.whenComplete { _, throwable ->
@@ -137,11 +134,10 @@ class PillarsWorld(
             return CompletableFuture.completedFuture(null)
         }
 
-        val futures = players.mapIndexed { index, pPlayer ->
+        val futures = players.map { pPlayer ->
             val future = CompletableFuture<Void>()
-            val delay = index * PLAYER_SPAWN_INTERVAL_TICKS
 
-            val task = scheduler.schedule {
+            scheduler.schedule {
                 if (pPlayer !in pGame.activePlayers) {
                     future.complete(null)
                     return@schedule
@@ -155,13 +151,7 @@ class PillarsWorld(
                             future.complete(null)
                         }
                     }
-            }.global()
-
-            if (delay > 0L) {
-                task.after(delay, Clock.TICKS).once()
-            } else {
-                task.once()
-            }
+            }.global().once()
 
             future
         }

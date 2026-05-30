@@ -27,6 +27,8 @@ abstract class GamePlayer(
         }.global().once()
     }
 
+    fun asPlayer() = Bukkit.getPlayer(playerId)
+
     companion object {
         fun Iterable<GamePlayer>.forEachOnlinePlayer(action: (Player) -> Unit) {
             scheduler.schedule {

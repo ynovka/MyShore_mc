@@ -43,11 +43,16 @@ object GameManager {
         noinline factory: () -> G
     ): Result<G> {
         @Suppress("UNCHECKED_CAST")
-        val existing = games.firstOrNull { g ->
+        val reconnectGame = games.firstOrNull { g ->
+            g is G && !g.isPrivate && g.hasExitedPlayer(playerId)
+        } as? G
+
+        @Suppress("UNCHECKED_CAST")
+        val availableGame = games.firstOrNull { g ->
             g is G && !g.isPrivate && !g.isFull()
         } as? G
 
-        val game = existing ?: factory().also { newGame ->
+        val game = reconnectGame ?: availableGame ?: factory().also { newGame ->
             games.add(newGame)
         }
 
@@ -77,7 +82,9 @@ object GameManager {
     }
 
     fun leave(playerId: UUID) {
+        println("leave 1")
         val game = playerId.currentGame<Game<*, *>>() ?: return
+        println("leave 2")
 
         game.onPlayerLeave(playerId)
 
