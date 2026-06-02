@@ -42,10 +42,6 @@ tasks.build {
 
 tasks.shadowJar {
     archiveFileName.set("${project.name}-${project.version}.jar")
-
-    destinationDirectory.set(
-        file("/var/lib/featherpanel/volumes/f77dd561-9f8b-4f19-9563-e9360906a3a1/plugins/")
-    )
 }
 
 tasks.processResources {

@@ -13,7 +13,6 @@ import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.ItemStack
-import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.Vector
 import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.MyShore.Companion.scheduler
@@ -70,10 +69,12 @@ object PillarsEvents : Listener {
     private fun checkPlayerFall(player: Player) {
         if (!player.world.isPillarsWorld()) return
         if (player.gameMode != GameMode.SURVIVAL) return
-        if (player.location.y > 0.0) return
 
         val game = player.uniqueId.currentPillarsGame() ?: return
         val pPlayer = game.getOrCreatePlayer(player.uniqueId)
+        pPlayer.updateLastKnownY(player.location.y)
+
+        if (player.location.y > 0.0) return
 
         when (game.fsm.current) {
             is PillarsInProgress -> {

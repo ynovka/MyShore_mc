@@ -14,6 +14,9 @@ class PillarsPlayer(
     var kills: Int = 0
         private set
 
+    var lastKnownY: Double = Double.NEGATIVE_INFINITY
+        private set
+
     val isEliminated: Boolean
         get() = eliminated.get()
 
@@ -30,5 +33,9 @@ class PillarsPlayer(
 
     fun resetKills() {
         kills = 0
+    }
+
+    fun updateLastKnownY(y: Double) {
+        lastKnownY = y
     }
 }

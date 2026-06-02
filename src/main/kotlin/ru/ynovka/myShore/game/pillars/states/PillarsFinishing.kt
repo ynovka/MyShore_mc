@@ -32,6 +32,8 @@ class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
             onCompletion = { game, _ ->
                 if (game.activePlayers.size >= 2) {
                     game.fsm.transitionTo(PillarsCountdown(game))
+                } else {
+                    game.fsm.transitionTo(PillarsWaitingForPlayers(game))
                 }
             }
         )
@@ -42,18 +44,8 @@ class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
             .shuffled()
             .maxWithOrNull(
                 compareBy<PillarsPlayer> { it.kills }
-                    .thenBy { getPlayerY(it) }
+                    .thenBy { it.lastKnownY }
             )
-    }
-
-    private fun getPlayerY(gamePlayer: PillarsPlayer): Double {
-        var y = Double.NEGATIVE_INFINITY
-
-        gamePlayer.withOnlinePlayer { player ->
-            y = player.y
-        }
-
-        return y
     }
 
     private fun announceWinner(winner: PillarsPlayer) {
@@ -79,4 +71,6 @@ class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
     }
 
     override fun canPlayerJoin(gamePlayer: PillarsPlayer) = false
+
+    override fun canPlayerReconnect(gamePlayer: PillarsPlayer) = true
 }

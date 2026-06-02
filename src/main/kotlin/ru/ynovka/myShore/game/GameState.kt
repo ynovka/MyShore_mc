@@ -9,6 +9,7 @@ abstract class GameState<P : GamePlayer, W : GameWorld, G : Game<P, W>>(protecte
     open fun canPlayerJoin(gamePlayer: P): Boolean = true
 
     open fun onPlayerReconnect(gamePlayer: P) = onPlayerJoin(gamePlayer)
+    open fun canPlayerReconnect(gamePlayer: P): Boolean = canPlayerJoin(gamePlayer)
 
     open fun onPlayerBecomeSpectator(gamePlayer: P, reason: SpectatorReason) {}
     open fun canPlayerBecomeSpectator(gamePlayer: P, reason: SpectatorReason): Boolean = true

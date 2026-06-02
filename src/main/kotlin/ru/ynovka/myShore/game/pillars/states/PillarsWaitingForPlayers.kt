@@ -30,7 +30,7 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
     }
 
     override fun onPlayerJoin(gamePlayer: PillarsPlayer) {
-        if (game.gamePlayers.size >= 2) {
+        if (game.activePlayers.size >= 2) {
             game.fsm.transitionTo(PillarsCountdown(game))
             return
         }

@@ -5,7 +5,6 @@ import ru.ynovka.myShore.party.PartyManager.Party
 import java.util.concurrent.CopyOnWriteArrayList
 import ru.ynovka.myShore.party.PartyManager
 import org.bukkit.entity.Player
-import kotlin.reflect.KClass
 import java.util.UUID
 
 
@@ -49,7 +48,7 @@ object GameManager {
 
         @Suppress("UNCHECKED_CAST")
         val availableGame = games.firstOrNull { g ->
-            g is G && !g.isPrivate && !g.isFull()
+            g is G && !g.isPrivate && g.canAcceptNewPlayer(playerId)
         } as? G
 
         val game = reconnectGame ?: availableGame ?: factory().also { newGame ->
@@ -82,9 +81,7 @@ object GameManager {
     }
 
     fun leave(playerId: UUID) {
-        println("leave 1")
         val game = playerId.currentGame<Game<*, *>>() ?: return
-        println("leave 2")
 
         game.onPlayerLeave(playerId)
 

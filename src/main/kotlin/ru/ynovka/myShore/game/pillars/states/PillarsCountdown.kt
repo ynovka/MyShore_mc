@@ -7,6 +7,7 @@ import ru.ynovka.myShore.game.pillars.PillarsWorld
 import ru.ynovka.myShore.game.pillars.PillarsGame
 import ru.ynovka.myShore.utils.restrictToBlock
 import ru.ynovka.myShore.game.GameState
+import java.util.concurrent.CompletableFuture
 
 
 class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
@@ -15,8 +16,12 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
     override fun onEnterState() {
         val state = this
 
-        game.gameWorld.countdownPrepare()
+        game.gameWorld.countdownPrepare { game.fsm.current === state }
             .thenCompose {
+                if (game.fsm.current !== state) {
+                    return@thenCompose CompletableFuture.completedFuture<Void>(null)
+                }
+
                 game.gameWorld.spawnPlayers(game)
             }
             .thenRun {
@@ -34,8 +39,10 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
             game = game,
             state = this,
             onCompletion = { game, _ ->
-                if (game.gamePlayers.size >= 2) {
+                if (game.activePlayers.size >= 2) {
                     game.fsm.transitionTo(PillarsInProgress(game))
+                } else {
+                    game.fsm.transitionTo(PillarsWaitingForPlayers(game))
                 }
             }
         )

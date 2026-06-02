@@ -16,7 +16,6 @@ import org.bukkit.Material
 import org.bukkit.GameMode
 import org.bukkit.Bukkit
 import org.bukkit.World
-import org.leavesmc.leaves.lithium.common.hopper.LithiumDoubleStackList.getOrCreate
 import java.util.UUID
 
 
@@ -28,7 +27,7 @@ class PillarsWorld(
 
     val pillars: MutableSet<Pillar> = mutableSetOf()
 
-    fun countdownPrepare(): CompletableFuture<Void> {
+    fun countdownPrepare(shouldContinue: () -> Boolean = { true }): CompletableFuture<Void> {
         pillars.clear()
 
         return getOrCreate()
@@ -40,6 +39,11 @@ class PillarsWorld(
 
                     scheduler.schedule {
                         try {
+                            if (!shouldContinue()) {
+                                future.complete(null)
+                                return@schedule
+                            }
+
                             if (!Bukkit.isOwnedByCurrentRegion(world, chunkX, chunkZ)) {
                                 inst.logger.warning(
                                     "[InstantChunkClear] Chunk $chunkX,$chunkZ is not owned by current region"
@@ -82,46 +86,22 @@ class PillarsWorld(
         updateBorder: Boolean = true
     ): CompletableFuture<Void> {
         return getOrCreate().thenCompose { world ->
-            removePlayerPillar(pPlayer.playerId, world)
+            removePlayerPillar(pPlayer.playerId, world).thenCompose {
+                val pillar = allocatorGen.gen.generate(pGame, pPlayer.playerId)
 
-            val pillar = allocatorGen.gen.generate(pGame, pPlayer.playerId)
+                val generateFuture = pillarGen.gen.generate(world, pillar)
+                val boxFuture = PillarsPlayerBox.create(world, pillar)
 
-            pillarGen.gen.generate(world, pillar)
-            PillarsPlayerBox.create(world, pillar)
-
-            if (updateBorder) {
-                scheduler.schedule {
-                    world.worldBorder.size = allocatorGen.gen.borderSize(this)
-                }.global().once()
-            }
-
-            val teleportLocation = Location(
-                world,
-                pillar.x + 0.5,
-                TELEPORT_Y,
-                pillar.z + 0.5
-            )
-
-            scheduler.schedule {
-                pPlayer.asPlayer()?.let {
-                    it.teleportAsync(teleportLocation).thenAccept { success ->
-                        if (!success) return@thenAccept
-
-                        pPlayer.withOnlinePlayer { player ->
-                            player.restrictToBlock(true)
-                            player.gameMode = GameMode.ADVENTURE
-                            player.foodLevel = 20
-                            player.saturation = 10f
-                            player.health = 20.0
-                            player.inventory.clear()
-                            player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
-                            player.clearActivePotionEffects()
+                CompletableFuture.allOf(generateFuture, boxFuture)
+                    .thenCompose {
+                        if (updateBorder) {
+                            updateWorldBorder(world)
+                                .thenCompose { teleportAndSetupPlayer(world, pillar, pPlayer) }
+                        } else {
+                            teleportAndSetupPlayer(world, pillar, pPlayer)
                         }
                     }
-                }
-            }.async().after(20L, Clock.TICKS).once()
-
-            return@thenCompose CompletableFuture.completedFuture<Void>(null)
+            }
         }.whenComplete { _, throwable ->
             if (throwable != null) throwable.printStackTrace()
         }
@@ -157,61 +137,138 @@ class PillarsWorld(
         }
 
         return CompletableFuture.allOf(*futures.toTypedArray())
-            .thenRun {
-                val world = get() ?: return@thenRun
-
-                scheduler.schedule {
-                    world.worldBorder.size = allocatorGen.gen.borderSize(this)
-                }.global().once()
+            .thenCompose {
+                val world = get()
+                    ?: return@thenCompose CompletableFuture.completedFuture<Void>(null)
+                updateWorldBorder(world)
             }
     }
 
     private fun removePPillar(
         playerId: UUID,
         world: World
-    ): Boolean {
-        val pillar = pillars.firstOrNull { it.owner == playerId } ?: return false
-
-        pillarGen.gen.remove(world, pillar)
-
-
-        val blockLoc = Location(world, pillar.x.toDouble(), TELEPORT_Y - 1, pillar.z.toDouble())
-
-        scheduler.schedule {
-            val centerX = blockLoc.blockX
-            val centerZ = blockLoc.blockZ
-
-            for (x in centerX - 2..centerX + 2) {
-                for (z in centerZ - 2..centerZ + 2) {
-                    for (y in 101..116) {
-                        world.getBlockAt(x, y, z).type = Material.AIR
-                    }
-                }
-            }
-        }.region(blockLoc).once()
+    ): CompletableFuture<Boolean> {
+        val pillar = pillars.firstOrNull { it.owner == playerId }
+            ?: return CompletableFuture.completedFuture(false)
 
         pillars.remove(pillar)
-        return true
+
+        return CompletableFuture.allOf(
+            pillarGen.gen.remove(world, pillar),
+            clearPlayerBox(world, pillar)
+        ).thenApply { true }
     }
 
     fun removePlayerPillar(
         playerId: UUID,
         world: World
     ): CompletableFuture<Void> {
-        val removed = removePPillar(playerId, world)
+        return removePPillar(playerId, world).thenCompose { removed ->
+            if (!removed) return@thenCompose CompletableFuture.completedFuture<Void>(null)
 
-        if (!removed) {
-            return CompletableFuture.completedFuture(null)
-        }
-
-        return getOrCreate().thenAccept { world ->
-            world.worldBorder.size = allocatorGen.gen.borderSize(this)
-            world.worldBorder.center = Location(world, 0.0001, 0.0, 0.0001)
+            updateWorldBorder(world, recenter = true)
         }
     }
 
-    private companion object {
-        const val PLAYER_SPAWN_INTERVAL_TICKS = 5L
+    private fun updateWorldBorder(
+        world: World,
+        recenter: Boolean = false
+    ): CompletableFuture<Void> {
+        val future = CompletableFuture<Void>()
+
+        scheduler.schedule {
+            try {
+                world.worldBorder.size = allocatorGen.gen.borderSize(this)
+                if (recenter) {
+                    world.worldBorder.center = Location(world, 0.0001, 0.0, 0.0001)
+                }
+                future.complete(null)
+            } catch (throwable: Throwable) {
+                future.completeExceptionally(throwable)
+            }
+        }.global().once()
+
+        return future
+    }
+
+    private fun teleportAndSetupPlayer(
+        world: World,
+        pillar: Pillar,
+        pPlayer: PillarsPlayer
+    ): CompletableFuture<Void> {
+        val future = CompletableFuture<Void>()
+        val teleportLocation = Location(
+            world,
+            pillar.x + 0.5,
+            TELEPORT_Y,
+            pillar.z + 0.5
+        )
+
+        scheduler.schedule {
+            val player = pPlayer.asPlayer()
+
+            if (player == null) {
+                future.complete(null)
+                return@schedule
+            }
+
+            player.teleportAsync(teleportLocation).whenComplete { success, throwable ->
+                if (throwable != null) {
+                    future.completeExceptionally(throwable)
+                    return@whenComplete
+                }
+
+                if (!success) {
+                    future.complete(null)
+                    return@whenComplete
+                }
+
+                scheduler.schedule {
+                    try {
+                        player.restrictToBlock(true)
+                        player.gameMode = GameMode.ADVENTURE
+                        player.foodLevel = 20
+                        player.saturation = 10f
+                        player.health = 20.0
+                        pPlayer.updateLastKnownY(teleportLocation.y)
+                        player.inventory.clear()
+                        player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
+                        player.clearActivePotionEffects()
+                        future.complete(null)
+                    } catch (throwable: Throwable) {
+                        future.completeExceptionally(throwable)
+                    }
+                }.entity(player).once()
+            }
+        }.global().after(20L, Clock.TICKS).once()
+
+        return future
+    }
+
+    private fun clearPlayerBox(world: World, pillar: Pillar): CompletableFuture<Void> {
+        val future = CompletableFuture<Void>()
+        val blockLoc = Location(world, pillar.x.toDouble(), TELEPORT_Y - 1, pillar.z.toDouble())
+
+        scheduler.schedule {
+            try {
+                val centerX = blockLoc.blockX
+                val centerZ = blockLoc.blockZ
+
+                for (x in centerX - 2..centerX + 2) {
+                    for (z in centerZ - 2..centerZ + 2) {
+                        for (y in 101..116) {
+                            world.getBlockAt(x, y, z).type = Material.AIR
+                        }
+                    }
+                }
+
+                future.complete(null)
+            } catch (throwable: Throwable) {
+                future.completeExceptionally(throwable)
+            }
+        }.region(blockLoc).once()
+
+        return future
     }
 }
 

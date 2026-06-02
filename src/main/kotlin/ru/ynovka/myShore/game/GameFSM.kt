@@ -17,6 +17,7 @@ class GameFSM<P : GamePlayer, W : GameWorld>(initial: GameState<P, W, *>) {
     fun playerReconnect(p: P) = current.onPlayerReconnect(p)
     fun playerLeave(p: P) = current.onPlayerLeave(p)
     fun canPlayerJoin(p: P) = current.canPlayerJoin(p)
+    fun canPlayerReconnect(p: P) = current.canPlayerReconnect(p)
     fun spectatorJoin(s: P) = current.onSpectatorJoin(s)
     fun playerBecomeSpectator(p: P, reason: SpectatorReason) = current.onPlayerBecomeSpectator(p, reason)
     fun canPlayerBecomeSpectator(p: P, reason: SpectatorReason) = current.canPlayerBecomeSpectator(p, reason)

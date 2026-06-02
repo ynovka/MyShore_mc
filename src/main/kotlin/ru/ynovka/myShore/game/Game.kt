@@ -25,6 +25,7 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
     val gamePlayers: MutableSet<P> = mutableSetOf()
     val activePlayers: MutableSet<P> = mutableSetOf()
     val exitedPlayers: MutableSet<P> = mutableSetOf()
+    val exitedSpectatorPlayers: MutableSet<P> = mutableSetOf()
     val spectatorPlayers: MutableSet<P> = mutableSetOf()
 
     private val playersById: MutableMap<UUID, P> = mutableMapOf()
@@ -52,8 +53,8 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
     }
 
     fun hasExitedPlayer(playerId: UUID): Boolean {
-        val player = playersById[playerId] ?: return false
-        return player in exitedPlayers
+        return exitedPlayers.any { it.playerId == playerId } ||
+                exitedSpectatorPlayers.any { it.playerId == playerId }
     }
 
     fun getPlayer(playerId: UUID): P? =
@@ -74,16 +75,42 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
 
     abstract fun createPlayer(playerId: UUID): P
 
+    fun canAcceptNewPlayer(playerId: UUID): Boolean {
+        if (isFull()) return false
+
+        val gamePlayer = playersById[playerId] ?: createPlayer(playerId)
+        return fsm.canPlayerJoin(gamePlayer)
+    }
+
     fun onPlayerJoin(playerId: UUID) {
-        println("onPlayerJoin 1")
         if (destroyed) return
 
         val gamePlayer = getOrCreatePlayer(playerId)
 
         if (gamePlayer in activePlayers || gamePlayer in spectatorPlayers) return
-        println("onPlayerJoin 2")
 
         gameVisibilityGroup.addViewer(playerId)
+
+        if (exitedPlayers.remove(gamePlayer)) {
+            if (!fsm.canPlayerReconnect(gamePlayer)) {
+                movePlayerToSpectator(gamePlayer)
+                fsm.spectatorJoin(gamePlayer)
+                return
+            }
+
+            activePlayers.add(gamePlayer)
+
+            fsm.playerReconnect(gamePlayer)
+            handlePlayerReconnect(gamePlayer)
+            return
+        }
+
+        if (exitedSpectatorPlayers.remove(gamePlayer)) {
+            if (movePlayerToSpectator(gamePlayer)) {
+                fsm.spectatorJoin(gamePlayer)
+            }
+            return
+        }
 
         val canJoin = !isFull() && fsm.canPlayerJoin(gamePlayer)
 
@@ -92,29 +119,14 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
             fsm.spectatorJoin(gamePlayer)
             return
         }
-        println("onPlayerJoin 3")
-
-        if (exitedPlayers.remove(gamePlayer)) {
-            activePlayers.add(gamePlayer)
-
-            fsm.playerReconnect(gamePlayer)
-            handlePlayerReconnect(gamePlayer)
-            return
-        }
-        println("onPlayerJoin 4")
 
         activePlayers.add(gamePlayer)
 
         fsm.playerJoin(gamePlayer)
         handlePlayerJoin(gamePlayer)
-        println("onPlayerJoin 5")
-        println("activePlayers: $activePlayers")
-        println("spectatorPlayers: $spectatorPlayers")
-        println("onPlayerJoin 5")
     }
 
     fun onPlayerLeave(playerId: UUID) {
-        println("onPlayerLeave 1")
         if (destroyed) return
 
         gameVisibilityGroup.removeViewer(playerId)
@@ -128,15 +140,16 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
 
         if (wasActive) {
             exitedPlayers.add(player)
-            playersById.remove(playerId)
 
             fsm.playerLeave(player)
             handlePlayerLeave(player)
         }
-        println("onPlayerLeave 2")
-        println("activePlayers: $activePlayers")
-        println("spectatorPlayers: $spectatorPlayers")
-        println("onPlayerLeave 2")
+
+        if (wasSpectator) {
+            exitedSpectatorPlayers.add(player)
+        }
+
+        playersById.remove(playerId)
     }
 
     fun movePlayerToSpectator(
@@ -179,6 +192,7 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
 
         activePlayers.clear()
         exitedPlayers.clear()
+        exitedSpectatorPlayers.clear()
         spectatorPlayers.clear()
         gamePlayers.clear()
         playersById.clear()
