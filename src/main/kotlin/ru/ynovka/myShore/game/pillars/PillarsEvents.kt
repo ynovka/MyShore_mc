@@ -9,6 +9,7 @@ import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.inventory.InventoryType
@@ -100,22 +101,28 @@ object PillarsEvents : Listener {
                 val world = game.gameWorld.get() ?: return
 
                 pPlayer.withOnlinePlayer { onlinePlayer ->
-                    scheduler.schedule {
-                        onlinePlayer.velocity = Vector()
-                        onlinePlayer.fallDistance = 0f
-
-                        onlinePlayer.teleportAsync(
-                            Location(
-                                world,
-                                pillar.x + 0.5,
-                                TOP_BLOCK + 1.0,
-                                pillar.z + 0.5
-                            )
+                    onlinePlayer.teleportAsync(
+                        Location(
+                            world,
+                            pillar.x + 0.5,
+                            TOP_BLOCK + 1.0,
+                            pillar.z + 0.5
                         )
-                    }.entity(onlinePlayer).once()
+                    )
                 }
             }
         }
+    }
+
+    @EventHandler
+    fun onPlayerDamage(e: EntityDamageEvent) {
+        val player = e.entity as? Player ?: return
+
+        if (!player.world.isPillarsWorld()) return
+
+        val game = player.uniqueId.currentPillarsGame() ?: return
+
+        if (game.fsm.current !is PillarsInProgress) e.isCancelled = true
     }
 
     @EventHandler
