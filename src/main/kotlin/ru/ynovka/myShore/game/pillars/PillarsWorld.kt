@@ -196,7 +196,10 @@ class PillarsWorld(
         pillar: Pillar,
         pPlayer: PillarsPlayer
     ): CompletableFuture<Void> {
+        val player = pPlayer.asPlayer() ?: return CompletableFuture.completedFuture(null)
+
         val future = CompletableFuture<Void>()
+
         val teleportLocation = Location(
             world,
             pillar.x + 0.5,
@@ -204,43 +207,38 @@ class PillarsWorld(
             pillar.z + 0.5
         )
 
-        scheduler.schedule {
-            val player = pPlayer.asPlayer()
+        player.teleportAsync(teleportLocation).whenComplete { success, throwable ->
+            if (throwable != null) {
+                future.completeExceptionally(throwable)
+                return@whenComplete
+            }
 
-            if (player == null) {
+            if (!success) {
                 future.complete(null)
-                return@schedule
+                return@whenComplete
             }
 
-            player.teleportAsync(teleportLocation).whenComplete { success, throwable ->
-                if (throwable != null) {
-                    future.completeExceptionally(throwable)
-                    return@whenComplete
-                }
+            scheduler.schedule {
+                try {
+                    player.restrictToBlock(true)
+                    player.gameMode = GameMode.ADVENTURE
+                    player.foodLevel = 20
+                    player.saturation = 10f
+                    player.health = 20.0
 
-                if (!success) {
+                    pPlayer.updateLastKnownY(teleportLocation.y)
+
+                    player.inventory.clear()
+                    player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
+
+                    player.clearActivePotionEffects()
+
                     future.complete(null)
-                    return@whenComplete
+                } catch (throwable: Throwable) {
+                    future.completeExceptionally(throwable)
                 }
-
-                scheduler.schedule {
-                    try {
-                        player.restrictToBlock(true)
-                        player.gameMode = GameMode.ADVENTURE
-                        player.foodLevel = 20
-                        player.saturation = 10f
-                        player.health = 20.0
-                        pPlayer.updateLastKnownY(teleportLocation.y)
-                        player.inventory.clear()
-                        player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
-                        player.clearActivePotionEffects()
-                        future.complete(null)
-                    } catch (throwable: Throwable) {
-                        future.completeExceptionally(throwable)
-                    }
-                }.entity(player).once()
-            }
-        }.global().after(20L, Clock.TICKS).once()
+            }.entity(player).once()
+        }
 
         return future
     }

@@ -121,7 +121,6 @@ object CosmeticFireworkListener : Listener {
 
     @EventHandler
     fun onDamage(event: EntityDamageByEntityEvent) {
-        println("cancel damage: ${event.isCancelled}")
         val firework = event.damager as? Firework ?: return
 
         val isCosmetic = firework.persistentDataContainer.has(

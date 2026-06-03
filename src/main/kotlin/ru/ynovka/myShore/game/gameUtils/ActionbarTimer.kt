@@ -4,7 +4,7 @@ import ru.ynovka.myShore.game.GamePlayer.Companion.forEachOnlinePlayer
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import java.util.concurrent.atomic.AtomicBoolean
-import ru.ynovka.myShore.text.ComponentDecorator
+import ru.ynovka.myShore.text.withBackground
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.GamePlayer
 import ru.ynovka.myShore.game.GameState
@@ -52,6 +52,7 @@ object ActionbarTimer {
             game.gamePlayers.forEachOnlinePlayer { player ->
                 player.sendActionBar(
                     Component.translatable(componentKey, Component.text(currentTime))
+                        .withBackground(player)
                 )
 
                 if (playSound) {

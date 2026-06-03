@@ -56,7 +56,6 @@ class MyShore : JavaPlugin() {
                         "^myshore_pillars_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
                     ).matches(world.name)
                 ) return@forEach
-                println("delete: ${world.name}")
                 access.delete(world)
             }
         }.global().once()

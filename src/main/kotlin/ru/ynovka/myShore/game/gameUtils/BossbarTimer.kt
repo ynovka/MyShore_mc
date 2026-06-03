@@ -2,15 +2,15 @@ package ru.ynovka.myShore.game.gameUtils
 
 import ru.ynovka.myShore.game.GamePlayer.Companion.withOnlinePlayers
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
-import io.papermc.paper.connection.DisconnectionReason.game
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import ru.ynovka.myShore.MyShore.Companion.inst
+import ru.ynovka.myShore.utils.Utils.formatTime
 import java.util.concurrent.ConcurrentHashMap
+import ru.ynovka.myShore.text.withBackground
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
-import net.minecraft.world.level.levelgen.SurfaceRules.state
 import ru.ynovka.myShore.game.GamePlayer
 import ru.ynovka.myShore.game.GameWorld
 import ru.ynovka.myShore.game.GameState
@@ -97,7 +97,7 @@ object BossbarTimer {
 
             syncViewers()
 
-            barTimer.name(Component.text(currentTime))
+            barTimer.name(Component.text(formatTime(currentTime)).withBackground())
             barTimer.progress(progress)
         }
             .global()

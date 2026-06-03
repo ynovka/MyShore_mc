@@ -19,7 +19,7 @@ object Hub {
     fun Player.toHub() {
         ru.ynovka.myShore.MyShore.scheduler.schedule {
             gameMode = GameMode.ADVENTURE
-            saturation = 20f
+            saturation = 10f
             foodLevel = 20
             health = 20.0
             clearActivePotionEffects()

@@ -18,4 +18,12 @@ object Utils {
             }
         }
     }
+
+    fun formatTime(seconds: Int): String {
+        val safeSeconds = seconds.coerceAtLeast(0)
+        val minutes = safeSeconds / 60
+        val secs = safeSeconds % 60
+
+        return "$minutes:${secs.toString().padStart(2, '0')}"
+    }
 }

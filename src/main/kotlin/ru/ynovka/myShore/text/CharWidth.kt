@@ -2,38 +2,72 @@ package ru.ynovka.myShore.text
 
 
 object CharWidth {
+    private val table: Map<Int, Int> = buildMap {
+        putChars("!',.;:i|", 2)
 
-    private val table: Map<Char, Int> = buildMap {
+        putChars("`l‘’‚•′‵", 3)
 
-        "!',.;:i\u2019".forEach { put(it, 2) }
+        putChars(" \"()*[]It{}◘‹›", 4)
 
-        "`▪l".forEach { put(it, 3) }
+        putChars("<>fkгк", 5)
 
-        " ()*[]It{}◘".forEach { put(it, 4) }
+        putChars(
+            "#\$%&+-/0123456789=?\\^_±■∈≥≤÷ψΩ" +
+                    "abcdeghjmnopqrsuvwxyz" +
+                    "ABCDEFGHJKLMNOPQRSTUVWXYZ" +
+                    "абвеёжзийлмнопрстуфхцчшьэя" +
+                    "АБВГЕЁЗИЙКЛМНОПРСТУХЧЬЭЯ",
+            6
+        )
 
-        "fk".forEach { put(it, 5) }
-        "гк".forEach { put(it, 5) }
+        putChars("@~√«»≡≈✔–ДЦЪдыщъ", 7)
 
-        "+-±#%/?■0123456789\$=^_∈≥≤÷ψ".forEach { put(it, 6) }
+        putChars("❤⌀★☠⏻⌚…‰ЖФШЫЮю", 8)
 
-        "abcdeghj mnopqrsuvwxyz".replace(" ", "").forEach { put(it, 6) }
+        putChars("—Щ", 9)
 
-        "ABCDEFGHJKLMNOPQRSTUVWXYZmM".forEach { put(it, 6) }
-
-        "абвеёжзийлмнопрстуфхцчшьэя".forEach { put(it, 6) }
-
-        "АБВГЕЗИЙКЛНОПРСТУХЧЬЭЯМ".forEach { put(it, 6) }
-
-        "~√ъ@«»≡≈Ω✔ДЦЪдыщ".forEach { put(it, 7) }
-        put('\uD83D', 7)
-        put('\uDD25', 7)
-
-        "❤⌀★☠⏻⌚ЖФШюЫЮ".forEach { put(it, 8) }
-
-        put('Щ', 9)
-
-        "⚠☯☒☐☑№".forEach { put(it, 10) }
+        putChars("⚠☯☒☐☑№", 10)
     }
 
-    fun of(char: Char): Int = table[char] ?: 6
+    private fun MutableMap<Int, Int>.putChars(chars: String, width: Int) {
+        var i = 0
+        while (i < chars.length) {
+            val codePoint = chars.codePointAt(i)
+            put(codePoint, width)
+            i += Character.charCount(codePoint)
+        }
+    }
+
+    fun of(codePoint: Int): Int = table[codePoint] ?: 6
+
+    fun of(char: Char): Int = table[char.code] ?: 6
+
+    fun width(text: String): Int {
+        var result = 0
+        var i = 0
+
+        while (i < text.length) {
+            val codePoint = text.codePointAt(i)
+            result += of(codePoint)
+            i += Character.charCount(codePoint)
+        }
+
+        return result
+    }
+
+    fun splitWidth(length: Int): List<Int> {
+        require(length >= 0)
+
+        var remaining = length
+        val result = mutableListOf<Int>()
+
+        for (width in BACKGROUND_WIDTHS) {
+            while (remaining >= width) {
+                result += width
+                remaining -= width
+            }
+        }
+
+        return result
+    }
 }
