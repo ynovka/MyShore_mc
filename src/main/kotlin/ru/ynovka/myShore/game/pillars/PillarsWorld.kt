@@ -2,6 +2,7 @@ package ru.ynovka.myShore.game.pillars
 
 import ru.ynovka.myShore.game.pillars.generators.allocators.AllocatorGenerator
 import ru.ynovka.myShore.game.pillars.generators.pillars.PillarGenerator
+import ru.ynovka.myShore.game.pillars.generators.platform.PlatformGenerator
 import ru.ynovka.myShore.game.pillars.Pillar.Companion.TELEPORT_Y
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.MyShore.Companion.scheduler
@@ -21,7 +22,8 @@ import java.util.UUID
 
 class PillarsWorld(
     var pillarGen: PillarGenerator,
-    var allocatorGen: AllocatorGenerator
+    var allocatorGen: AllocatorGenerator,
+    var platformGen: PlatformGenerator
 ) : GameWorld() {
     override val name = "pillars_${UUID.randomUUID()}"
 
@@ -83,7 +85,8 @@ class PillarsWorld(
     fun spawnPlayer(
         pGame: PillarsGame,
         pPlayer: PillarsPlayer,
-        updateBorder: Boolean = true
+        updateBorder: Boolean = true,
+        generatePlatform: Boolean = true
     ): CompletableFuture<Void> {
         return getOrCreate().thenCompose { world ->
             removePlayerPillar(pPlayer.playerId, world).thenCompose {
@@ -99,6 +102,13 @@ class PillarsWorld(
                                 .thenCompose { teleportAndSetupPlayer(world, pillar, pPlayer) }
                         } else {
                             teleportAndSetupPlayer(world, pillar, pPlayer)
+                        }
+                    }
+                    .thenCompose {
+                        if (generatePlatform) {
+                            platformGen.gen.generate(world, pillars.toList())
+                        } else {
+                            CompletableFuture.completedFuture<Void>(null)
                         }
                     }
             }
@@ -123,7 +133,7 @@ class PillarsWorld(
                     return@schedule
                 }
 
-                spawnPlayer(pGame, pPlayer, updateBorder = false)
+                spawnPlayer(pGame, pPlayer, updateBorder = false, generatePlatform = false)
                     .whenComplete { _, throwable ->
                         if (throwable != null) {
                             future.completeExceptionally(throwable)
@@ -140,7 +150,9 @@ class PillarsWorld(
             .thenCompose {
                 val world = get()
                     ?: return@thenCompose CompletableFuture.completedFuture<Void>(null)
+
                 updateWorldBorder(world)
+                    .thenCompose { platformGen.gen.generate(world, pillars.toList()) }
             }
     }
 
@@ -166,22 +178,18 @@ class PillarsWorld(
         return removePPillar(playerId, world).thenCompose { removed ->
             if (!removed) return@thenCompose CompletableFuture.completedFuture<Void>(null)
 
-            updateWorldBorder(world, recenter = true)
+            updateWorldBorder(world)
         }
     }
 
     private fun updateWorldBorder(
-        world: World,
-        recenter: Boolean = false
+        world: World
     ): CompletableFuture<Void> {
         val future = CompletableFuture<Void>()
 
         scheduler.schedule {
             try {
                 world.worldBorder.size = allocatorGen.gen.borderSize(this)
-                if (recenter) {
-                    world.worldBorder.center = Location(world, 0.0001, 0.0, 0.0001)
-                }
                 future.complete(null)
             } catch (throwable: Throwable) {
                 future.completeExceptionally(throwable)
@@ -222,8 +230,9 @@ class PillarsWorld(
                 try {
                     player.restrictToBlock(true)
                     player.gameMode = GameMode.ADVENTURE
-                    player.foodLevel = 20
                     player.saturation = 10f
+                    player.foodLevel = 20
+                    player.fireTicks = 0
                     player.health = 20.0
 
                     pPlayer.updateLastKnownY(teleportLocation.y)

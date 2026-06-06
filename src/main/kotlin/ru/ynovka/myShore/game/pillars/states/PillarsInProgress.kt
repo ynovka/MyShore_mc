@@ -42,6 +42,8 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
             }.region(blockLoc).once()
         }
 
+        game.roundGameMode.gm.roundStart(game)
+
         game.gamePlayers.forEach {
             it.resetKills()
             it.resetEliminated()
@@ -127,7 +129,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
                 if (game.fsm.current !is PillarsInProgress) return@startCountdownTimer
                 game.activePlayers.forEachOnlinePlayer { player ->
                     scheduler.schedule {
-                        player.inventory.addItem(ItemStack.of(items.random()))
+                        game.roundGameMode.gm.onGiveRandomItems(player)
                     }.entity(player).once()
                 }
                 startGiveRandomItemsTimer()

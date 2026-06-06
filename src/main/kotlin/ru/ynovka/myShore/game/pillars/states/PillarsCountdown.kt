@@ -16,6 +16,8 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
     override fun onEnterState() {
         val state = this
 
+        game.applyNextRoundGenerators()
+
         game.gameWorld.countdownPrepare { game.fsm.current === state }
             .thenCompose {
                 if (game.fsm.current !== state) {
@@ -31,6 +33,12 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
                     }
                 }.global().once()
             }
+
+        if (game.party != null) {
+            // todo выдаём меню голосования только party.owner
+        } else {
+            // todo выдаём меню голосования всем игрокам
+        }
     }
 
     private fun startCountdown() {
