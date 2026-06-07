@@ -10,6 +10,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.concurrent.ConcurrentHashMap
 import ru.ynovka.myShore.party.PartyManager
+import ru.ynovka.myShore.event.EventManager
 import ru.ynovka.myShore.game.GameManager
 import ru.ynovka.myShore.party.LeftReason
 import org.bukkit.potion.PotionEffectType
@@ -140,13 +141,21 @@ object HubEvents : Listener {
         player.toHub()
 
         TabController.updateAll()
+
+        EventManager.onPlayerJoin(player)
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onPlayerLeave(e: PlayerQuitEvent) {
         removeWaterTick(e.player)
-        GameManager.leave(e.player.uniqueId)
-        PartyManager.leave(e.player, LeftReason.QUIT)
+        EventManager.onPlayerQuit(e.player)
+        val isInEventParty = EventManager.activeEvent?.let { e.player.uniqueId in it.party.members } == true
+        if (!isInEventParty) {
+            GameManager.leave(e.player.uniqueId)
+            PartyManager.leave(e.player, LeftReason.QUIT)
+        } else {
+            GameManager.leave(e.player.uniqueId)
+        }
         scheduler.schedule {
             TabController.updateAll()
         }

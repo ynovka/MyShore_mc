@@ -1,5 +1,6 @@
 package ru.ynovka.myShore
 
+import ru.ynovka.myShore.event.EventCommands
 import ru.ynovka.myShore.party.PartyCommands
 import ru.ynovka.myShore.hub.HubCommands
 
@@ -7,6 +8,7 @@ import ru.ynovka.myShore.hub.HubCommands
 object Commands {
     fun register() {
         PartyCommands.register()
+        EventCommands.register()
         HubCommands.register()
     }
 }

@@ -40,21 +40,18 @@ object PartyManager {
     fun disband(owner: Player): Boolean {
         val party = getParty(owner)
         if (party == null) {
-            // todo перевод
-            owner.sendMessage("У вас нет пати.")
+            owner.sendMessage(Component.translatable("msg.myshore.party.error.no_party"))
             return false
         }
         if (party.owner != owner.uniqueId) {
-            // todo перевод
-            owner.sendMessage("Только лидер может удалить пати.")
+            owner.sendMessage(Component.translatable("msg.myshore.party.error.disband.not_owner"))
             return false
         }
 
         val membersOnline = party.members.toList().asPlayers()
         party.members.forEach(parties::remove)
 
-        // todo перевод
-        membersOnline.forEach { it.sendMessage("Пати было распущено.") }
+        membersOnline.forEach { it.sendMessage(Component.translatable("msg.myshore.party.disbanded")) }
         return true
     }
 
@@ -63,40 +60,40 @@ object PartyManager {
      */
     fun invite(sender: Player, invitedPlayer: Player): Boolean {
         if (sender.uniqueId == invitedPlayer.uniqueId) {
-            // todo перевод
-            sender.sendMessage("Вы не можете пригласить самого себя.")
+            sender.sendMessage(Component.translatable("msg.myshore.party.invite.error.self"))
             return false
         }
 
         val party = getParty(sender) ?: create(sender)
 
         if (party.owner != sender.uniqueId) {
-            // todo перевод
-            sender.sendMessage("Только лидер пати может приглашать игроков.")
+            sender.sendMessage(Component.translatable("msg.myshore.party.invite.error.not_owner"))
             return false
         }
 
         val invitedId = invitedPlayer.uniqueId
         if (invitedId in parties) {
-            // todo перевод
-            sender.sendMessage("Игрок ${invitedPlayer.name} уже состоит в пати.")
+            sender.sendMessage(
+                Component.translatable("msg.myshore.party.invite.error.target_in_party", Component.text(invitedPlayer.name))
+            )
             return false
         }
         if (invitedId in party.invited) {
-            // todo перевод
-            sender.sendMessage("Игрок ${invitedPlayer.name} уже приглашён.")
+            sender.sendMessage(
+                Component.translatable("msg.myshore.party.invite.error.already_invited", Component.text(invitedPlayer.name))
+            )
             return false
         }
         if (invitedId in party.members) {
-            // todo перевод
-            sender.sendMessage("Игрок ${invitedPlayer.name} уже в вашей пати.")
+            sender.sendMessage(
+                Component.translatable("msg.myshore.party.invite.error.already_member", Component.text(invitedPlayer.name))
+            )
             return false
         }
 
         party.invited.add(invitedId)
 
-        // todo перевод
-        sender.sendMessage("Вы пригласили игрока ${invitedPlayer.name} в пати.")
+        sender.sendMessage(Component.translatable("msg.myshore.party.invite.sent", Component.text(invitedPlayer.name)))
         invitedPlayer.sendMessage(buildInviteAcceptMessage(sender))
         return true
     }
@@ -107,21 +104,18 @@ object PartyManager {
     fun acceptInvite(invited: Player, partyOwner: Player): Boolean {
         val party = getParty(partyOwner)
         if (party == null) {
-            // todo перевод
-            invited.sendMessage("Пати не существует.")
+            invited.sendMessage(Component.translatable("msg.myshore.party.accept.error.no_party"))
             return false
         }
 
         val invitedId = invited.uniqueId
         if (invitedId in parties) {
-            // todo перевод
-            invited.sendMessage("Вы уже состоите в пати.")
+            invited.sendMessage(Component.translatable("msg.myshore.party.error.already_in_party"))
             return false
         }
 
         if (invitedId !in party.invited) {
-            // todo перевод
-            invited.sendMessage("Вас не приглашали в это пати.")
+            invited.sendMessage(Component.translatable("msg.myshore.party.accept.error.not_invited"))
             return false
         }
 
@@ -129,13 +123,13 @@ object PartyManager {
         party.members.add(invitedId)
         parties[invitedId] = party
 
-        // todo перевод
-        invited.sendMessage("Вы присоединились к пати игрока ${partyOwner.name}.")
+        invited.sendMessage(Component.translatable("msg.myshore.party.accept.success", Component.text(partyOwner.name)))
 
         party.members.asPlayers()
             .filter { it.uniqueId != invitedId }
-            // todo перевод
-            .forEach { it.sendMessage("Игрок ${invited.name} присоединился к пати.") }
+            .forEach {
+                it.sendMessage(Component.translatable("msg.myshore.party.member.joined", Component.text(invited.name)))
+            }
 
         return true
     }
@@ -147,8 +141,9 @@ object PartyManager {
         val playerId = player.uniqueId
         val party = parties[playerId]
         if (party == null) {
-            // todo перевод
-            if (reason == LeftReason.COMMAND) player.sendMessage("Вы не состоите в пати.")
+            if (reason == LeftReason.COMMAND) {
+                player.sendMessage(Component.translatable("msg.myshore.party.error.not_in_party"))
+            }
             return false
         }
 
@@ -160,8 +155,9 @@ object PartyManager {
 
         // Если пати пустое — оно исчезает (ссылок на него больше нет в map)
         if (party.members.isEmpty()) {
-            // todo перевод
-            if (reason == LeftReason.COMMAND) player.sendMessage("Вы покинули пати.")
+            if (reason == LeftReason.COMMAND) {
+                player.sendMessage(Component.translatable("msg.myshore.party.leave.success"))
+            }
             return true
         }
 
@@ -172,29 +168,36 @@ object PartyManager {
 
         val ownerNameBefore = Bukkit.getPlayer(oldOwner)?.name
         if (reason == LeftReason.COMMAND) {
-            // todo перевод
-            player.sendMessage("Вы покинули пати" + (ownerNameBefore?.let { " игрока $it" } ?: ""))
+            if (ownerNameBefore != null) {
+                player.sendMessage(Component.translatable("msg.myshore.party.leave.success_owner", Component.text(ownerNameBefore)))
+            } else {
+                player.sendMessage(Component.translatable("msg.myshore.party.leave.success"))
+            }
         }
 
-        // todo перевод
-        val leaveText = when (reason) {
-            LeftReason.QUIT -> "Игрок ${player.name} вышел из игры и покинул пати."
-            LeftReason.COMMAND -> "Игрок ${player.name} покинул пати."
+        val leaveKey = when (reason) {
+            LeftReason.QUIT -> "msg.myshore.party.member.left.quit"
+            LeftReason.COMMAND -> "msg.myshore.party.member.left"
         }
 
         party.members.asPlayers()
-            .forEach { it.sendMessage(leaveText) }
+            .forEach { it.sendMessage(Component.translatable(leaveKey, Component.text(player.name))) }
 
         // Сообщение о смене лидера (если было)
         if (wasOwner) {
             val newOwnerPlayer = Bukkit.getPlayer(party.owner)
-            // todo перевод
-            newOwnerPlayer?.sendMessage("Вы стали лидером пати.")
+            newOwnerPlayer?.sendMessage(Component.translatable("msg.myshore.party.owner.you"))
 
             party.members.asPlayers()
                 .filter { it.uniqueId != party.owner }
-                // todo перевод
-                .forEach { it.sendMessage("Новый лидер пати: ${newOwnerPlayer?.name ?: "???"}") }
+                .forEach {
+                    it.sendMessage(
+                        Component.translatable(
+                            "msg.myshore.party.owner.changed",
+                            Component.text(newOwnerPlayer?.name ?: "???")
+                        )
+                    )
+                }
         }
 
         return true
@@ -206,32 +209,27 @@ object PartyManager {
     fun kick(actor: Player, target: Player): Boolean {
         val party = getParty(actor)
         if (party == null) {
-            // todo перевод
-            actor.sendMessage("У вас нет пати.")
+            actor.sendMessage(Component.translatable("msg.myshore.party.error.no_party"))
             return false
         }
 
         if (party.owner != actor.uniqueId) {
-            // todo перевод
-            actor.sendMessage("Только лидер пати может кикать участников.")
+            actor.sendMessage(Component.translatable("msg.myshore.party.kick.error.not_owner"))
             return false
         }
 
         if (target.uniqueId == actor.uniqueId) {
-            // todo перевод
-            actor.sendMessage("Вы не можете кикнуть самого себя.")
+            actor.sendMessage(Component.translatable("msg.myshore.party.kick.error.self"))
             return false
         }
 
         if (target.getParty() !== party) {
-            // todo перевод
-            actor.sendMessage("Этот игрок не в вашей пати.")
+            actor.sendMessage(Component.translatable("msg.myshore.party.error.target_not_member"))
             return false
         }
 
         if (target.uniqueId == party.owner) {
-            // todo перевод
-            actor.sendMessage("Нельзя кикнуть лидера пати.")
+            actor.sendMessage(Component.translatable("msg.myshore.party.kick.error.owner"))
             return false
         }
 
@@ -240,14 +238,14 @@ object PartyManager {
         // выгоняем
         leave(target, LeftReason.COMMAND)
 
-        // todo перевод
-        actor.sendMessage("Игрок ${target.name} был изгнан из пати.")
-        target.sendMessage("Вас выгнали из пати игрока ${actor.name}.")
+        actor.sendMessage(Component.translatable("msg.myshore.party.kick.success", Component.text(target.name)))
+        target.sendMessage(Component.translatable("msg.myshore.party.kick.target", Component.text(actor.name)))
 
         membersBefore.asPlayers()
             .filter { it.uniqueId != target.uniqueId }
-            // todo перевод
-            .forEach { it.sendMessage("Игрок ${target.name} был изгнан из пати.") }
+            .forEach {
+                it.sendMessage(Component.translatable("msg.myshore.party.kick.broadcast", Component.text(target.name)))
+            }
 
         return true
     }
@@ -258,38 +256,48 @@ object PartyManager {
     fun setOwner(currentOwner: Player, newOwner: Player): Boolean {
         val party = getParty(currentOwner)
         if (party == null) {
-            // todo перевод
-            currentOwner.sendMessage("У вас нет пати.")
+            currentOwner.sendMessage(Component.translatable("msg.myshore.party.error.no_party"))
             return false
         }
         if (party.owner != currentOwner.uniqueId) {
-            // todo перевод
-            currentOwner.sendMessage("Только лидер может передавать лидерство.")
+            currentOwner.sendMessage(Component.translatable("msg.myshore.party.set_owner.error.not_owner"))
             return false
         }
         if (newOwner.getParty() !== party) {
-            // todo перевод
-            currentOwner.sendMessage("Этот игрок не в вашей пати.")
+            currentOwner.sendMessage(Component.translatable("msg.myshore.party.error.target_not_member"))
             return false
         }
         if (newOwner.uniqueId == party.owner) {
-            // todo перевод
-            currentOwner.sendMessage("Этот игрок уже является лидером.")
+            currentOwner.sendMessage(Component.translatable("msg.myshore.party.set_owner.error.already_owner"))
             return false
         }
 
         party.owner = newOwner.uniqueId
 
-        // todo перевод
-        currentOwner.sendMessage("Вы передали лидерство игроку ${newOwner.name}.")
-        newOwner.sendMessage("Вы стали лидером пати.")
+        currentOwner.sendMessage(Component.translatable("msg.myshore.party.set_owner.success", Component.text(newOwner.name)))
+        newOwner.sendMessage(Component.translatable("msg.myshore.party.owner.you"))
 
         party.members.asPlayers()
             .filter { it.uniqueId != currentOwner.uniqueId && it.uniqueId != newOwner.uniqueId }
-            // todo перевод
-            .forEach { it.sendMessage("Новый лидер пати: ${newOwner.name}.") }
+            .forEach {
+                it.sendMessage(Component.translatable("msg.myshore.party.owner.changed", Component.text(newOwner.name)))
+            }
 
         return true
+    }
+
+    /**
+     * Зарегистрировать участника в mapping (используется EventManager для прямого добавления).
+     */
+    fun registerMember(playerId: UUID, party: Party) {
+        parties[playerId] = party
+    }
+
+    /**
+     * Удалить участника из mapping без изменения members set (используется EventManager).
+     */
+    fun unregisterMember(playerId: UUID) {
+        parties.remove(playerId)
     }
 
     /**
@@ -298,22 +306,35 @@ object PartyManager {
     fun showMembers(player: Player): Boolean {
         val party = getParty(player)
         if (party == null) {
-            // todo перевод
-            player.sendMessage("Вы не состоите в пати.")
+            player.sendMessage(Component.translatable("msg.myshore.party.error.not_in_party"))
             return false
         }
 
         val ownerName = Bukkit.getPlayer(party.owner)?.name ?: "???"
-        val names = party.members.asPlayers().joinToString(", ") { p ->
-            val mark = if (p.uniqueId == party.owner) " (лидер)" else ""
-            p.name + mark
-        }
+        val names = party.members.asPlayers()
+            .foldIndexed(Component.text()) { index, builder, p ->
+                if (index > 0) {
+                    builder.append(Component.text(", "))
+                }
+                builder.append(Component.text(p.name))
+                if (p.uniqueId == party.owner) {
+                    builder
+                        .append(Component.space())
+                        .append(Component.text("("))
+                        .append(Component.translatable("msg.myshore.party.members.owner_mark"))
+                        .append(Component.text(")"))
+                }
+                builder
+            }
+            .build()
 
-        // todo перевод
         player.sendMessage(
-            "Лидер пати: $ownerName",
-            "Участников: ${party.members.size}",
-            names
+            Component.translatable(
+                "msg.myshore.party.members.info",
+                Component.text(ownerName),
+                Component.text(party.members.size),
+                names
+            )
         )
         return true
     }
@@ -347,18 +368,21 @@ object PartyManager {
      * Сообщение с кликабельным принятием приглашения.
      */
     private fun buildInviteAcceptMessage(inviter: Player): Component {
-        // todo перевод
         return Component.text()
-            .append(Component.text("▍ ").color(NamedTextColor.BLUE))
-            .append(Component.text("Игрок ${inviter.name} пригласил вас в пати ").color(NamedTextColor.YELLOW))
             .append(
-                Component.text("ПРИНЯТЬ")
+                Component.translatable("msg.myshore.party.invite.accept.message", Component.text(inviter.name))
+                    .color(NamedTextColor.YELLOW)
+            )
+            .append(Component.space())
+            .append(
+                Component.translatable("msg.myshore.party.invite.accept.button")
                     .color(NamedTextColor.GREEN)
                     .decorate(TextDecoration.BOLD)
                     .clickEvent(ClickEvent.runCommand("/p accept ${inviter.name}"))
                     .hoverEvent(
                         HoverEvent.showText(
-                            Component.text("Нажмите, чтобы принять приглашение").color(NamedTextColor.BLUE)
+                            Component.translatable("msg.myshore.party.invite.accept.hover")
+                                .color(NamedTextColor.BLUE)
                         )
                     )
             )

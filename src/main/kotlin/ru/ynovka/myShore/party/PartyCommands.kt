@@ -5,6 +5,7 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.kotlindsl.commandAPICommand
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import dev.jorel.commandapi.CommandAPICommand
+import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 
 
@@ -61,19 +62,7 @@ object PartyCommands {
         commandAPICommand("p") {
             withAliases("party")
             playerExecutor { player, _ ->
-                // todo перевод
-                player.sendMessage(
-                    """
-                    ---------------------- Party help ----------------------
-                    /p invite <игрок>     - пригласить в пати (лидер)
-                    /p accept <игрок>     - принять приглашение
-                    /p members (list)     - список игроков в пати
-                    /p kick <игрок>       - выгнать игрока (лидер)
-                    /p setOwner <игрок>   - передать лидерство (лидер)
-                    /p leave              - выйти из пати
-                    /p delete             - удалить пати (лидер)
-                    """.trimIndent()
-                )
+                player.sendMessage(Component.translatable("msg.myshore.party.help"))
             }
             withSubcommand(inviteSub)
             withSubcommand(acceptSub)

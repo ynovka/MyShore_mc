@@ -7,9 +7,13 @@ import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.pillars.PillarsPlayer
 import ru.ynovka.myShore.game.pillars.PillarsWorld
 import ru.ynovka.myShore.game.pillars.PillarsGame
+import ru.ynovka.myShore.event.EventManager
 import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.game.GameManager
 import ru.ynovka.myShore.game.GameState
 import net.kyori.adventure.title.Title
+import ru.ynovka.myShore.hub.Hub.toHub
+import org.bukkit.Bukkit
 
 
 class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
@@ -19,6 +23,34 @@ class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
 
         if (winner != null) {
             announceWinner(winner)
+        }
+
+        val event = game.party?.let { party ->
+            EventManager.activeEvent?.takeIf { it.party === party }
+        }
+
+        if (event != null) {
+            game.activePlayers += game.spectatorPlayers
+            game.spectatorPlayers.clear()
+
+            ActionbarTimer.startCountdownTimer(
+                time = 5,
+                game = game,
+                state = this,
+                componentKey = "bar.myshore.new_round_in",
+                onCompletion = { game, _ ->
+                    val onlinePlayers = game.gamePlayers.mapNotNull { Bukkit.getPlayer(it.playerId) }
+                    onlinePlayers.forEach { it.toHub() }
+
+                    game.gamePlayers
+                        .filter { Bukkit.getPlayer(it.playerId) == null }
+                        .forEach { GameManager.leave(it.playerId) }
+
+                    EventManager.onGameRoundFinished(game.party)
+                }
+            )
+
+            return
         }
 
         game.activePlayers += game.spectatorPlayers

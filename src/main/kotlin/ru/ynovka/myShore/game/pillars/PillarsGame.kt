@@ -5,12 +5,13 @@ import ru.ynovka.myShore.game.pillars.generators.platform.PlatformGenerator
 import ru.ynovka.myShore.game.pillars.generators.pillars.PillarGenerator
 import ru.ynovka.myShore.game.pillars.states.PillarsWaitingForPlayers
 import ru.ynovka.myShore.game.pillars.gameMode.PillarsGameMode
+import ru.ynovka.myShore.party.PartyManager.Party
 import ru.ynovka.myShore.game.GameManager
 import ru.ynovka.myShore.game.Game
 import java.util.UUID
 
 
-class PillarsGame : Game<PillarsPlayer, PillarsWorld>() {
+class PillarsGame(party: Party? = null) : Game<PillarsPlayer, PillarsWorld>(party) {
 
     override fun createPlayer(playerId: UUID) = PillarsPlayer(playerId)
     override val initialState = PillarsWaitingForPlayers(this)
