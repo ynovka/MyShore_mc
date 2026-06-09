@@ -49,7 +49,7 @@ object ActionbarTimer {
         val task = scheduler.schedule {
             val currentTime = timeLeft--
 
-            game.gamePlayers.forEachOnlinePlayer { player ->
+            game.getPlayers().forEachOnlinePlayer { player ->
                 player.sendActionBar(
                     Component.translatable(componentKey, Component.text(currentTime))
                         .withBackground(player)

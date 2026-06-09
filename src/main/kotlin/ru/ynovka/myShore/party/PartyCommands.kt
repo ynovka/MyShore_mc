@@ -6,6 +6,7 @@ import dev.jorel.commandapi.kotlindsl.commandAPICommand
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import dev.jorel.commandapi.CommandAPICommand
 import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.text.translate
 import org.bukkit.entity.Player
 
 
@@ -62,7 +63,7 @@ object PartyCommands {
         commandAPICommand("p") {
             withAliases("party")
             playerExecutor { player, _ ->
-                player.sendMessage(Component.translatable("msg.myshore.party.help"))
+                player.sendMessage(Component.translatable("msg.myshore.party.help").translate(player))
             }
             withSubcommand(inviteSub)
             withSubcommand(acceptSub)

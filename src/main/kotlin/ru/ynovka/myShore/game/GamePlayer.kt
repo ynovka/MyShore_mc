@@ -23,13 +23,23 @@ abstract class GamePlayer(
     fun withOnlinePlayer(action: (Player) -> Unit) {
         scheduler.schedule {
             val player = Bukkit.getPlayer(playerId) ?: return@schedule
-            action(player)
+            scheduler.schedule {
+                action(player)
+            }.entity(player).once()
         }.global().once()
     }
 
     fun asPlayer() = Bukkit.getPlayer(playerId)
 
     companion object {
+        @JvmName("forEachOnlineUuidPlayer")
+        fun Iterable<UUID>.forEachOnlinePlayer(action: (Player) -> Unit) {
+            scheduler.schedule {
+                mapNotNull { Bukkit.getPlayer(it) }.forEach(action)
+            }.global().once()
+        }
+
+        @JvmName("forEachOnlineGamePlayer")
         fun Iterable<GamePlayer>.forEachOnlinePlayer(action: (Player) -> Unit) {
             scheduler.schedule {
                 mapNotNull { Bukkit.getPlayer(it.playerId) }
@@ -37,6 +47,15 @@ abstract class GamePlayer(
             }.global().once()
         }
 
+        @JvmName("withOnlineUuidPlayers")
+        fun Iterable<UUID>.withOnlinePlayers(action: (List<Player>) -> Unit) {
+            scheduler.schedule {
+                val players = mapNotNull { Bukkit.getPlayer(it) }
+                action(players)
+            }.global().once()
+        }
+
+        @JvmName("withOnlineGamePlayers")
         fun Iterable<GamePlayer>.withOnlinePlayers(action: (List<Player>) -> Unit) {
             scheduler.schedule {
                 val players = mapNotNull { Bukkit.getPlayer(it.playerId) }

@@ -33,7 +33,7 @@ object ActionbarWaitingFor {
             frame++
             if (frame == frames.size) frame = 0
 
-            game.activePlayers.forEachOnlinePlayer { player ->
+            game.getPlayers().forEachOnlinePlayer { player ->
                 player.sendActionBar(
                         Component.translatable(componentKey)
                             .append(Component.text(frames[frame]))

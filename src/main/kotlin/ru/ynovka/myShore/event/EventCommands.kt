@@ -7,6 +7,7 @@ import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import dev.jorel.commandapi.CommandAPICommand
 import net.kyori.adventure.text.Component
+import ru.ynovka.myShore.text.translate
 
 
 object EventCommands {
@@ -48,6 +49,7 @@ object EventCommands {
                     player.sendMessage(
                         Component.translatable("msg.myshore.event.status.none")
                             .color(NamedTextColor.YELLOW)
+                            .translate(player)
                     )
                     return@playerExecutor
                 }
@@ -64,7 +66,7 @@ object EventCommands {
                         event.displayName,
                         Component.translatable(stateKey),
                         Component.text(event.party.members.size)
-                    ).color(NamedTextColor.GOLD)
+                    ).color(NamedTextColor.GOLD).translate(player)
                 )
             }
 

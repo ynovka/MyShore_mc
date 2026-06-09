@@ -53,6 +53,8 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
         game.activePlayers.forEachOnlinePlayer { player ->
             scheduler.schedule {
                 player.gameMode = GameMode.SURVIVAL
+                player.allowFlight = false
+                player.isFlying = false
                 player.inventory.clear()
                 player.addPotionEffect(
                     PotionEffect(

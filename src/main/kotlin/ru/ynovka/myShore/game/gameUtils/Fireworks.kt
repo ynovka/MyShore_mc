@@ -120,14 +120,16 @@ object CosmeticFireworkListener : Listener {
     }
 
     @EventHandler
-    fun onDamage(event: EntityDamageByEntityEvent) {
-        val firework = event.damager as? Firework ?: return
+    fun onDamage(e: EntityDamageByEntityEvent) {
+        val firework = e.damager as? Firework ?: return
 
         val isCosmetic = firework.persistentDataContainer.has(
             COSMETIC_FIREWORK_KEY,
             PersistentDataType.BYTE
         )
 
-        if (isCosmetic) event.isCancelled = true
+        if (!isCosmetic) return
+
+        e.isCancelled = true
     }
 }

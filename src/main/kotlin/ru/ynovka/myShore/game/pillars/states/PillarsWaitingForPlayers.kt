@@ -11,6 +11,7 @@ import ru.ynovka.myShore.hub.HubItems
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
 import org.bukkit.Sound
+import java.util.concurrent.CompletableFuture
 
 
 class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
@@ -30,13 +31,18 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
     }
 
     override fun onPlayerJoin(gamePlayer: PillarsPlayer) {
-        if (game.activePlayers.size >= 2) {
-            game.fsm.transitionTo(PillarsCountdown(game))
-            return
-        }
-
+        val state = this
         gamePlayer.withOnlinePlayer { player ->
-            setupForWaiting(player, gamePlayer, game)
+            val setup = setupForWaiting(player, gamePlayer, game)
+            if (game.activePlayers.size >= 2) {
+                setup.thenRun {
+                    scheduler.schedule {
+                        if (game.fsm.current === state && game.activePlayers.size >= 2) {
+                            game.fsm.transitionTo(PillarsCountdown(game))
+                        }
+                    }.global().once()
+                }
+            }
         }
     }
 
@@ -44,16 +50,15 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
         player: Player,
         pPlayer: PillarsPlayer,
         game: PillarsGame
-    ) {
+    ): CompletableFuture<Void> =
         game.gameWorld.spawnPlayer(game, pPlayer).thenRun {
             player.restrictToBlock(true)
+            scheduler.schedule {
+                player.gameMode = GameMode.ADVENTURE
+                player.clearActivePotionEffects()
+                player.inventory.clear()
+                player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
+                player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
+            }.entity(player).once()
         }
-        scheduler.schedule {
-            player.gameMode = GameMode.ADVENTURE
-            player.clearActivePotionEffects()
-            player.inventory.clear()
-            player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))
-            player.playSound(player.location, Sound.BLOCK_COPPER_BULB_TURN_OFF, 0.5f, 2f)
-        }.entity(player).once()
-    }
 }

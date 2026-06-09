@@ -8,6 +8,7 @@ import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.PlayerDeathEvent
@@ -79,8 +80,7 @@ object PillarsEvents : Listener {
 
         when (game.fsm.current) {
             is PillarsInProgress -> {
-                if (!pPlayer.markEliminated()) return
-                if (!game.movePlayerToSpectator(pPlayer, SpectatorReason.ELIMINATED)) return
+                if (!game.eliminatePlayer(player, pPlayer)) return
 
                 pPlayer.withOnlinePlayer { onlinePlayer ->
                     onlinePlayer.gameMode = GameMode.SPECTATOR
@@ -122,7 +122,12 @@ object PillarsEvents : Listener {
 
         val game = player.uniqueId.currentPillarsGame() ?: return
 
-        if (game.fsm.current !is PillarsInProgress) e.isCancelled = true
+        if (game.fsm.current is PillarsInProgress) return
+        e.isCancelled = true
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    fun onPlayerDamage2(e: EntityDamageEvent) {
     }
 
     @EventHandler
@@ -145,15 +150,25 @@ object PillarsEvents : Listener {
 
         when (game.fsm.current) {
             is PillarsInProgress -> {
-                if (!pPlayer.markEliminated()) return
+                if (!game.eliminatePlayer(player, pPlayer)) return
 
                 dropDeathItems(player, drops)
 
-                if (game.movePlayerToSpectator(pPlayer, SpectatorReason.ELIMINATED)) {
-                    game.broadcast(PlayerDeathMessages.from(e))
-                }
+                game.broadcast(PlayerDeathMessages.from(e))
             }
         }
+    }
+
+    private fun PillarsGame.eliminatePlayer(player: Player, pPlayer: PillarsPlayer): Boolean {
+        val shouldHandleElimination = pPlayer.markEliminated() || pPlayer in activePlayers
+
+        if (!shouldHandleElimination && pPlayer in spectatorPlayers) return false
+
+        if (player.isInsideVehicle) {
+            player.leaveVehicle()
+        }
+
+        return movePlayerToSpectator(pPlayer, SpectatorReason.ELIMINATED) && shouldHandleElimination
     }
 
     private fun dropDeathItems(player: Player, drops: List<ItemStack>) {

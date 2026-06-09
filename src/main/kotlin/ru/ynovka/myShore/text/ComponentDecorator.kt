@@ -29,6 +29,9 @@ fun Component.withBackground(): Component {
 fun TranslatableComponent.withBackground(player: Player): Component =
     ServerTranslator.translate(this, player.locale()).withBackground()
 
+fun Component.translate(player: Player): Component =
+    ServerTranslator.translate(this, player.locale())
+
 fun backgroundComponent(length: Int): Component =
     CharWidth.splitWidth(length)
         .fold(Component.empty()) { component, width ->

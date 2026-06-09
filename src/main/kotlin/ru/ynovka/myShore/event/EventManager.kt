@@ -11,6 +11,7 @@ import ru.ynovka.myShore.party.PartyManager
 import net.kyori.adventure.text.Component
 import ru.ynovka.myShore.game.GameManager
 import ru.ynovka.myShore.hub.Hub.toHub
+import ru.ynovka.myShore.text.translate
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
 import java.util.UUID
@@ -37,7 +38,8 @@ class GameEvent(
 private data class EventGameSpec(
     val canonicalName: String,
     val displayName: String,
-    val start: (Player) -> Boolean
+    val startParty: (PartyManager.Party) -> Result<*>,
+    val joinPlayer: (Player) -> Result<*>
 )
 
 object EventManager {
@@ -46,27 +48,21 @@ object EventManager {
     private val supportedGames = listOf(
         EventGameSpec(
             canonicalName = "pillars",
-            displayName = "Pillars"
-        ) { player ->
-            val result = GameManager.join<PillarsGame>(
-                player = player,
-                factory = { PillarsGame() },
-                partyFactory = { party -> PillarsGame(party) }
-            )
-
-            if (result.isFailure) {
-                player.sendMessage(
-                    Component.translatable(
-                        "msg.myshore.event.game.join_failed",
-                        result.exceptionOrNull()?.message
-                            ?.let(Component::text)
-                            ?: Component.translatable("msg.myshore.event.error.unknown_reason")
-                    ).color(NamedTextColor.RED)
+            displayName = "Pillars",
+            startParty = { party ->
+                GameManager.joinParty<PillarsGame>(
+                    party = party,
+                    partyFactory = { PillarsGame(it) }
+                )
+            },
+            joinPlayer = { player ->
+                GameManager.join<PillarsGame>(
+                    player = player,
+                    factory = { PillarsGame() },
+                    partyFactory = { party -> PillarsGame(party) }
                 )
             }
-
-            result.isSuccess
-        }
+        )
     )
 
     val activeEvent: GameEvent?
@@ -80,12 +76,12 @@ object EventManager {
 
     fun create(admin: Player): Boolean {
         if (!admin.isOp) {
-            admin.sendMessage(Component.translatable("msg.myshore.event.error.admin.create").color(NamedTextColor.RED))
+            admin.sendMessage(Component.translatable("msg.myshore.event.error.admin.create").color(NamedTextColor.RED).translate(admin))
             return false
         }
 
         if (PartyManager.getParty(admin) != null) {
-            admin.sendMessage(Component.translatable("msg.myshore.event.error.party_exists").color(NamedTextColor.RED))
+            admin.sendMessage(Component.translatable("msg.myshore.event.error.party_exists").color(NamedTextColor.RED).translate(admin))
             return false
         }
 
@@ -95,7 +91,7 @@ object EventManager {
                 Component.translatable(
                     "msg.myshore.event.error.already_active",
                     existing.displayName
-                ).color(NamedTextColor.RED)
+                ).color(NamedTextColor.RED).translate(admin)
             )
             return false
         }
@@ -110,23 +106,23 @@ object EventManager {
         if (!currentEvent.compareAndSet(null, event)) {
             party.members.toList().forEach { PartyManager.unregisterMember(it) }
             party.members.clear()
-            admin.sendMessage(Component.translatable("msg.myshore.event.error.concurrent_create").color(NamedTextColor.RED))
+            admin.sendMessage(Component.translatable("msg.myshore.event.error.concurrent_create").color(NamedTextColor.RED).translate(admin))
             return false
         }
 
         Bukkit.getOnlinePlayers().forEach { it.sendEventAnnouncement(event) }
-        admin.sendMessage(Component.translatable("msg.myshore.event.created").color(NamedTextColor.GREEN))
+        admin.sendMessage(Component.translatable("msg.myshore.event.created").color(NamedTextColor.GREEN).translate(admin))
         return true
     }
 
     fun start(admin: Player, gameName: String): Boolean {
         if (!admin.isOp) {
-            admin.sendMessage(Component.translatable("msg.myshore.event.error.admin.start").color(NamedTextColor.RED))
+            admin.sendMessage(Component.translatable("msg.myshore.event.error.admin.start").color(NamedTextColor.RED).translate(admin))
             return false
         }
 
         val event = activeEvent ?: run {
-            admin.sendMessage(Component.translatable("msg.myshore.event.error.no_active").color(NamedTextColor.RED))
+            admin.sendMessage(Component.translatable("msg.myshore.event.error.no_active").color(NamedTextColor.RED).translate(admin))
             return false
         }
 
@@ -135,7 +131,7 @@ object EventManager {
                 Component.translatable(
                     "msg.myshore.event.error.already_started",
                     event.displayName
-                ).color(NamedTextColor.RED)
+                ).color(NamedTextColor.RED).translate(admin)
             )
             return false
         }
@@ -147,7 +143,7 @@ object EventManager {
                     "msg.myshore.event.error.unknown_game",
                     Component.text(gameName),
                     Component.text(supportedGames.joinToString(", ") { it.displayName })
-                ).color(NamedTextColor.RED)
+                ).color(NamedTextColor.RED).translate(admin)
             )
             return false
         }
@@ -160,17 +156,12 @@ object EventManager {
         event.gameName = spec.canonicalName
         event.state = EventState.STARTED
 
-        if (!startGameFor(event, admin)) {
+        val startResult = spec.startParty(event.party)
+        if (startResult.isFailure) {
             event.state = EventState.GATHERING
+            admin.sendGameJoinFailure(startResult)
             return false
         }
-
-        event.party.members.asPlayers()
-            .filter { it.uniqueId != admin.uniqueId }
-            .forEach { player ->
-                if (GameManager.run { player.uniqueId.inGame() }) return@forEach
-                startGameFor(event, player)
-            }
 
         event.party.members.asPlayers()
             .forEach {
@@ -178,7 +169,7 @@ object EventManager {
                     Component.translatable(
                         "msg.myshore.event.started",
                         event.displayName
-                    ).color(NamedTextColor.GREEN)
+                    ).color(NamedTextColor.GREEN).translate(it)
                 )
             }
 
@@ -187,13 +178,13 @@ object EventManager {
 
     fun join(player: Player): Boolean {
         val event = activeEvent ?: run {
-            player.sendMessage(Component.translatable("msg.myshore.event.error.no_active").color(NamedTextColor.RED))
+            player.sendMessage(Component.translatable("msg.myshore.event.error.no_active").color(NamedTextColor.RED).translate(player))
             return false
         }
 
         val currentParty = PartyManager.getParty(player)
         if (currentParty != null && currentParty !== event.party) {
-            player.sendMessage(Component.translatable("msg.myshore.event.error.other_party").color(NamedTextColor.RED))
+            player.sendMessage(Component.translatable("msg.myshore.event.error.other_party").color(NamedTextColor.RED).translate(player))
             return false
         }
 
@@ -202,7 +193,7 @@ object EventManager {
                 Component.translatable(
                     "msg.myshore.event.join.already",
                     event.displayName
-                ).color(NamedTextColor.YELLOW)
+                ).color(NamedTextColor.YELLOW).translate(player)
             )
             if (event.state == EventState.STARTED && !GameManager.run { player.uniqueId.inGame() }) {
                 startGameFor(event, player)
@@ -219,7 +210,7 @@ object EventManager {
             Component.translatable(
                 "msg.myshore.event.join.success",
                 event.displayName
-            ).color(NamedTextColor.GREEN)
+            ).color(NamedTextColor.GREEN).translate(player)
         )
 
         event.party.members.asPlayers()
@@ -229,7 +220,7 @@ object EventManager {
                     Component.translatable(
                         "msg.myshore.event.join.broadcast",
                         Component.text(player.name)
-                    ).color(NamedTextColor.YELLOW)
+                    ).color(NamedTextColor.YELLOW).translate(it)
                 )
             }
 
@@ -242,12 +233,12 @@ object EventManager {
 
     fun leave(player: Player): Boolean {
         val event = currentEvent.get()?.takeIf { it.isActive } ?: run {
-            player.sendMessage(Component.translatable("msg.myshore.event.error.no_active").color(NamedTextColor.RED))
+            player.sendMessage(Component.translatable("msg.myshore.event.error.no_active").color(NamedTextColor.RED).translate(player))
             return false
         }
 
         if (player.uniqueId !in event.party.members) {
-            player.sendMessage(Component.translatable("msg.myshore.event.leave.not_member").color(NamedTextColor.RED))
+            player.sendMessage(Component.translatable("msg.myshore.event.leave.not_member").color(NamedTextColor.RED).translate(player))
             return false
         }
 
@@ -264,7 +255,7 @@ object EventManager {
             Component.translatable(
                 "msg.myshore.event.leave.success",
                 event.displayName
-            ).color(NamedTextColor.GREEN)
+            ).color(NamedTextColor.GREEN).translate(player)
         )
 
         event.party.members.asPlayers()
@@ -273,7 +264,7 @@ object EventManager {
                     Component.translatable(
                         "msg.myshore.event.leave.broadcast",
                         Component.text(player.name)
-                    ).color(NamedTextColor.YELLOW)
+                    ).color(NamedTextColor.YELLOW).translate(it)
                 )
             }
 
@@ -291,12 +282,12 @@ object EventManager {
 
     fun finish(admin: Player): Boolean {
         if (!admin.isOp) {
-            admin.sendMessage(Component.translatable("msg.myshore.event.error.admin.finish").color(NamedTextColor.RED))
+            admin.sendMessage(Component.translatable("msg.myshore.event.error.admin.finish").color(NamedTextColor.RED).translate(admin))
             return false
         }
 
         val event = activeEvent ?: run {
-            admin.sendMessage(Component.translatable("msg.myshore.event.error.no_active_finish").color(NamedTextColor.RED))
+            admin.sendMessage(Component.translatable("msg.myshore.event.error.no_active_finish").color(NamedTextColor.RED).translate(admin))
             return false
         }
 
@@ -315,7 +306,7 @@ object EventManager {
 
         event.party.members.asPlayers()
             .forEach {
-                it.sendMessage(Component.translatable("msg.myshore.event.round_finished").color(NamedTextColor.GOLD))
+                it.sendMessage(Component.translatable("msg.myshore.event.round_finished").color(NamedTextColor.GOLD).translate(it))
             }
     }
 
@@ -355,7 +346,7 @@ object EventManager {
     private fun startGameFor(event: GameEvent, player: Player): Boolean {
         val gameName = event.gameName
         if (gameName == null) {
-            player.sendMessage(Component.translatable("msg.myshore.event.error.game_not_selected").color(NamedTextColor.RED))
+            player.sendMessage(Component.translatable("msg.myshore.event.error.game_not_selected").color(NamedTextColor.RED).translate(player))
             return false
         }
 
@@ -365,12 +356,16 @@ object EventManager {
                 Component.translatable(
                     "msg.myshore.event.error.game_unsupported",
                     event.displayName
-                ).color(NamedTextColor.RED)
+                ).color(NamedTextColor.RED).translate(player)
             )
             return false
         }
 
-        return spec.start(player)
+        val result = spec.joinPlayer(player)
+        if (result.isFailure) {
+            player.sendGameJoinFailure(result)
+        }
+        return result.isSuccess
     }
 
     private fun resolveGame(gameName: String): EventGameSpec? {
@@ -408,13 +403,14 @@ object EventManager {
 
     private fun transferOwnership(event: GameEvent, newOwner: UUID) {
         event.party.owner = newOwner
-        Bukkit.getPlayer(newOwner)
-            ?.sendMessage(
+        Bukkit.getPlayer(newOwner)?.let { player ->
+            player.sendMessage(
                 Component.translatable(
                     "msg.myshore.event.owner.transferred",
                     event.displayName
-                ).color(NamedTextColor.GOLD)
+                ).color(NamedTextColor.GOLD).translate(player)
             )
+        }
     }
 
     private fun finishEvent(event: GameEvent, reason: Component) {
@@ -429,7 +425,7 @@ object EventManager {
                     "msg.myshore.event.finished",
                     event.displayName,
                     reason
-                ).color(NamedTextColor.GOLD)
+                ).color(NamedTextColor.GOLD).translate(it)
             )
         }
 
@@ -439,7 +435,7 @@ object EventManager {
         currentEvent.set(null)
     }
 
-    private fun buildEventAnnouncement(event: GameEvent): Component =
+    private fun buildEventAnnouncement(event: GameEvent, player: Player): Component =
         Component.text()
             .append(
                 Component.translatable("msg.myshore.event.announcement", event.displayName)
@@ -455,12 +451,24 @@ object EventManager {
                         HoverEvent.showText(
                             Component.translatable("msg.myshore.event.announcement.hover")
                                 .color(NamedTextColor.GREEN)
+                                .translate(player)
                         )
                     )
             )
             .build()
 
     private fun Player.sendEventAnnouncement(event: GameEvent) {
-        sendMessage(buildEventAnnouncement(event))
+        sendMessage(buildEventAnnouncement(event, this).translate(this))
+    }
+
+    private fun Player.sendGameJoinFailure(result: Result<*>) {
+        sendMessage(
+            Component.translatable(
+                "msg.myshore.event.game.join_failed",
+                result.exceptionOrNull()?.message
+                    ?.let(Component::text)
+                    ?: Component.translatable("msg.myshore.event.error.unknown_reason")
+            ).color(NamedTextColor.RED).translate(this)
+        )
     }
 }

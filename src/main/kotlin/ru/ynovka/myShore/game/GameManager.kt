@@ -5,6 +5,7 @@ import ru.ynovka.myShore.party.PartyManager.Party
 import java.util.concurrent.CopyOnWriteArrayList
 import ru.ynovka.myShore.party.PartyManager
 import org.bukkit.entity.Player
+import org.bukkit.Bukkit
 import java.util.UUID
 
 
@@ -34,6 +35,27 @@ object GameManager {
             joinPrivate<G>(party, partyFactory)
         else
             joinPublic<G>(player.uniqueId, factory)
+    }
+
+    inline fun <reified G : Game<*, *>> joinParty(
+        party: Party,
+        noinline partyFactory: (Party) -> G,
+    ): Result<G> {
+        val joinableMembers = party.members.filter { !it.inGame() }
+        if (joinableMembers.isEmpty()) {
+            return Result.failure(IllegalStateException("Party has no players available to join"))
+        }
+
+        joinableMembers
+            .mapNotNull(Bukkit::getPlayer)
+            .forEach { player ->
+                scheduler.schedule {
+                    player.inventory.clear()
+                    player.clearActivePotionEffects()
+                }.entity(player).once()
+            }
+
+        return joinPrivate<G>(party, partyFactory)
     }
 
     @PublishedApi

@@ -1,22 +1,25 @@
 package ru.ynovka.myShore.game.pillars.states
 
 import ru.ynovka.myShore.game.GamePlayer.Companion.forEachOnlinePlayer
+import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.game.gameUtils.spawnFireworksAround
 import ru.ynovka.myShore.game.gameUtils.ActionbarTimer
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.pillars.PillarsPlayer
+import ru.ynovka.myShore.game.pillars.PillarsItems
 import ru.ynovka.myShore.game.pillars.PillarsWorld
 import ru.ynovka.myShore.game.pillars.PillarsGame
 import ru.ynovka.myShore.event.EventManager
 import net.kyori.adventure.text.Component
-import ru.ynovka.myShore.game.GameManager
 import ru.ynovka.myShore.game.GameState
 import net.kyori.adventure.title.Title
-import ru.ynovka.myShore.hub.Hub.toHub
 import org.bukkit.Bukkit
+import org.bukkit.GameMode
+import org.bukkit.entity.Player
 
 
 class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorld, PillarsGame>(game) {
+    private var automaticNextRoundStarted = false
 
     override fun onEnterState() {
         val winner = determineWinner()
@@ -29,32 +32,14 @@ class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
             EventManager.activeEvent?.takeIf { it.party === party }
         }
 
+        game.activePlayers += game.spectatorPlayers
+        game.spectatorPlayers.clear()
+
         if (event != null) {
-            game.activePlayers += game.spectatorPlayers
-            game.spectatorPlayers.clear()
-
-            ActionbarTimer.startCountdownTimer(
-                time = 5,
-                game = game,
-                state = this,
-                componentKey = "bar.myshore.new_round_in",
-                onCompletion = { game, _ ->
-                    val onlinePlayers = game.gamePlayers.mapNotNull { Bukkit.getPlayer(it.playerId) }
-                    onlinePlayers.forEach { it.toHub() }
-
-                    game.gamePlayers
-                        .filter { Bukkit.getPlayer(it.playerId) == null }
-                        .forEach { GameManager.leave(it.playerId) }
-
-                    EventManager.onGameRoundFinished(game.party)
-                }
-            )
+            setupEventFinishing()
 
             return
         }
-
-        game.activePlayers += game.spectatorPlayers
-        game.spectatorPlayers.clear()
 
         ActionbarTimer.startCountdownTimer(
             time = 5,
@@ -69,6 +54,70 @@ class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
                 }
             }
         )
+    }
+
+    override fun onPlayerJoin(gamePlayer: PillarsPlayer) {
+        gamePlayer.withOnlinePlayer { player ->
+            if (game.canOwnerControl(player)) {
+                giveOwnerControls(player)
+            }
+        }
+    }
+
+    override fun onPlayerReconnect(gamePlayer: PillarsPlayer) = onPlayerJoin(gamePlayer)
+
+    override fun onPlayerLeave(gamePlayer: PillarsPlayer) {
+        val party = game.party ?: return
+        val owner = Bukkit.getPlayer(party.owner)
+
+        if (owner != null && game.hasPlayer(owner.uniqueId) && game.canOwnerControl(owner)) {
+            game.getPlayer(owner.uniqueId)?.withOnlinePlayer(::giveOwnerControls)
+            return
+        }
+
+        startAutomaticNextRound()
+    }
+
+    private fun setupEventFinishing() {
+        val owner = game.party
+            ?.owner
+            ?.let(Bukkit::getPlayer)
+
+        val ownerCanControl = owner != null &&
+            game.canOwnerControl(owner) &&
+            game.activePlayers.any { it.playerId == owner.uniqueId }
+
+        game.activePlayers.forEach { pPlayer ->
+            pPlayer.withOnlinePlayer { player ->
+                if (ownerCanControl && player.uniqueId == owner.uniqueId) {
+                    scheduler.schedule {
+                        giveOwnerControls(player)
+                    }.after(20L, Clock.TICKS).once()
+                }
+            }
+        }
+
+        if (!ownerCanControl) {
+            startAutomaticNextRound()
+        }
+    }
+
+    private fun giveOwnerControls(player: Player) {
+        player.gameMode = GameMode.CREATIVE
+        player.inventory.clear()
+        player.inventory.setItem(0, PillarsItems.roundSettings.getStack(player))
+        player.inventory.setItem(8, PillarsItems.nextRound.getStack(player))
+    }
+
+    private fun startAutomaticNextRound() {
+        if (automaticNextRoundStarted) return
+        automaticNextRoundStarted = true
+
+        scheduler.schedule {
+            if (game.fsm.current === this) {
+                game.startNextRound()
+            }
+        }.global().after(1L, Clock.TICKS).once()
     }
 
     private fun determineWinner(): PillarsPlayer? {
@@ -102,7 +151,7 @@ class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
         }
     }
 
-    override fun canPlayerJoin(gamePlayer: PillarsPlayer) = false
+    override fun canPlayerJoin(gamePlayer: PillarsPlayer) = game.party != null
 
     override fun canPlayerReconnect(gamePlayer: PillarsPlayer) = true
 }

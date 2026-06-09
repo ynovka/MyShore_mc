@@ -60,6 +60,8 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
     fun getPlayer(playerId: UUID): P? =
         playersById[playerId]
 
+    fun getPlayers(): Set<UUID> = playersById.keys
+
     fun getOrCreatePlayer(playerId: UUID): P {
         check(!destroyed) { "Game is already destroyed" }
 

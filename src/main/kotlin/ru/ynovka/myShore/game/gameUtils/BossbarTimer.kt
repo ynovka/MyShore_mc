@@ -72,7 +72,7 @@ object BossbarTimer {
         }
 
         fun syncViewers() {
-            game.gamePlayers.withOnlinePlayers { currentPlayers ->
+            game.getPlayers().withOnlinePlayers { currentPlayers ->
                 val currentIds = currentPlayers.mapTo(mutableSetOf()) { it.uniqueId }
 
                 viewers.filterNot { it in currentIds }.toSet().also { removed ->
