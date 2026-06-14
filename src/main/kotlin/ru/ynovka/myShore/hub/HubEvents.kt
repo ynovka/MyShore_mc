@@ -163,22 +163,28 @@ object HubEvents : Listener {
             .once()
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(ignoreCancelled = false, priority = EventPriority.HIGHEST)
     fun onPlayerDeath(e: PlayerDeathEvent) {
         if (e.isCancelled) return
+
         e.isCancelled = true
+
         e.player.toHub()
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = false)
     fun onPlayerInteract(e: PlayerInteractEvent) {
+        println("PlayerInteractEvent isCancelled == ${e.isCancelled}")
         if (!e.player.isInHubWorld() || e.player.gameMode == GameMode.CREATIVE) return
+        println("PlayerInteractEvent isCancelled = true")
         e.isCancelled = true
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = false)
     fun onPlayerAttack(e: PrePlayerAttackEntityEvent) {
+        println("PrePlayerAttackEntityEvent isCancelled == ${e.isCancelled}")
         if (!e.player.isInHubWorld() || e.player.gameMode == GameMode.CREATIVE) return
+        println("PrePlayerAttackEntityEvent isCancelled = true")
         e.isCancelled = true
     }
 

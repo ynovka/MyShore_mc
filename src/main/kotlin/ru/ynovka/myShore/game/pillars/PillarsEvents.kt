@@ -10,6 +10,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
@@ -114,28 +115,32 @@ object PillarsEvents : Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = false)
     fun onPlayerDamage(e: EntityDamageEvent) {
+        println("0 isCancelled == ${e.isCancelled}")
         val player = e.entity as? Player ?: return
+        println("00")
 
         if (!player.world.isPillarsWorld()) return
 
+        println("1")
         val game = player.uniqueId.currentPillarsGame() ?: return
+        println("2")
 
         if (game.fsm.current is PillarsInProgress) return
+        println("3")
+
         e.isCancelled = true
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    fun onPlayerDamage2(e: EntityDamageEvent) {
-    }
-
-    @EventHandler
+    @EventHandler(ignoreCancelled = false)
     fun onPlayerDeath(e: PlayerDeathEvent) {
         val player = e.player
 
+        println("11 isCancelled == ${e.isCancelled}")
         if (!player.world.isPillarsWorld()) return
 
+        println("22")
         val game = player.uniqueId.currentPillarsGame() ?: return
         val pPlayer = game.getOrCreatePlayer(player.uniqueId)
 
@@ -143,6 +148,7 @@ object PillarsEvents : Listener {
             .filter { !it.type.isAir && it.amount > 0 }
             .map { it.clone() }
 
+        println("33")
         e.isCancelled = true
 
         e.drops.clear()
@@ -152,7 +158,11 @@ object PillarsEvents : Listener {
             is PillarsInProgress -> {
                 if (!game.eliminatePlayer(player, pPlayer)) return
 
-                dropDeathItems(player, drops)
+                try {
+                    dropDeathItems(player, drops)
+                } catch (throwable: Throwable) {
+                    println("555")
+                }
 
                 game.broadcast(PlayerDeathMessages.from(e))
             }
@@ -172,18 +182,18 @@ object PillarsEvents : Listener {
     }
 
     private fun dropDeathItems(player: Player, drops: List<ItemStack>) {
-        val world = player.world
-
         val dropLocation = player.location.clone()
             .add(0.0, player.eyeHeight - 0.3, 0.0)
 
         for (stack in drops) {
             if (stack.type.isAir || stack.amount <= 0) continue
 
-            world.dropItem(dropLocation, stack.clone()) { item ->
-                item.pickupDelay = 10
-                item.velocity = randomDeathDropVelocity()
-            }
+            scheduler.schedule {
+                dropLocation.world.dropItem(dropLocation, stack.clone()) { item ->
+                    item.pickupDelay = 10
+                    item.velocity = randomDeathDropVelocity()
+                }
+            }.region(dropLocation).once()
         }
     }
 
@@ -215,6 +225,7 @@ object PillarsEvents : Listener {
     fun onPlayerOpenEnderChest(e: InventoryOpenEvent) {
         if (!e.player.world.isPillarsWorld()) return
         if (e.inventory.type != InventoryType.ENDER_CHEST) return
+
         e.isCancelled = true
     }
 

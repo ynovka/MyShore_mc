@@ -215,19 +215,20 @@ class PillarsWorld(
             pillar.z + 0.5
         )
 
-        player.teleportAsync(teleportLocation).whenComplete { success, throwable ->
-            if (throwable != null) {
-                future.completeExceptionally(throwable)
-                return@whenComplete
-            }
 
-            if (!success) {
-                future.complete(null)
-                return@whenComplete
-            }
+        scheduler.schedule {
+            player.teleportAsync(teleportLocation).whenComplete { success, throwable ->
+                if (throwable != null) {
+                    future.completeExceptionally(throwable)
+                    return@whenComplete
+                }
 
-            scheduler.schedule {
-                try {
+                if (!success) {
+                    future.complete(null)
+                    return@whenComplete
+                }
+
+                scheduler.schedule {
                     player.restrictToBlock(true)
                     player.gameMode = GameMode.ADVENTURE
                     player.saturation = 10f
@@ -243,11 +244,10 @@ class PillarsWorld(
                     player.clearActivePotionEffects()
 
                     future.complete(null)
-                } catch (throwable: Throwable) {
-                    future.completeExceptionally(throwable)
-                }
-            }.entity(player).once()
-        }
+                }.entity(player).once()
+            }
+        }.entity(player).after(10L, Clock.TICKS).once()
+
 
         return future
     }

@@ -78,7 +78,7 @@ abstract class GameWorld {
 
         world.setGameRule(GameRules.SPECTATORS_GENERATE_CHUNKS, false)
 
-        world.worldBorder.center = Location(world, 0.0001, 0.0, 0.0001)
+        world.worldBorder.center = Location(world, 0.0, 0.0, 0.0)
         world.worldBorder.damageBuffer = 0.0
         world.worldBorder.damageAmount = 0.5
 

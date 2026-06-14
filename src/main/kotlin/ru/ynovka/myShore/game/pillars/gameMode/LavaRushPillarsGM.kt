@@ -16,7 +16,7 @@ import org.bukkit.Material
 import org.bukkit.World
 
 
-object LavaRushPillarsGM : PillarsGM {
+object LavaRushPillarsGM : PillarsGM() {
     override fun roundStart(game: PillarsGame) {
         val state = game.fsm.current
         val world = game.gameWorld.get() ?: return

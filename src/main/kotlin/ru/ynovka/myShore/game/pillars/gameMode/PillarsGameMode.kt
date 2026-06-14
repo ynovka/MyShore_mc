@@ -1,17 +1,14 @@
 package ru.ynovka.myShore.game.pillars.gameMode
 
-import org.bukkit.entity.Player
-import ru.ynovka.myShore.game.pillars.states.PillarsInProgress.Companion.items
 import ru.ynovka.myShore.game.pillars.PillarsGame
-import org.bukkit.inventory.ItemStack
 
 
-interface PillarsGM {
-    fun roundStart(game: PillarsGame) { }
+abstract class PillarsGM {
+    open fun roundStart(game: PillarsGame) { }
 
-    fun onGiveRandomItems(player: Player) {
-        player.inventory.addItem(ItemStack.of(items.random()))
-    }
+    open val giveItemsAmount: Int = 1
+    open val giveItemsDelaySec: Int = 5
+    open val shouldClearInventory: Boolean = false
 }
 
 enum class PillarsGameMode(

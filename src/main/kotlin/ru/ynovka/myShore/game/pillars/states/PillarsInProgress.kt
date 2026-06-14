@@ -84,13 +84,30 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
         // Барьер
         scheduler.schedule {
             val time = (world.worldBorder.size / 0.25).toLong()
-            world.worldBorder.changeSize(2.0, time * 20L)
+            world.worldBorder.changeSize(4.0, time * 20L)
             BossbarTimer.startCountdownTimer(
                 time = time.toInt(),
                 game = game,
                 state = this,
-                onCompletion = { game, _ ->
-                    game.fsm.transitionTo(PillarsFinishing(game))
+                onCompletion = { game, state ->
+                    scheduler.schedule {
+                        game.activePlayers.forEachOnlinePlayer { p ->
+                            println(p.name)
+                            p.damage(1.0)
+                        }
+                    }
+                        .global()
+                        .repeatWhile { game.fsm.current === state }
+                        .repeatEvery(20L, Clock.TICKS)
+
+                    BossbarTimer.startCountdownTimer(
+                        time = 60,
+                        game = game,
+                        state = state,
+                        onCompletion = { game, _ ->
+                            game.fsm.transitionTo(PillarsFinishing(game))
+                        }
+                    )
                 }
             )
         }.global().once()
@@ -121,8 +138,9 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
     }
 
     private fun startGiveRandomItemsTimer() {
+        val gm = game.roundGameMode.gm
         ActionbarTimer.startCountdownTimer(
-            time = 5,
+            time = gm.giveItemsDelaySec,
             game = game,
             state = this,
             componentKey = "bar.myshore.new_item_in",
@@ -131,7 +149,11 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
                 if (game.fsm.current !is PillarsInProgress) return@startCountdownTimer
                 game.activePlayers.forEachOnlinePlayer { player ->
                     scheduler.schedule {
-                        game.roundGameMode.gm.onGiveRandomItems(player)
+                        if (gm.shouldClearInventory) player.inventory.clear()
+
+                        repeat(gm.giveItemsAmount) {
+                            player.inventory.addItem(ItemStack.of(items.random()))
+                        }
                     }.entity(player).once()
                 }
                 startGiveRandomItemsTimer()
@@ -153,6 +175,16 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
             Material.LIGHT,
             Material.WATER,
             Material.LAVA,
+            Material.DEBUG_STICK,
+            Material.TEST_BLOCK,
+            Material.TEST_INSTANCE_BLOCK,
+            Material.STRUCTURE_VOID,
+            Material.STRUCTURE_BLOCK,
+            Material.COMMAND_BLOCK_MINECART,
+            Material.JIGSAW,
+            Material.LIGHT,
+            Material.BARRIER,
+            Material.ENCHANTED_BOOK,
         )
 
         val items = Material.entries
