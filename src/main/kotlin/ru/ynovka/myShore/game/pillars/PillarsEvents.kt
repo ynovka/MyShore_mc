@@ -115,32 +115,25 @@ object PillarsEvents : Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     fun onPlayerDamage(e: EntityDamageEvent) {
-        println("0 isCancelled == ${e.isCancelled}")
         val player = e.entity as? Player ?: return
-        println("00")
 
         if (!player.world.isPillarsWorld()) return
 
-        println("1")
         val game = player.uniqueId.currentPillarsGame() ?: return
-        println("2")
 
         if (game.fsm.current is PillarsInProgress) return
-        println("3")
 
         e.isCancelled = true
     }
 
-    @EventHandler(ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     fun onPlayerDeath(e: PlayerDeathEvent) {
         val player = e.player
 
-        println("11 isCancelled == ${e.isCancelled}")
         if (!player.world.isPillarsWorld()) return
 
-        println("22")
         val game = player.uniqueId.currentPillarsGame() ?: return
         val pPlayer = game.getOrCreatePlayer(player.uniqueId)
 
@@ -148,7 +141,6 @@ object PillarsEvents : Listener {
             .filter { !it.type.isAir && it.amount > 0 }
             .map { it.clone() }
 
-        println("33")
         e.isCancelled = true
 
         e.drops.clear()

@@ -93,7 +93,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
                     scheduler.schedule {
                         game.activePlayers.forEachOnlinePlayer { p ->
                             println(p.name)
-                            p.damage(1.0)
+                            //p.damage(1.0)
                         }
                     }
                         .global()
