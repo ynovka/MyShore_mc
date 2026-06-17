@@ -20,7 +20,7 @@ repositories {
 dependencies {
     paperweight.devBundle("me.earthme.luminol", "26.1.2.build.+")
 
-    compileOnly("com.github.darksoulq:AbyssalLib:v2.3.0-mc.26.1.2")
+    compileOnly("com.github.darksoulq:AbyssalLib:v2.3.9-mc.26.1.2")
     //compileOnly("com.github.darksoulq:AbyssalLib")
     compileOnly("su.plo.voice.server:paper:2.1.8")
     compileOnly("net.thenextlvl:worlds:4.2.2")

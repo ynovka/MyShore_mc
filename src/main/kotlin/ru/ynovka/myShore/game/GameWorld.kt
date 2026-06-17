@@ -1,9 +1,13 @@
 package ru.ynovka.myShore.game
 
+import ru.ynovka.myShore.MyShore.Companion.inst
 import ru.ynovka.myShore.MyShore.Companion.PLUGIN_ID
 import net.thenextlvl.worlds.generator.GeneratorType
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
+import java.util.concurrent.ExecutionException
 import net.thenextlvl.worlds.preset.Preset
+import net.thenextlvl.worlds.WorldOperationException
 import net.thenextlvl.worlds.WorldsAccess
 import net.thenextlvl.worlds.Dimension
 import net.kyori.adventure.key.Key
@@ -43,10 +47,35 @@ abstract class GameWorld {
             .structures(false)
             .build()
 
-        return access.create(level).thenApply { world ->
-            access.worldRegistry.register(level, true)
-            configureWorld(world)
-        }
+        return access.create(level)
+            .thenApply { world ->
+                access.worldRegistry.registerIfAbsent(
+                    level.key(),
+                    level.getDimension(),
+                    true,
+                    level.getGenerator().orElse(null)
+                )
+                configureWorld(world)
+            }
+            .exceptionallyCompose { throwable ->
+                val operationException = throwable.findWorldOperationException()
+
+                if (operationException?.reason() in recoverableCreateReasons) {
+                    inst.logger.warning(
+                        "World ${key.asString()} already exists (${operationException?.reason()}); loading it instead."
+                    )
+                    access.worldRegistry.registerIfAbsent(
+                        level.key(),
+                        level.getDimension(),
+                        true,
+                        level.getGenerator().orElse(null)
+                    )
+                    return@exceptionallyCompose access.load(key).thenApply(::configureWorld)
+                }
+
+                logWorldOperationFailure(throwable)
+                CompletableFuture.failedFuture(throwable)
+            }
     }
 
     fun delete(): CompletableFuture<Boolean> {
@@ -85,6 +114,41 @@ abstract class GameWorld {
         world.difficulty = Difficulty.EASY
 
         return world
+    }
+
+    private fun logWorldOperationFailure(throwable: Throwable) {
+        val operationException = throwable.findWorldOperationException() ?: return
+
+        inst.logger.warning(
+            "World operation failed for ${key.asString()}: " +
+                "reason=${operationException.reason()}, " +
+                "key=${operationException.key()}, " +
+                "path=${operationException.path()}, " +
+                "backup=${operationException.backup()}"
+        )
+    }
+
+    private fun Throwable.findWorldOperationException(): WorldOperationException? {
+        var current: Throwable? = this
+
+        while (current != null) {
+            when (current) {
+                is WorldOperationException -> return current
+                is CompletionException,
+                is ExecutionException -> current = current.cause
+                else -> current = current.cause
+            }
+        }
+
+        return null
+    }
+
+    private companion object {
+        val recoverableCreateReasons = setOf(
+            WorldOperationException.Reason.WORLD_KEY_EXISTS,
+            WorldOperationException.Reason.WORLD_NAME_EXISTS,
+            WorldOperationException.Reason.WORLD_PATH_EXISTS
+        )
     }
 }
 

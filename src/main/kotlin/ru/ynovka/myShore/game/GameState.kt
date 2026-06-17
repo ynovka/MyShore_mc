@@ -2,6 +2,12 @@ package ru.ynovka.myShore.game
 
 
 abstract class GameState<P : GamePlayer, W : GameWorld, G : Game<P, W>>(protected val game: G) {
+    protected val isCurrent: Boolean
+        get() = game.isCurrentState(this)
+
+    protected fun transitionTo(next: GameState<P, W, *>) =
+        game.transitionTo(next)
+
     open fun onEnterState() {}
     open fun onExitState() {}
 

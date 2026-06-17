@@ -27,7 +27,7 @@ object BossbarTimer {
      *     game = game,
      *     state = this,
      *     onCompletion = { g, s ->
-     *         g.fsm.transition(PillarsInProgress(g))
+     *         g.transitionTo(PillarsInProgress(g))
      *     }
      * )
      * ```
@@ -101,7 +101,7 @@ object BossbarTimer {
             barTimer.progress(progress)
         }
             .global()
-            .repeatWhile { game.fsm.current === state && timeLeft.get() > 0 && !cancelled.get() }
+            .repeatWhile { game.isCurrentState(state) && timeLeft.get() > 0 && !cancelled.get() }
             .repeatEvery(20L, Clock.TICKS)
 
         task.completion().whenComplete { _, throwable ->
@@ -112,7 +112,7 @@ object BossbarTimer {
                 return@whenComplete
             }
 
-            if (game.fsm.current === state && timeLeft.get() <= 0 && !cancelled.get() && onCompletion != null) {
+            if (game.isCurrentState(state) && timeLeft.get() <= 0 && !cancelled.get() && onCompletion != null) {
                 scheduler.schedule {
                     onCompletion(game, state)
                 }.global().once()

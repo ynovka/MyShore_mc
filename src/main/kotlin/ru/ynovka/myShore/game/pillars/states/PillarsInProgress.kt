@@ -55,6 +55,9 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
                 player.gameMode = GameMode.SURVIVAL
                 player.allowFlight = false
                 player.isFlying = false
+                player.isInvulnerable = false
+                player.isCollidable = true
+                player.canPickupItems = true
                 player.inventory.clear()
                 player.addPotionEffect(
                     PotionEffect(
@@ -96,8 +99,8 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
                             //p.damage(1.0)
                         }
                     }
-                        .global()
-                        .repeatWhile { game.fsm.current === state }
+                    .global()
+                        .repeatWhile { game.isCurrentState(state) }
                         .repeatEvery(20L, Clock.TICKS)
 
                     BossbarTimer.startCountdownTimer(
@@ -105,7 +108,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
                         game = game,
                         state = state,
                         onCompletion = { game, _ ->
-                            game.fsm.transitionTo(PillarsFinishing(game))
+                            game.transitionToFinishing()
                         }
                     )
                 }
@@ -133,7 +136,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
 
     private fun tryFinishRound() {
         if (game.activePlayers.size <= 1) {
-            game.fsm.transitionTo(PillarsFinishing(game))
+            game.transitionToFinishing()
         }
     }
 
@@ -146,7 +149,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
             componentKey = "bar.myshore.new_item_in",
             playSound = false,
             onCompletion = { game, _ ->
-                if (game.fsm.current !is PillarsInProgress) return@startCountdownTimer
+                if (!game.isInProgress()) return@startCountdownTimer
                 game.activePlayers.forEachOnlinePlayer { player ->
                     scheduler.schedule {
                         if (gm.shouldClearInventory) player.inventory.clear()
@@ -185,6 +188,7 @@ class PillarsInProgress(game: PillarsGame) : GameState<PillarsPlayer, PillarsWor
             Material.LIGHT,
             Material.BARRIER,
             Material.ENCHANTED_BOOK,
+            Material.ENDER_DRAGON_SPAWN_EGG,
         )
 
         val items = Material.entries

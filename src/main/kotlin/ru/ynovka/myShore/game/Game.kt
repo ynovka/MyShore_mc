@@ -1,9 +1,7 @@
 package ru.ynovka.myShore.game
 
-import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.gameUtils.VisibilityGroup
 import ru.ynovka.myShore.party.PartyManager.Party
-import org.bukkit.GameMode
 import java.util.UUID
 
 
@@ -16,188 +14,112 @@ abstract class Game<P : GamePlayer, W : GameWorld>(
 
     abstract val initialState: GameState<P, W, *>
     val fsm: GameFSM<P, W> by lazy { GameFSM(initialState).also { it.start() } }
+    val currentState: GameState<P, W, *>
+        get() = fsm.current
 
     abstract val gameWorld: W
     abstract val maxPlayers: Int
 
-    val gameVisibilityGroup = VisibilityGroup()
+    val visibilityGroup = VisibilityGroup()
+    val gameVisibilityGroup: VisibilityGroup
+        get() = visibilityGroup
 
-    val gamePlayers: MutableSet<P> = mutableSetOf()
-    val activePlayers: MutableSet<P> = mutableSetOf()
-    val exitedPlayers: MutableSet<P> = mutableSetOf()
-    val exitedSpectatorPlayers: MutableSet<P> = mutableSetOf()
-    val spectatorPlayers: MutableSet<P> = mutableSetOf()
+    private val roster = GameRoster { playerId -> createPlayer(playerId) }
+    private val playerLifecycle = GamePlayerLifecycle(
+        roster = roster,
+        visibilityGroup = visibilityGroup,
+        fsm = { fsm },
+        isDestroyed = { destroyed },
+        maxPlayers = { maxPlayers },
+        onPlayerJoined = { handlePlayerJoin(it) },
+        onPlayerReconnected = { handlePlayerReconnect(it) },
+        onPlayerLeft = { handlePlayerLeave(it) },
+        onPlayerBecameSpectator = { player, reason ->
+            handlePlayerBecomeSpectator(player, reason)
+        }
+    )
 
-    private val playersById: MutableMap<UUID, P> = mutableMapOf()
+    val gamePlayers: MutableSet<P>
+        get() = roster.gamePlayers
+    val activePlayers: MutableSet<P>
+        get() = roster.activePlayers
+    val exitedPlayers: MutableSet<P>
+        get() = roster.exitedPlayers
+    val exitedSpectatorPlayers: MutableSet<P>
+        get() = roster.exitedSpectatorPlayers
+    val spectatorPlayers: MutableSet<P>
+        get() = roster.spectatorPlayers
 
     val isPrivate: Boolean
         get() = party != null
 
     fun isEmpty(): Boolean =
-        activePlayers.isEmpty() && spectatorPlayers.isEmpty()
+        roster.isEmpty()
 
     fun isFull(): Boolean =
-        activePlayers.size >= maxPlayers
+        roster.isFull(maxPlayers)
 
     fun hasPlayer(playerId: UUID): Boolean =
-        playersById.containsKey(playerId)
+        roster.hasPlayer(playerId)
 
-    fun hasActivePlayer(playerId: UUID): Boolean {
-        val player = playersById[playerId] ?: return false
-        return player in activePlayers
-    }
+    fun hasActivePlayer(playerId: UUID): Boolean =
+        roster.hasActivePlayer(playerId)
 
-    fun hasSpectator(playerId: UUID): Boolean {
-        val player = playersById[playerId] ?: return false
-        return player in spectatorPlayers
-    }
+    fun hasSpectator(playerId: UUID): Boolean =
+        roster.hasSpectator(playerId)
 
-    fun hasExitedPlayer(playerId: UUID): Boolean {
-        return exitedPlayers.any { it.playerId == playerId } ||
-                exitedSpectatorPlayers.any { it.playerId == playerId }
-    }
+    fun hasExitedPlayer(playerId: UUID): Boolean =
+        roster.hasExitedPlayer(playerId)
 
     fun getPlayer(playerId: UUID): P? =
-        playersById[playerId]
+        roster.getPlayer(playerId)
 
-    fun getPlayers(): Set<UUID> = playersById.keys
+    fun getPlayers(): Set<UUID> =
+        roster.getPlayers()
 
     fun getOrCreatePlayer(playerId: UUID): P {
         check(!destroyed) { "Game is already destroyed" }
-
-        playersById[playerId]?.let { return it }
-
-        val player = createPlayer(playerId)
-
-        playersById[playerId] = player
-        gamePlayers.add(player)
-
-        return player
+        return roster.getOrCreatePlayer(playerId)
     }
 
     abstract fun createPlayer(playerId: UUID): P
 
-    fun canAcceptNewPlayer(playerId: UUID): Boolean {
-        if (isFull()) return false
+    fun canAcceptNewPlayer(playerId: UUID): Boolean =
+        playerLifecycle.canAcceptNewPlayer(playerId)
 
-        val gamePlayer = playersById[playerId] ?: createPlayer(playerId)
-        return fsm.canPlayerJoin(gamePlayer)
-    }
+    fun onPlayerJoin(playerId: UUID) =
+        playerLifecycle.onPlayerJoin(playerId)
 
-    fun onPlayerJoin(playerId: UUID) {
-        if (destroyed) return
-
-        val gamePlayer = getOrCreatePlayer(playerId)
-
-        if (gamePlayer in activePlayers || gamePlayer in spectatorPlayers) return
-
-        gameVisibilityGroup.addViewer(playerId)
-
-        if (exitedPlayers.remove(gamePlayer)) {
-            if (!fsm.canPlayerReconnect(gamePlayer)) {
-                movePlayerToSpectator(gamePlayer)
-                fsm.spectatorJoin(gamePlayer)
-                return
-            }
-
-            activePlayers.add(gamePlayer)
-
-            fsm.playerReconnect(gamePlayer)
-            handlePlayerReconnect(gamePlayer)
-            return
-        }
-
-        if (exitedSpectatorPlayers.remove(gamePlayer)) {
-            if (movePlayerToSpectator(gamePlayer)) {
-                fsm.spectatorJoin(gamePlayer)
-            }
-            return
-        }
-
-        val canJoin = !isFull() && fsm.canPlayerJoin(gamePlayer)
-
-        if (!canJoin) {
-            movePlayerToSpectator(gamePlayer, SpectatorReason.GAME_FULL)
-            fsm.spectatorJoin(gamePlayer)
-            return
-        }
-
-        activePlayers.add(gamePlayer)
-
-        fsm.playerJoin(gamePlayer)
-        handlePlayerJoin(gamePlayer)
-    }
-
-    fun onPlayerLeave(playerId: UUID) {
-        if (destroyed) return
-
-        gameVisibilityGroup.removeViewer(playerId)
-
-        val player = playersById[playerId] ?: return
-
-        val wasActive = activePlayers.remove(player)
-        val wasSpectator = spectatorPlayers.remove(player)
-
-        if (!wasActive && !wasSpectator) return
-
-        if (wasActive) {
-            exitedPlayers.add(player)
-
-            fsm.playerLeave(player)
-            handlePlayerLeave(player)
-        }
-
-        if (wasSpectator) {
-            exitedSpectatorPlayers.add(player)
-        }
-
-        playersById.remove(playerId)
-    }
+    fun onPlayerLeave(playerId: UUID) =
+        playerLifecycle.onPlayerLeave(playerId)
 
     fun movePlayerToSpectator(
         gamePlayer: P,
         reason: SpectatorReason = SpectatorReason.UNKNOWN
-    ): Boolean {
-        if (destroyed) return false
+    ): Boolean =
+        playerLifecycle.movePlayerToSpectator(gamePlayer, reason)
 
-        val player = playersById[gamePlayer.playerId] ?: gamePlayer.also {
-            playersById[it.playerId] = it
-            gamePlayers.add(it)
-        }
+    fun moveSpectatorsToActive() =
+        playerLifecycle.moveSpectatorsToActive()
 
-        if (player in spectatorPlayers) return false
-        if (!fsm.canPlayerBecomeSpectator(player, reason)) return false
+    fun refreshSpectatorVisibility() =
+        playerLifecycle.refreshSpectatorVisibility()
 
-        activePlayers.remove(player)
-        exitedPlayers.remove(player)
-        spectatorPlayers.add(player)
+    fun transitionTo(next: GameState<P, W, *>) =
+        fsm.transitionTo(next)
 
-        player.withOnlinePlayer { bukkitPlayer ->
-            scheduler.schedule {
-                bukkitPlayer.gameMode = GameMode.SPECTATOR
-                bukkitPlayer.clearActivePotionEffects()
-                bukkitPlayer.inventory.clear()
-            }.entity(bukkitPlayer).once()
-        }
+    fun isCurrentState(state: GameState<P, W, *>): Boolean =
+        currentState === state
 
-        fsm.playerBecomeSpectator(player, reason)
-        handlePlayerBecomeSpectator(player, reason)
-
-        return true
-    }
+    inline fun <reified S : GameState<*, *, *>> isInState(): Boolean =
+        currentState is S
 
     fun destroy() {
         if (destroyed) return
         destroyed = true
 
-        gameVisibilityGroup.clear()
-
-        activePlayers.clear()
-        exitedPlayers.clear()
-        exitedSpectatorPlayers.clear()
-        spectatorPlayers.clear()
-        gamePlayers.clear()
-        playersById.clear()
+        visibilityGroup.clear()
+        roster.clear()
     }
 
     protected open fun handlePlayerJoin(gamePlayer: P) {}

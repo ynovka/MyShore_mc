@@ -31,14 +31,13 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
     }
 
     override fun onPlayerJoin(gamePlayer: PillarsPlayer) {
-        val state = this
         gamePlayer.withOnlinePlayer { player ->
             val setup = setupForWaiting(player, gamePlayer, game)
             if (game.activePlayers.size >= 2) {
                 setup.thenRun {
                     scheduler.schedule {
-                        if (game.fsm.current === state && game.activePlayers.size >= 2) {
-                            game.fsm.transitionTo(PillarsCountdown(game))
+                        if (game.isCurrentState(this) && game.activePlayers.size >= 2) {
+                            game.transitionToCountdown()
                         }
                     }.global().once()
                 }
@@ -55,6 +54,11 @@ class PillarsWaitingForPlayers(game: PillarsGame) : GameState<PillarsPlayer, Pil
             player.restrictToBlock(true)
             scheduler.schedule {
                 player.gameMode = GameMode.ADVENTURE
+                player.allowFlight = false
+                player.isFlying = false
+                player.isInvulnerable = false
+                player.isCollidable = true
+                player.canPickupItems = true
                 player.clearActivePotionEffects()
                 player.inventory.clear()
                 player.inventory.setItem(8, HubItems.hubTeleport.getStack(null))

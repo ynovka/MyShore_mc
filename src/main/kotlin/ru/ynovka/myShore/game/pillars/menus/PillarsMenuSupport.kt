@@ -15,7 +15,6 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import ru.ynovka.myShore.game.pillars.PillarsGame
-import ru.ynovka.myShore.game.pillars.states.PillarsFinishing
 
 object PillarsMenuSupport {
     private val optionSlots = listOf(10, 12, 14, 16, 20, 22, 24)
@@ -77,7 +76,7 @@ object PillarsMenuSupport {
 
     fun updateIfOwner(ctx: GuiClickContext, game: PillarsGame, block: (Player) -> Unit) {
         val player = ctx.source() as? Player ?: return
-        if (game.fsm.current !is PillarsFinishing || !game.canOwnerControl(player)) {
+        if (!game.isFinishing() || !game.canOwnerControl(player)) {
             player.sendMessage(Component.text("Only the event owner can change next round settings now.", NamedTextColor.RED))
             GuiManager.close(player)
             return

@@ -19,6 +19,11 @@ object Hub {
     fun Player.toHub() {
         ru.ynovka.myShore.MyShore.scheduler.schedule {
             gameMode = GameMode.ADVENTURE
+            allowFlight = false
+            isFlying = false
+            isInvulnerable = false
+            isCollidable = true
+            canPickupItems = true
             saturation = 10f
             foodLevel = 20
             health = 20.0

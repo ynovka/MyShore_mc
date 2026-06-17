@@ -7,6 +7,12 @@ class GameFSM<P : GamePlayer, W : GameWorld>(initial: GameState<P, W, *>) {
 
     fun start() = current.onEnterState()
 
+    fun isCurrent(state: GameState<P, W, *>): Boolean =
+        current === state
+
+    inline fun <reified S : GameState<*, *, *>> currentIs(): Boolean =
+        current is S
+
     fun transitionTo(next: GameState<P, W, *>) {
         current.onExitState()
         current = next

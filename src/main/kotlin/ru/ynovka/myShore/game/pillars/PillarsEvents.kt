@@ -1,20 +1,23 @@
 package ru.ynovka.myShore.game.pillars
 
+import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import com.github.darksoulq.abyssallib.server.scheduler.ScheduledTask
 import net.kyori.adventure.text.Component
 import org.bukkit.GameMode
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.inventory.InventoryType
+import org.bukkit.event.player.PlayerInteractEntityEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import ru.ynovka.myShore.MyShore.Companion.inst
@@ -24,7 +27,6 @@ import ru.ynovka.myShore.game.SpectatorReason
 import ru.ynovka.myShore.game.gameUtils.PlayerDeathMessages
 import ru.ynovka.myShore.game.pillars.Pillar.Companion.TOP_BLOCK
 import ru.ynovka.myShore.game.pillars.PillarsGame.Companion.currentPillarsGame
-import ru.ynovka.myShore.game.pillars.states.PillarsInProgress
 
 object PillarsEvents : Listener {
 
@@ -79,39 +81,34 @@ object PillarsEvents : Listener {
 
         if (player.location.y > 0.0) return
 
-        when (game.fsm.current) {
-            is PillarsInProgress -> {
-                if (!game.eliminatePlayer(player, pPlayer)) return
+        if (game.isInProgress()) {
+            if (!game.eliminatePlayer(player, pPlayer)) return
 
-                pPlayer.withOnlinePlayer { onlinePlayer ->
-                    onlinePlayer.gameMode = GameMode.SPECTATOR
-
-                    game.gameWorld.get()?.let { world ->
-                        onlinePlayer.teleportAsync(Location(world, 0.0, 110.0, 0.0))
-                    }
-
-                    game.broadcast(PlayerDeathMessages.voidFall(onlinePlayer))
+            pPlayer.withOnlinePlayer { onlinePlayer ->
+                game.gameWorld.get()?.let { world ->
+                    onlinePlayer.teleportAsync(Location(world, 0.0, 110.0, 0.0))
                 }
+
+                game.broadcast(PlayerDeathMessages.voidFall(onlinePlayer))
             }
+            return
+        }
 
-            else -> {
-                val pillar = game.gameWorld.pillars
-                    .firstOrNull { it.owner == pPlayer.playerId }
-                    ?: return
+        val pillar = game.gameWorld.pillars
+            .firstOrNull { it.owner == pPlayer.playerId }
+            ?: return
 
-                val world = game.gameWorld.get() ?: return
+        val world = game.gameWorld.get() ?: return
 
-                pPlayer.withOnlinePlayer { onlinePlayer ->
-                    onlinePlayer.teleportAsync(
-                        Location(
-                            world,
-                            pillar.x + 0.5,
-                            TOP_BLOCK + 1.0,
-                            pillar.z + 0.5
-                        )
-                    )
-                }
-            }
+        pPlayer.withOnlinePlayer { onlinePlayer ->
+            onlinePlayer.teleportAsync(
+                Location(
+                    world,
+                    pillar.x + 0.5,
+                    TOP_BLOCK + 1.0,
+                    pillar.z + 0.5
+                )
+            )
         }
     }
 
@@ -123,7 +120,12 @@ object PillarsEvents : Listener {
 
         val game = player.uniqueId.currentPillarsGame() ?: return
 
-        if (game.fsm.current is PillarsInProgress) return
+        if (game.hasSpectator(player.uniqueId)) {
+            e.isCancelled = true
+            return
+        }
+
+        if (game.isInProgress()) return
 
         e.isCancelled = true
     }
@@ -146,18 +148,18 @@ object PillarsEvents : Listener {
         e.drops.clear()
         e.droppedExp = 0
 
-        when (game.fsm.current) {
-            is PillarsInProgress -> {
-                if (!game.eliminatePlayer(player, pPlayer)) return
+        if (pPlayer in game.spectatorPlayers) return
 
-                try {
-                    dropDeathItems(player, drops)
-                } catch (throwable: Throwable) {
-                    println("555")
-                }
+        if (game.isInProgress()) {
+            if (!game.eliminatePlayer(player, pPlayer)) return
 
-                game.broadcast(PlayerDeathMessages.from(e))
+            try {
+                dropDeathItems(player, drops)
+            } catch (_: Throwable) {
+                println("dropDeathItems err")
             }
+
+            game.broadcast(PlayerDeathMessages.from(e))
         }
     }
 
@@ -205,7 +207,7 @@ object PillarsEvents : Listener {
         if (!e.player.world.isPillarsWorld()) return
 
         val game = e.player.uniqueId.currentPillarsGame() ?: return
-        if (game.fsm.current !is PillarsInProgress) return
+        if (!game.isInProgress()) return
 
         val killerId = e.entity.killer?.uniqueId ?: return
         val killer = game.getOrCreatePlayer(killerId)
@@ -215,10 +217,42 @@ object PillarsEvents : Listener {
 
     @EventHandler
     fun onPlayerOpenEnderChest(e: InventoryOpenEvent) {
-        if (!e.player.world.isPillarsWorld()) return
+        val player = e.player as? Player ?: return
+
+        if (!player.world.isPillarsWorld()) return
         if (e.inventory.type != InventoryType.ENDER_CHEST) return
 
         e.isCancelled = true
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    fun onSpectatorAttack(e: PrePlayerAttackEntityEvent) {
+        val game = e.player.uniqueId.currentPillarsGame() ?: return
+
+        if (game.hasSpectator(e.player.uniqueId)) {
+            e.isCancelled = true
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    fun onSpectatorInteract(e: PlayerInteractEvent) {
+        val game = e.player.uniqueId.currentPillarsGame() ?: return
+
+        if (game.hasSpectator(e.player.uniqueId)) {
+            val itemType = e.item?.type
+            if (itemType == Material.COMPASS || itemType == Material.RABBIT_FOOT) return
+
+            e.isCancelled = true
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    fun onSpectatorInteractEntity(e: PlayerInteractEntityEvent) {
+        val game = e.player.uniqueId.currentPillarsGame() ?: return
+
+        if (game.hasSpectator(e.player.uniqueId)) {
+            e.isCancelled = true
+        }
     }
 
     private fun PillarsGame.broadcast(message: Component) {

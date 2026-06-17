@@ -8,6 +8,8 @@ import ru.ynovka.myShore.game.pillars.generators.platform.PLATFORM_Y
 import com.github.darksoulq.abyssallib.server.scheduler.Clock
 import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.game.pillars.PillarsGame
+import ru.ynovka.myShore.game.pillars.PillarsPlayer
+import ru.ynovka.myShore.game.pillars.PillarsWorld
 import java.util.concurrent.CompletableFuture
 import ru.ynovka.myShore.game.GameState
 import kotlin.random.Random
@@ -18,7 +20,7 @@ import org.bukkit.World
 
 object LavaRushPillarsGM : PillarsGM() {
     override fun roundStart(game: PillarsGame) {
-        val state = game.fsm.current
+        val state = game.currentState
         val world = game.gameWorld.get() ?: return
         fillLavaSchedule(
             game,
@@ -30,7 +32,7 @@ object LavaRushPillarsGM : PillarsGM() {
 
     private fun fillLavaSchedule(
         game: PillarsGame,
-        state: GameState<*, *, *>,
+        state: GameState<PillarsPlayer, PillarsWorld, *>,
         world: World,
         lavaY: Int
     ) {
@@ -49,9 +51,9 @@ object LavaRushPillarsGM : PillarsGM() {
         CompletableFuture.allOf(*futures.toTypedArray())
             .thenAccept {
 
-                // Следующий слой через 1 секунду
+                // Следующий слой через 2 секунды
                 scheduler.schedule {
-                    if (game.fsm.current !== state) return@schedule
+                    if (!game.isCurrentState(state)) return@schedule
                     fillLavaSchedule(
                         game,
                         state,
@@ -60,7 +62,7 @@ object LavaRushPillarsGM : PillarsGM() {
                     )
                 }
                     .global()
-                    .after(3 * 20L, Clock.TICKS)
+                    .after(2 * 20L, Clock.TICKS)
                     .once()
             }
     }

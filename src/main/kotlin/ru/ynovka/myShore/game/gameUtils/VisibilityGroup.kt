@@ -15,31 +15,37 @@ import java.util.UUID
 class VisibilityGroup {
 
     private val members: MutableSet<UUID> = ConcurrentHashMap.newKeySet()
+    private val hiddenTargetsByViewer: MutableMap<UUID, MutableSet<UUID>> = ConcurrentHashMap()
 
     companion object {
         private val playerGroupIndex = ConcurrentHashMap<UUID, VisibilityGroup>()
         private val membershipLock = Any()
 
         fun onPlayerQuit(uuid: UUID) {
+            val group: VisibilityGroup
             val oldMembers: Set<UUID>
 
             synchronized(membershipLock) {
-                val group = playerGroupIndex[uuid] ?: return
+                group = playerGroupIndex[uuid] ?: return
                 oldMembers = group.members.toSet() - uuid
                 group.removeMemberLocked(uuid)
             }
 
-            val group = playerGroupIndex[uuid]
             oldMembers.forEach { memberId ->
-                group?.hideBoth(uuid, memberId)
+                group.hideBoth(uuid, memberId)
             }
         }
 
         fun UUID.getVisiblePlayers(include: Boolean = false): Set<UUID> {
-            val group = playerGroupIndex[this] ?: return emptySet()
+            val group: VisibilityGroup
 
-            return group.members
-                .filterTo(mutableSetOf()) { include || it != this }
+            synchronized(membershipLock) {
+                group = playerGroupIndex[this] ?: return emptySet()
+                val hiddenTargets = group.hiddenTargetsByViewer[this].orEmpty()
+
+                return group.members
+                    .filterTo(mutableSetOf()) { (include || it != this) && it !in hiddenTargets }
+            }
         }
 
         fun Player.getVisiblePlayers(include: Boolean = false): Set<UUID> =
@@ -91,6 +97,46 @@ class VisibilityGroup {
         }
     }
 
+    fun showFor(viewerId: UUID, targetId: UUID) {
+        if (viewerId == targetId) return
+
+        var shouldShow = false
+
+        synchronized(membershipLock) {
+            if (viewerId !in members || targetId !in members) return
+
+            hiddenTargetsByViewer[viewerId]?.let { hiddenTargets ->
+                shouldShow = hiddenTargets.remove(targetId)
+
+                if (hiddenTargets.isEmpty()) {
+                    hiddenTargetsByViewer.remove(viewerId)
+                }
+            }
+        }
+
+        if (!shouldShow) return
+
+        showOneWay(viewerId, targetId)
+    }
+
+    fun hideFor(viewerId: UUID, targetId: UUID) {
+        if (viewerId == targetId) return
+
+        val shouldHide: Boolean
+
+        synchronized(membershipLock) {
+            if (viewerId !in members || targetId !in members) return
+
+            shouldHide = hiddenTargetsByViewer
+                .getOrPut(viewerId) { ConcurrentHashMap.newKeySet() }
+                .add(targetId)
+        }
+
+        if (!shouldHide) return
+
+        hideOneWay(viewerId, targetId)
+    }
+
     fun clear() {
         val oldMembers: Set<UUID>
 
@@ -104,6 +150,7 @@ class VisibilityGroup {
             }
 
             members.clear()
+            hiddenTargetsByViewer.clear()
         }
 
         oldMembers.forEach { a ->
@@ -119,6 +166,8 @@ class VisibilityGroup {
 
     private fun removeMemberLocked(uuid: UUID) {
         members.remove(uuid)
+        hiddenTargetsByViewer.remove(uuid)
+        hiddenTargetsByViewer.values.forEach { it.remove(uuid) }
 
         playerGroupIndex.remove(uuid, this)
     }

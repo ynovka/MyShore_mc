@@ -15,7 +15,6 @@ import ru.ynovka.myShore.MyShore.Companion.ITEMS
 import ru.ynovka.myShore.MyShore.Companion.PLUGIN_ID
 import ru.ynovka.myShore.game.pillars.PillarsGame.Companion.currentPillarsGame
 import ru.ynovka.myShore.game.pillars.menus.VotingMainMenu
-import ru.ynovka.myShore.game.pillars.states.PillarsFinishing
 
 object PillarsItems {
     fun register() {
@@ -69,7 +68,7 @@ object PillarsItems {
 
     private fun startNextRound(player: Player) {
         val game = player.uniqueId.currentPillarsGame()
-        if (game == null || game.fsm.current !is PillarsFinishing || !game.canOwnerControl(player)) {
+        if (game == null || !game.isFinishing() || !game.canOwnerControl(player)) {
             player.sendMessage(Component.text("Only the event owner can start the next round now.", NamedTextColor.RED))
             return
         }
@@ -79,7 +78,7 @@ object PillarsItems {
 
     private fun openSettings(player: Player) {
         val game = player.uniqueId.currentPillarsGame()
-        if (game == null || game.fsm.current !is PillarsFinishing || !game.canOwnerControl(player)) {
+        if (game == null || !game.isFinishing() || !game.canOwnerControl(player)) {
             player.sendMessage(Component.text("Only the event owner can change next round settings now.", NamedTextColor.RED))
             return
         }

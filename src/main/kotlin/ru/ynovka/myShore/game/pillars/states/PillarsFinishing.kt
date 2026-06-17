@@ -32,8 +32,7 @@ class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
             EventManager.activeEvent?.takeIf { it.party === party }
         }
 
-        game.activePlayers += game.spectatorPlayers
-        game.spectatorPlayers.clear()
+        game.moveSpectatorsToActive()
 
         if (event != null) {
             setupEventFinishing()
@@ -47,11 +46,7 @@ class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
             state = this,
             componentKey = "bar.myshore.new_round_in",
             onCompletion = { game, _ ->
-                if (game.activePlayers.size >= 2) {
-                    game.fsm.transitionTo(PillarsCountdown(game))
-                } else {
-                    game.fsm.transitionTo(PillarsWaitingForPlayers(game))
-                }
+                game.transitionToRoundStart()
             }
         )
     }
@@ -114,7 +109,7 @@ class PillarsFinishing(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
         automaticNextRoundStarted = true
 
         scheduler.schedule {
-            if (game.fsm.current === this) {
+            if (game.isCurrentState(this)) {
                 game.startNextRound()
             }
         }.global().after(1L, Clock.TICKS).once()

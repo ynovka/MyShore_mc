@@ -18,17 +18,17 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
 
         game.applyNextRoundGenerators()
 
-        game.gameWorld.countdownPrepare { game.fsm.current === state }
+        game.gameWorld.countdownPrepare { game.isCurrentState(state) }
             .thenCompose {
-                if (game.fsm.current !== state) {
-                    return@thenCompose CompletableFuture.completedFuture<Void>(null)
+                if (!game.isCurrentState(state)) {
+                    return@thenCompose CompletableFuture.completedFuture(null)
                 }
 
                 game.gameWorld.spawnPlayers(game)
             }
             .thenRun {
                 scheduler.schedule {
-                    if (game.fsm.current === state) {
+                    if (game.isCurrentState(state)) {
                         startCountdown()
                     }
                 }.global().once()
@@ -48,9 +48,9 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
             state = this,
             onCompletion = { game, _ ->
                 if (game.activePlayers.size >= 2) {
-                    game.fsm.transitionTo(PillarsInProgress(game))
+                    game.transitionToInProgress()
                 } else {
-                    game.fsm.transitionTo(PillarsWaitingForPlayers(game))
+                    game.transitionToWaitingForPlayers()
                 }
             }
         )
@@ -70,7 +70,7 @@ class PillarsCountdown(game: PillarsGame) : GameState<PillarsPlayer, PillarsWorl
         if (game.activePlayers.size <= 1) {
             timer?.cancel()
             timer = null
-            game.fsm.transitionTo(PillarsWaitingForPlayers(game))
+            game.transitionToWaitingForPlayers()
         }
         val world = game.gameWorld.get() ?: return
         game.gameWorld.removePlayerPillar(gamePlayer.playerId, world)

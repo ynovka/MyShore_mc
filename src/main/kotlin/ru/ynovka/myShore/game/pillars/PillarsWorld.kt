@@ -231,6 +231,11 @@ class PillarsWorld(
                 scheduler.schedule {
                     player.restrictToBlock(true)
                     player.gameMode = GameMode.ADVENTURE
+                    player.allowFlight = false
+                    player.isFlying = false
+                    player.isInvulnerable = false
+                    player.isCollidable = true
+                    player.canPickupItems = true
                     player.saturation = 10f
                     player.foodLevel = 20
                     player.fireTicks = 0

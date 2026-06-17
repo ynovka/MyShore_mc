@@ -42,7 +42,7 @@ object ActionbarWaitingFor {
             }
         }
             .global()
-            .repeatWhile { game.fsm.current === state }
+            .repeatWhile { game.isCurrentState(state) }
             .repeatEvery(10L, Clock.TICKS)
     }
 

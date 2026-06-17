@@ -22,7 +22,7 @@ object ActionbarTimer {
      *     game = game,
      *     state = this,
      *     onCompletion = { g, s ->
-     *         g.fsm.transition(PillarsInProgress(g))
+     *         g.transitionTo(PillarsInProgress(g))
      *     }
      * )
      * ```
@@ -61,11 +61,11 @@ object ActionbarTimer {
             }
         }
             .global()
-            .repeatWhile { game.fsm.current === state && timeLeft > 0 && !handler.isCancelled }
+            .repeatWhile { game.isCurrentState(state) && timeLeft > 0 && !handler.isCancelled }
             .repeatEvery(20L, Clock.TICKS)
 
         task.completion().thenRun {
-            if (game.fsm.current === state && !handler.isCancelled && onCompletion != null) {
+            if (game.isCurrentState(state) && !handler.isCancelled && onCompletion != null) {
                 scheduler.schedule {
                     onCompletion(game, state)
                 }.global().once()

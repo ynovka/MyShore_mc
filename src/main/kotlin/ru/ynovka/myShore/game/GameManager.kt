@@ -1,8 +1,6 @@
 package ru.ynovka.myShore.game
 
-import ru.ynovka.myShore.MyShore.Companion.scheduler
 import ru.ynovka.myShore.party.PartyManager.Party
-import java.util.concurrent.CopyOnWriteArrayList
 import ru.ynovka.myShore.party.PartyManager
 import org.bukkit.entity.Player
 import org.bukkit.Bukkit
@@ -10,12 +8,17 @@ import java.util.UUID
 
 
 object GameManager {
-    val games: MutableList<Game<*, *>> = CopyOnWriteArrayList()
+    @PublishedApi
+    internal val registry = GameRegistry()
+
+    val games: MutableList<Game<*, *>>
+        get() = registry.games
 
     inline fun <reified G : Game<*, *>> UUID.currentGame(): G? =
-        games.firstOrNull { it is G && it.hasPlayer(this) } as? G
+        registry.currentGame(this)
 
-    fun UUID.inGame(): Boolean = currentGame<Game<*, *>>() != null
+    fun UUID.inGame(): Boolean =
+        registry.hasPlayer(this)
 
     inline fun <reified G : Game<*, *>> join(
         player: Player,
@@ -25,10 +28,7 @@ object GameManager {
         if (player.uniqueId.inGame())
             return Result.failure(IllegalStateException("Player ${player.name} is already in a game"))
 
-        scheduler.schedule {
-            player.inventory.clear()
-            player.clearActivePotionEffects()
-        }.entity(player).once()
+        GamePlayerPreparation.reset(player)
 
         val party = PartyManager.getParty(player)
         return if (party != null)
@@ -48,12 +48,7 @@ object GameManager {
 
         joinableMembers
             .mapNotNull(Bukkit::getPlayer)
-            .forEach { player ->
-                scheduler.schedule {
-                    player.inventory.clear()
-                    player.clearActivePotionEffects()
-                }.entity(player).once()
-            }
+            .let(GamePlayerPreparation::resetAll)
 
         return joinPrivate<G>(party, partyFactory)
     }
@@ -63,18 +58,11 @@ object GameManager {
         playerId: UUID,
         noinline factory: () -> G
     ): Result<G> {
-        @Suppress("UNCHECKED_CAST")
-        val reconnectGame = games.firstOrNull { g ->
-            g is G && !g.isPrivate && g.hasExitedPlayer(playerId)
-        } as? G
-
-        @Suppress("UNCHECKED_CAST")
-        val availableGame = games.firstOrNull { g ->
-            g is G && !g.isPrivate && g.canAcceptNewPlayer(playerId)
-        } as? G
+        val reconnectGame = registry.publicReconnectGame<G>(playerId)
+        val availableGame = registry.publicAvailableGame<G>(playerId)
 
         val game = reconnectGame ?: availableGame ?: factory().also { newGame ->
-            games.add(newGame)
+            registry.add(newGame)
         }
 
         game.onPlayerJoin(playerId)
@@ -86,13 +74,10 @@ object GameManager {
         party: Party,
         noinline partyFactory: (Party) -> G,
     ): Result<G> {
-        @Suppress("UNCHECKED_CAST")
-        val existing = games.firstOrNull { g ->
-            g is G && g.party == party
-        } as? G
+        val existing = registry.privateGame<G>(party)
 
         val game = existing ?: partyFactory(party).also { newGame ->
-            games.add(newGame)
+            registry.add(newGame)
         }
 
         party.members
@@ -113,7 +98,7 @@ object GameManager {
     }
 
     fun destroy(game: Game<*, *>) {
-        if (games.remove(game)) {
+        if (registry.remove(game)) {
             game.destroy()
         }
     }
